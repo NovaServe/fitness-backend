@@ -113,7 +113,6 @@ jobs:
           EC2_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_HOSTNAME: ${{ secrets.EC2_HOSTNAME }}
           EC2_USERNAME: ${{secrets.EC2_USERNAME}}
-          DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
         run: |
           echo "$EC2_PRIVATE_KEY" > ec2_private_key && chmod 600 ec2_private_key && 
           ssh -o StrictHostKeyChecking=no -o "ServerAliveInterval 60" -o "ServerAliveCountMax 10" -i ec2_private_key ${EC2_USERNAME}@${EC2_HOSTNAME} '
@@ -136,7 +135,8 @@ jobs:
             echo && echo ">>>> REMOVE BACKEND IMAGE..." && echo && 
             sudo docker image rm novaservefitness/backend:latest &&
             echo && echo ">>>> LOGIN TO DOCKER HUB..." && echo && 
-            cat ~/keys/docker_hub_password.txt | sudo docker login --username ${DOCKERHUB_USERNAME} --password-stdin && 
+            DOCKERHUB_USERNAME=$(cat ~/keys/dockerhub_username.txt) && 
+            cat ~/keys/dockerhub_password.txt | sudo docker login --username ${DOCKERHUB_USERNAME} --password-stdin && 
             echo && echo ">>>> CHANGE DIRECTORY TO HOSTING..." && echo && 
             cd ~/hosting/backend && 
             echo && echo ">>>> PULL LATEST IMAGE AND CREATE BACKEND CONTAINER..." && echo && 
