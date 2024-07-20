@@ -1,3 +1,3 @@
 INSERT INTO genders(id, name) VALUES
-(1, 'MALE'),
-(2, 'FEMALE');
+(1, 'M'),
+(2, 'F');

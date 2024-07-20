@@ -1,4 +1,4 @@
-package com.novaserve.fitness.user.model;
+package com.novaserve.fitness.users.model;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,19 +1,17 @@
-package com.novaserve.fitness.security;
+package com.novaserve.fitness.security.auth;
 
-import com.novaserve.fitness.exception.ApiException;
-import com.novaserve.fitness.exception.ErrorMessage;
-import com.novaserve.fitness.user.service.UserUtil;
+import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.service.UserUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JwtTokenProvider {
+public class JWTTokenProvider {
     @Autowired
     SecurityProps securityProps;
 
@@ -21,26 +19,34 @@ public class JwtTokenProvider {
     UserUtil userUtil;
 
     public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
-        Date currentDate = new Date();
-        Date expirationDate =
-                new Date(currentDate.getTime() + securityProps.Jwt().expirationMilliseconds());
-
+        User user = (User) (authentication.getPrincipal());
+        Date currentDateTime = new Date(); // In UTC
+        Date expirationDateTime =
+                new Date(currentDateTime.getTime() + securityProps.Jwt().expiresInMilliseconds()); // In UTC
         return Jwts.builder()
-                .subject(username)
-                .issuedAt(currentDate)
-                .expiration(expirationDate)
+                .subject(user.getUsername())
+                .issuedAt(currentDateTime)
+                .expiration(expirationDateTime)
                 .signWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()), Jwts.SIG.HS512)
                 .compact();
     }
 
-    public String getUsernameFromJwt(String token) {
+    public String getUsernameFromJWT(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
         return claims.getSubject();
+    }
+
+    public Date getExpirationDateFromJWT(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()))
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.getExpiration();
     }
 
     public boolean validateToken(String token) {
@@ -52,20 +58,20 @@ public class JwtTokenProvider {
 
             byte[] signature = claims.getDigest();
             if (signature == null || signature.length == 0) {
-                throw new ApiException(ErrorMessage.INVALID_TOKEN, null, HttpStatus.UNAUTHORIZED);
+                return false;
             }
 
             Date issuedAt = claims.getPayload().getIssuedAt();
             Date expiredAt = claims.getPayload().getExpiration();
             if ((expiredAt.getTime() - issuedAt.getTime())
-                    != securityProps.Jwt().expirationMilliseconds()) {
-                throw new ApiException(ErrorMessage.INVALID_TOKEN, null, HttpStatus.UNAUTHORIZED);
+                    != securityProps.Jwt().expiresInMilliseconds()) {
+                return false;
             }
 
-            String usernameOrEmail = claims.getPayload().getSubject();
-            if (userUtil.getUserByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+            String username = claims.getPayload().getSubject();
+            if (userUtil.getUserByUsernameOrEmailOrPhone(username, username, username)
                     .isEmpty()) {
-                throw new ApiException(ErrorMessage.INVALID_TOKEN, null, HttpStatus.UNAUTHORIZED);
+                return false;
             }
 
         } catch (ExpiredJwtException
@@ -73,7 +79,7 @@ public class JwtTokenProvider {
                 | MalformedJwtException
                 | SignatureException
                 | IllegalArgumentException ex) {
-            throw new ApiException(ErrorMessage.INVALID_TOKEN, null, HttpStatus.UNAUTHORIZED);
+            return false;
         }
 
         return true;
