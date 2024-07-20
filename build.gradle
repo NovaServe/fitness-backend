@@ -75,6 +75,14 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+tasks.named('build').configure {
+	dependsOn 'spotlessApply'
+}
+
+tasks.withType(JavaCompile) {
+	options.debug = true
+}
+
 tasks.withType(Test).configureEach {
 	if (!project.hasProperty("createReports")) {
 		reports.html.required = false

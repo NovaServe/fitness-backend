@@ -1,4 +1,4 @@
-package com.novaserve.fitness.user.model;
+package com.novaserve.fitness.users.model;
 
 import jakarta.persistence.*;
 import java.util.Set;
@@ -10,8 +10,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "age_groups")
-public class AgeGroup {
+@Table(name = "genders")
+public class Gender {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -19,6 +19,6 @@ public class AgeGroup {
     @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "ageGroup")
+    @OneToMany(mappedBy = "gender")
     private Set<User> users;
 }

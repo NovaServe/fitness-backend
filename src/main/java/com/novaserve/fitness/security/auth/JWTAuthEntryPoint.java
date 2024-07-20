@@ -1,4 +1,4 @@
-package com.novaserve.fitness.security;
+package com.novaserve.fitness.security.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.novaserve.fitness.exception.ExceptionDto;
@@ -13,7 +13,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JwtAuthEntryPoint implements AuthenticationEntryPoint {
+public class JWTAuthEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(
             HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
