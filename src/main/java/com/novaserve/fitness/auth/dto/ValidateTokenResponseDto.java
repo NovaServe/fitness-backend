@@ -1,4 +1,4 @@
-package com.novaserve.fitness.users.auth.dto;
+package com.novaserve.fitness.auth.dto;
 
 import lombok.*;
 
@@ -7,11 +7,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginProcessData {
-    private String token;
-
-    private String cookieExpires;
-
+public class ValidateTokenResponseDto {
     private String role;
 
     private String fullName;

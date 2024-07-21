@@ -1,10 +1,10 @@
-package com.novaserve.fitness.users.auth.controller;
+package com.novaserve.fitness.auth.controller;
 
-import com.novaserve.fitness.users.auth.dto.LoginProcessData;
-import com.novaserve.fitness.users.auth.dto.LoginRequestDto;
-import com.novaserve.fitness.users.auth.dto.LoginResponseDto;
-import com.novaserve.fitness.users.auth.dto.ValidateTokenResponseDto;
-import com.novaserve.fitness.users.auth.service.AuthService;
+import com.novaserve.fitness.auth.dto.LoginProcessData;
+import com.novaserve.fitness.auth.dto.LoginRequestDto;
+import com.novaserve.fitness.auth.dto.LoginResponseDto;
+import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
+import com.novaserve.fitness.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

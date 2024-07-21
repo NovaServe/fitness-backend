@@ -1,11 +1,11 @@
-package com.novaserve.fitness.users.auth.service;
+package com.novaserve.fitness.auth.service;
 
+import com.novaserve.fitness.auth.dto.LoginProcessData;
+import com.novaserve.fitness.auth.dto.LoginRequestDto;
+import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
 import com.novaserve.fitness.exception.ApiException;
 import com.novaserve.fitness.exception.ErrorMessage;
 import com.novaserve.fitness.security.auth.JWTTokenProvider;
-import com.novaserve.fitness.users.auth.dto.LoginProcessData;
-import com.novaserve.fitness.users.auth.dto.LoginRequestDto;
-import com.novaserve.fitness.users.auth.dto.ValidateTokenResponseDto;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Optional;

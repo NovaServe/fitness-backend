@@ -1,4 +1,4 @@
-package com.novaserve.fitness.users.auth.dto;
+package com.novaserve.fitness.auth.dto;
 
 import lombok.*;
 
