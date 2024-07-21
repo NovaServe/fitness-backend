@@ -1,4 +1,4 @@
-package com.novaserve.fitness.users.auth.service;
+package com.novaserve.fitness.auth.service;
 
 import com.novaserve.fitness.users.model.User;
 import java.util.Date;
