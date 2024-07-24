@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.security.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,56 +18,56 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Autowired
-    CustomUserDetailsService customUserDetailsService;
 
-    @Autowired
-    CustomAuthenticationProvider customAuthenticationProvider;
+  @Autowired CustomUserDetailsService customUserDetailsService;
 
-    @Autowired
-    JWTAuthEntryPoint jwtAuthEntryPoint;
+  @Autowired CustomAuthenticationProvider customAuthenticationProvider;
 
-    @Autowired
-    JWTAuthFilter jwtAuthFilter;
+  @Autowired JWTAuthEntryPoint jwtAuthEntryPoint;
 
-    @Autowired
-    OpenEndpoints openEndpoints;
+  @Autowired JWTAuthFilter jwtAuthFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
-                .csrf(csrf -> csrf.disable())
-                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthEntryPoint))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.GET, openEndpoints.getErrorURL())
-                        .permitAll()
-                        .requestMatchers(HttpMethod.POST, openEndpoints.getErrorURL())
-                        .permitAll()
-                        .requestMatchers(HttpMethod.PATCH, openEndpoints.getErrorURL())
-                        .permitAll()
-                        .requestMatchers(HttpMethod.DELETE, openEndpoints.getErrorURL())
-                        .permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.POST, openEndpoints.getLoginURL())
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, openEndpoints.getLogoutURL())
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated());
+  @Autowired OpenEndpoints openEndpoints;
 
-        //        httpSecurity.authenticationProvider(authenticationProvider());
-        httpSecurity.authenticationProvider(customAuthenticationProvider);
-        httpSecurity.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        return httpSecurity.build();
-    }
+  @Bean
+  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    httpSecurity
+        .csrf(csrf -> csrf.disable())
+        .exceptionHandling(
+            exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthEntryPoint))
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers(HttpMethod.GET, openEndpoints.getErrorURL())
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, openEndpoints.getErrorURL())
+                    .permitAll()
+                    .requestMatchers(HttpMethod.PATCH, openEndpoints.getErrorURL())
+                    .permitAll()
+                    .requestMatchers(HttpMethod.DELETE, openEndpoints.getErrorURL())
+                    .permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, openEndpoints.getLoginURL())
+                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, openEndpoints.getLogoutURL())
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated());
 
-    //    @Bean
-    //    public DaoAuthenticationProvider authenticationProvider() {
-    //        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    //        authProvider.setUserDetailsService(customUserDetailsService);
-    //        authProvider.setPasswordEncoder(passwordEncoder());
-    //        return authProvider;
-    //    }
+    //        httpSecurity.authenticationProvider(authenticationProvider());
+    httpSecurity.authenticationProvider(customAuthenticationProvider);
+    httpSecurity.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    return httpSecurity.build();
+  }
+
+  //    @Bean
+  //    public DaoAuthenticationProvider authenticationProvider() {
+  //        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+  //        authProvider.setUserDetailsService(customUserDetailsService);
+  //        authProvider.setPasswordEncoder(passwordEncoder());
+  //        return authProvider;
+  //    }
 }

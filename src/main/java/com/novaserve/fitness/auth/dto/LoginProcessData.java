@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.auth.dto;
 
 import lombok.*;
@@ -8,11 +11,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginProcessData {
-    private String token;
+  private String token;
 
-    private String cookieExpires;
+  private String cookieExpires;
 
-    private String role;
+  private String role;
 
-    private String fullName;
+  private String fullName;
 }

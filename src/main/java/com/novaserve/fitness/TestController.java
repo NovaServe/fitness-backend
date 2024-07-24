@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness;
 
 import java.util.HashMap;
@@ -9,11 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class TestController {
-    @PreAuthorize("hasRole('ROLE_SUPERADMIN')")
-    @GetMapping("/api/v1/test")
-    public ResponseEntity<?> getTestMessage() {
-        Map<String, String> data = new HashMap<>();
-        data.put("data", "Test message from the backend");
-        return ResponseEntity.ok(data);
-    }
+  @PreAuthorize("hasRole('ROLE_SUPERADMIN')")
+  @GetMapping("/api/v1/test")
+  public ResponseEntity<?> getTestMessage() {
+    Map<String, String> data = new HashMap<>();
+    data.put("data", "Test message from the backend");
+    return ResponseEntity.ok(data);
+  }
 }

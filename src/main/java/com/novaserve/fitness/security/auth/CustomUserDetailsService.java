@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.security.auth;
 
 import com.novaserve.fitness.users.model.User;
@@ -12,20 +15,27 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    @Autowired
-    UserUtil userUtil;
 
-    @Autowired
-    SecurityUtil securityUtil;
+  @Autowired UserUtil userUtil;
 
-    @Override
-    @Transactional
-    public UserDetails loadUserByUsername(String username) {
-        User user = userUtil.getUserByUsername(username).orElseThrow(() -> {
-            String message = String.format("User not found with provided username, email, or phone: %s", username);
-            return new UsernameNotFoundException(message);
-        });
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(), user.getPassword(), securityUtil.mapRolesToAuthorities(Set.of(user.getRole())));
-    }
+  @Autowired SecurityUtil securityUtil;
+
+  @Override
+  @Transactional
+  public UserDetails loadUserByUsername(String username) {
+    User user =
+        userUtil
+            .getUserByUsername(username)
+            .orElseThrow(
+                () -> {
+                  String message =
+                      String.format(
+                          "User not found with provided username, email, or phone: %s", username);
+                  return new UsernameNotFoundException(message);
+                });
+    return new org.springframework.security.core.userdetails.User(
+        user.getUsername(),
+        user.getPassword(),
+        securityUtil.mapRolesToAuthorities(Set.of(user.getRole())));
+  }
 }

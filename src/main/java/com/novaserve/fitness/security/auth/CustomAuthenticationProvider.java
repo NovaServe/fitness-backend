@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.security.auth;
 
 import com.novaserve.fitness.users.model.User;
@@ -15,32 +18,33 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
-    @Autowired
-    private UserRepository userRepository;
 
-    @Autowired
-    SecurityUtil securityUtil;
+  @Autowired private UserRepository userRepository;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+  @Autowired SecurityUtil securityUtil;
 
-    @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        String principal = authentication.getPrincipal().toString();
-        String credentials = authentication.getCredentials().toString();
-        User user = userRepository
-                .findByUsernameOrEmailOrPhone(principal, principal, principal)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found with username, email, or phone: " + principal));
-        if (!passwordEncoder.matches(credentials, user.getPassword())) {
-            throw new BadCredentialsException("Invalid credentials");
-        }
-        return new UsernamePasswordAuthenticationToken(
-                user, credentials, securityUtil.mapRolesToAuthorities(Set.of(user.getRole())));
+  @Autowired PasswordEncoder passwordEncoder;
+
+  @Override
+  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    String principal = authentication.getPrincipal().toString();
+    String credentials = authentication.getCredentials().toString();
+    User user =
+        userRepository
+            .findByUsernameOrEmailOrPhone(principal, principal, principal)
+            .orElseThrow(
+                () ->
+                    new UsernameNotFoundException(
+                        "User not found with username, email, or phone: " + principal));
+    if (!passwordEncoder.matches(credentials, user.getPassword())) {
+      throw new BadCredentialsException("Invalid credentials");
     }
+    return new UsernamePasswordAuthenticationToken(
+        user, credentials, securityUtil.mapRolesToAuthorities(Set.of(user.getRole())));
+  }
 
-    @Override
-    public boolean supports(Class<?> authentication) {
-        return authentication.equals(UsernamePasswordAuthenticationToken.class);
-    }
+  @Override
+  public boolean supports(Class<?> authentication) {
+    return authentication.equals(UsernamePasswordAuthenticationToken.class);
+  }
 }

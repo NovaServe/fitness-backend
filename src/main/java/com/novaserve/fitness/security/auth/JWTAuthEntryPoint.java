@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.security.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,21 +17,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JWTAuthEntryPoint implements AuthenticationEntryPoint {
-    @Override
-    public void commence(
-            HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException {
 
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        ExceptionDto exceptionDto = new ExceptionDto(authException.getMessage());
-
-        PrintWriter out = response.getWriter();
-        ObjectMapper objectMapper = new ObjectMapper();
-        out.write(objectMapper.writeValueAsString(exceptionDto));
-        out.flush();
-
-        // Alternative
-        // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
-    }
+  @Override
+  public void commence(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      AuthenticationException authException)
+      throws IOException {
+    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    ExceptionDto exceptionDto = new ExceptionDto(authException.getMessage());
+    PrintWriter out = response.getWriter();
+    ObjectMapper objectMapper = new ObjectMapper();
+    out.write(objectMapper.writeValueAsString(exceptionDto));
+    out.flush();
+    // Alternative
+    // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+  }
 }

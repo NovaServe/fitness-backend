@@ -1,8 +1,5 @@
-INSERT INTO age_groups(name) VALUES
-('16-20'),
-('20-30'),
-('30-40'),
-('40-50'),
-('50-60'),
-('60-70'),
-('70+');
+insert into age_groups(name) values
+('Child'),
+('Teenager'),
+('Adult'),
+('Senior');

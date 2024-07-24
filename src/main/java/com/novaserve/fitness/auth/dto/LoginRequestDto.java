@@ -1,6 +1,10 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -9,9 +13,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequestDto {
-    @NotBlank
-    private String usernameOrEmailOrPhone;
+  @NotBlank
+  @Size(min = 5, max = 40)
+  private String usernameOrEmailOrPhone;
 
-    @NotBlank
-    private String password;
+  @NotBlank
+  @Size(min = 8, max = 20)
+  private String password;
 }
