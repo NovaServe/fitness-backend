@@ -5,19 +5,10 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="users_init" author="Oleh Kucherenko" context="structure">
-        <comment>Create roles, age groups, genders, and user table</comment>
+    <changeSet id="users" author="Oleg Kucherenko" context="structure">
+        <comment>Users</comment>
 
         <createTable tableName="roles">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true"/>
-            </column>
-            <column name="name" type="varchar">
-                <constraints nullable="false" unique="true"/>
-            </column>
-        </createTable>
-
-        <createTable tableName="age_groups">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
@@ -35,6 +26,15 @@
             </column>
         </createTable>
 
+        <createTable tableName="age_groups">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
         <createTable tableName="users">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -42,26 +42,26 @@
             <column name="username" type="varchar">
                 <constraints nullable="false" unique="true"/>
             </column>
-            <column name="email" type="varchar">
-                <constraints nullable="false" unique="true"/>
-            </column>
             <column name="full_name" type="varchar">
                 <constraints nullable="false" unique="false"/>
             </column>
-            <column name="password" type="varchar">
-                <constraints nullable="false" unique="false"/>
+            <column name="email" type="varchar">
+                <constraints nullable="false" unique="true"/>
             </column>
             <column name="phone" type="varchar">
                 <constraints nullable="true" unique="true"/>
             </column>
+            <column name="password" type="varchar">
+                <constraints nullable="false" unique="false"/>
+            </column>
             <column name="role_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="fk_role_id" references="roles(id)"/>
             </column>
-            <column name="age_group_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_age_group_id" references="age_groups(id)"/>
-            </column>
             <column name="gender_id" type="bigint">
                 <constraints nullable="false" foreignKeyName="fk_gender_id" references="genders(id)"/>
+            </column>
+            <column name="age_group_id" type="bigint">
+                <constraints nullable="false" foreignKeyName="fk_age_group_id" references="age_groups(id)"/>
             </column>
         </createTable>
 

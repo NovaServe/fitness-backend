@@ -4,8 +4,8 @@
 package com.novaserve.fitness.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaserve.fitness.helpers.DBHelper;
-import com.novaserve.fitness.helpers.DTOHelper;
+import com.novaserve.fitness.helpers.DbHelper;
+import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.helpers.MockHelper;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -15,8 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @TestConfiguration
 public class TestBeans {
   @Bean
-  public DTOHelper dtoHelper() {
-    return new DTOHelper();
+  public DtoHelper dtoHelper() {
+    return new DtoHelper();
   }
 
   @Bean
@@ -25,8 +25,8 @@ public class TestBeans {
   }
 
   @Bean
-  public DBHelper dbHelper() {
-    return new DBHelper();
+  public DbHelper dbHelper() {
+    return new DbHelper();
   }
 
   @Bean

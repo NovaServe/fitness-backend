@@ -19,30 +19,30 @@ public class AuthUtilImpl implements AuthUtil {
   @Autowired UserRepository userRepository;
 
   @Override
-  public Long getUserIdFromAuthentication(Authentication authentication) {
-    User user = getUserFromAuthentication(authentication);
+  public Long getUserIdFromAuth(Authentication auth) {
+    User user = getUserFromAuth(auth);
     return user == null ? null : user.getId();
   }
 
   @Override
-  public User getUserFromAuthentication(Authentication authentication) {
-    if (authentication == null || !authentication.isAuthenticated()) {
+  public User getUserFromAuth(Authentication auth) {
+    if (auth == null || !auth.isAuthenticated()) {
       return null;
     }
     String username = null;
-    String principalClassName = authentication.getPrincipal().getClass().getName();
+    String principalClassName = auth.getPrincipal().getClass().getName();
     if (principalClassName.equals("org.springframework.security.core.userdetails.User")) {
       username =
-          ((org.springframework.security.core.userdetails.User) (authentication.getPrincipal()))
+          ((org.springframework.security.core.userdetails.User) (auth.getPrincipal()))
               .getUsername();
     } else if (principalClassName.equals("com.novaserve.fitness.users.model.User")) {
-      username = ((User) (authentication.getPrincipal())).getUsername();
+      username = ((User) (auth.getPrincipal())).getUsername();
     }
     return userRepository.findByUsername(username).orElse(null);
   }
 
   @Override
-  public String formatCookieExpirationDateTime(Date date) {
+  public String formatCookieExpire(Date date) {
     ZonedDateTime zonedDateTime =
         ZonedDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.of("GMT"));
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz");

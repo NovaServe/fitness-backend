@@ -15,9 +15,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.novaserve.fitness.config.Docker;
 import com.novaserve.fitness.config.TestBeans;
-import com.novaserve.fitness.exception.ExceptionMessage;
-import com.novaserve.fitness.helpers.DBHelper;
-import com.novaserve.fitness.helpers.DTOHelper;
+import com.novaserve.fitness.exception.ExMessage;
+import com.novaserve.fitness.helpers.DbHelper;
+import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.users.dto.CreateUserReqDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
@@ -49,16 +49,15 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 @Import(TestBeans.class)
 class CreateUserTest {
-
   @Autowired private MockMvc mockMvc;
 
   @Autowired PasswordEncoder passwordEncoder;
 
   @Autowired ObjectMapper objectMapper;
 
-  @Autowired DBHelper $db;
+  @Autowired DbHelper $db;
 
-  @Autowired DTOHelper $dto;
+  @Autowired DtoHelper $dto;
 
   static String CREATE_USER_URL = "/api/v1/users";
 
@@ -182,7 +181,7 @@ class CreateUserTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message", is(ExceptionMessage.ROLES_MISMATCH.getName())))
+        .andExpect(jsonPath("$.message", is(ExMessage.ROLES_MISMATCH.getName())))
         .andDo(print());
     assertNull($db.getUser(dto.getUsername()));
   }

@@ -10,9 +10,9 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
-import com.novaserve.fitness.exception.ExceptionMessage;
-import com.novaserve.fitness.exception.ServerException;
-import com.novaserve.fitness.helpers.DTOHelper;
+import com.novaserve.fitness.exception.ExMessage;
+import com.novaserve.fitness.exception.ServerEx;
+import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.helpers.MockHelper;
 import com.novaserve.fitness.users.dto.CreateUserReqDto;
 import com.novaserve.fitness.users.model.AgeGroup;
@@ -41,7 +41,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class CreateUserTest {
-
   @InjectMocks UserServiceImpl userService;
 
   @Mock AuthUtil authUtil;
@@ -58,7 +57,7 @@ class CreateUserTest {
 
   @Spy MockHelper $db;
 
-  @Spy DTOHelper $dto;
+  @Spy DtoHelper $dto;
 
   Role superadminRole;
   Role adminRole;
@@ -121,7 +120,7 @@ class CreateUserTest {
             .ageGroup(ageGroup.getName())
             .get();
 
-    when(authUtil.getUserFromAuthentication(any())).thenReturn(superadmin);
+    when(authUtil.getUserFromAuth(any())).thenReturn(superadmin);
 
     User actual = userService.createUser(dto);
     assertHelper(actual, dto);
@@ -140,7 +139,7 @@ class CreateUserTest {
             .ageGroup(ageGroup.getName())
             .get();
 
-    when(authUtil.getUserFromAuthentication(any())).thenReturn(admin);
+    when(authUtil.getUserFromAuth(any())).thenReturn(admin);
 
     User actual = userService.createUser(dto);
     assertHelper(actual, dto);
@@ -170,10 +169,10 @@ class CreateUserTest {
             .ageGroup(ageGroup.getName())
             .get();
 
-    when(authUtil.getUserFromAuthentication(any())).thenReturn(user);
+    when(authUtil.getUserFromAuth(any())).thenReturn(user);
 
-    ServerException actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
-    assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
+    ServerEx actual = assertThrows(ServerEx.class, () -> userService.createUser(dto));
+    assertEquals(actual.getMessage(), ExMessage.ROLES_MISMATCH.getName());
     assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
   }
 

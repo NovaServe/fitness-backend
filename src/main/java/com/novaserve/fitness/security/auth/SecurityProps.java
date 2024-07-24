@@ -7,6 +7,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "security")
 public record SecurityProps(Jwt Jwt) {
-
   public record Jwt(long expiresInMilliseconds, String secret) {}
 }

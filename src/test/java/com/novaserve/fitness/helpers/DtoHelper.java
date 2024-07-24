@@ -5,7 +5,7 @@ package com.novaserve.fitness.helpers;
 
 import com.novaserve.fitness.users.dto.CreateUserReqDto;
 
-public class DTOHelper {
+public class DtoHelper {
   public CreateUserRequestDtoBuilder createUserRequestDto() {
     return new CreateUserRequestDtoBuilder();
   }

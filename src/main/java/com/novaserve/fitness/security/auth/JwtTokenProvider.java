@@ -14,26 +14,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JWTTokenProvider {
-
+public class JwtTokenProvider {
   @Autowired SecurityProps securityProps;
 
   @Autowired UserUtil userUtil;
 
-  public String generateToken(Authentication authentication) {
-    User user = (User) (authentication.getPrincipal());
-    Date currentDateTime = new Date(); // In UTC
-    Date expirationDateTime =
-        new Date(currentDateTime.getTime() + securityProps.Jwt().expiresInMilliseconds()); // In UTC
+  public String generateToken(Authentication auth) {
+    User user = (User) (auth.getPrincipal());
+    Date curr = new Date(); // In UTC
+    Date expire = new Date(curr.getTime() + securityProps.Jwt().expiresInMilliseconds()); // In UTC
     return Jwts.builder()
         .subject(user.getUsername())
-        .issuedAt(currentDateTime)
-        .expiration(expirationDateTime)
+        .issuedAt(curr)
+        .expiration(expire)
         .signWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()), Jwts.SIG.HS512)
         .compact();
   }
 
-  public String getUsernameFromJWT(String token) {
+  public String getUsernameFromJwt(String token) {
     Claims claims =
         Jwts.parser()
             .verifyWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()))
@@ -43,7 +41,7 @@ public class JWTTokenProvider {
     return claims.getSubject();
   }
 
-  public Date getExpirationDateFromJWT(String token) {
+  public Date getExpireFromJwt(String token) {
     Claims claims =
         Jwts.parser()
             .verifyWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()))

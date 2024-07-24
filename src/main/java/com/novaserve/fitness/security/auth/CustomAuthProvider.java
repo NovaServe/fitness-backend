@@ -17,8 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CustomAuthenticationProvider implements AuthenticationProvider {
-
+public class CustomAuthProvider implements AuthenticationProvider {
   @Autowired private UserRepository userRepository;
 
   @Autowired SecurityUtil securityUtil;
@@ -26,9 +25,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
   @Autowired PasswordEncoder passwordEncoder;
 
   @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-    String principal = authentication.getPrincipal().toString();
-    String credentials = authentication.getCredentials().toString();
+  public Authentication authenticate(Authentication auth) throws AuthenticationException {
+    String principal = auth.getPrincipal().toString();
+    String credentials = auth.getCredentials().toString();
     User user =
         userRepository
             .findByUsernameOrEmailOrPhone(principal, principal, principal)
@@ -44,7 +43,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
   }
 
   @Override
-  public boolean supports(Class<?> authentication) {
-    return authentication.equals(UsernamePasswordAuthenticationToken.class);
+  public boolean supports(Class<?> auth) {
+    return auth.equals(UsernamePasswordAuthenticationToken.class);
   }
 }

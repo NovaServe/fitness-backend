@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 @TestComponent
-public class DBHelper {
+public class DbHelper {
   @Autowired RoleRepository roleRepository;
 
   @Autowired GenderRepository genderRepository;
@@ -77,7 +77,7 @@ public class DBHelper {
   }
 
   public UserBuilder user() {
-    return new DBHelper.UserBuilder(userRepository, passwordEncoder);
+    return new DbHelper.UserBuilder(userRepository, passwordEncoder);
   }
 
   public static class UserBuilder {

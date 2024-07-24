@@ -16,16 +16,15 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class OpenEndpoints {
-
   @Value("/error/**")
-  private String errorURL;
+  private String errorUrl;
 
   @Value("${api.basePath}/${api.version}/auth/login")
-  private String loginURL;
+  private String loginUrl;
 
   @Value("${api.basePath}/${api.version}/auth/logout")
-  private String logoutURL;
+  private String logoutUrl;
 
   @Value("${api.basePath}/${api.version}/auth/validateToken")
-  private String validateTokenURL;
+  private String validateTokenUrl;
 }

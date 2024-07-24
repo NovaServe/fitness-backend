@@ -12,6 +12,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExceptionDto {
+public class ExDto {
   private String message;
 }

@@ -9,7 +9,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class SymmetricEncryptor {
-
   private static final String ALGORITHM = "AES";
   private static final String MODE = "CBC";
   private static final String PADDING = "PKCS5Padding";

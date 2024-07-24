@@ -16,7 +16,7 @@ public class TestController {
   @GetMapping("/api/v1/test")
   public ResponseEntity<?> getTestMessage() {
     Map<String, String> data = new HashMap<>();
-    data.put("data", "Test message from the backend");
+    data.put("data", "Test message from the server");
     return ResponseEntity.ok(data);
   }
 }

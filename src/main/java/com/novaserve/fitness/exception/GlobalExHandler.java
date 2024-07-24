@@ -24,13 +24,13 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+public class GlobalExHandler extends ResponseEntityExceptionHandler {
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExHandler.class);
 
-  @ExceptionHandler(ServerException.class)
-  public ResponseEntity<ExceptionDto> handleApiException(ServerException e, WebRequest req) {
+  @ExceptionHandler(ServerEx.class)
+  public ResponseEntity<ExDto> handleApiException(ServerEx e, WebRequest req) {
     logger.error("{}, {}, {}", req.getDescription(true), e.getStatus(), e.getStackTrace());
-    ExceptionDto dto = new ExceptionDto(e.getMessage());
+    ExDto dto = new ExDto(e.getMessage());
     return new ResponseEntity<>(dto, e.getStatus());
   }
 
@@ -40,9 +40,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     return new ResponseEntity<>(e.getStatus());
   }
 
-  @ExceptionHandler(NotFoundInternalError.class)
-  public ResponseEntity<ExceptionDto> handleResourceNotFoundInternalError(
-      NotFoundInternalError e, WebRequest req) {
+  @ExceptionHandler(NotFoundInternalErr.class)
+  public ResponseEntity<ExDto> handleResourceNotFoundInternalError(
+      NotFoundInternalErr e, WebRequest req) {
     logger.error("{}, {}, {}", req.getDescription(true), e.getStatusCode(), e.getStackTrace());
     return new ResponseEntity<>(e.getStatus());
   }

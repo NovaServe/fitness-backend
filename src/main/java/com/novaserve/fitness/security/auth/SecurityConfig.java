@@ -18,49 +18,47 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+  @Autowired CustomUserDetails customUserDetails;
 
-  @Autowired CustomUserDetailsService customUserDetailsService;
+  @Autowired CustomAuthProvider customAuthProvider;
 
-  @Autowired CustomAuthenticationProvider customAuthenticationProvider;
+  @Autowired JwtAuthEntry jwtAuthEntry;
 
-  @Autowired JWTAuthEntryPoint jwtAuthEntryPoint;
-
-  @Autowired JWTAuthFilter jwtAuthFilter;
+  @Autowired JwtAuthFilter jwtAuthFilter;
 
   @Autowired OpenEndpoints openEndpoints;
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-    httpSecurity
-        .csrf(csrf -> csrf.disable())
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(csrf -> csrf.disable())
         .exceptionHandling(
-            exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthEntryPoint))
+            exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthEntry))
         .sessionManagement(
             session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             authorize ->
                 authorize
-                    .requestMatchers(HttpMethod.GET, openEndpoints.getErrorURL())
+                    .requestMatchers(HttpMethod.GET, openEndpoints.getErrorUrl())
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, openEndpoints.getErrorURL())
+                    .requestMatchers(HttpMethod.POST, openEndpoints.getErrorUrl())
                     .permitAll()
-                    .requestMatchers(HttpMethod.PATCH, openEndpoints.getErrorURL())
+                    .requestMatchers(HttpMethod.PATCH, openEndpoints.getErrorUrl())
                     .permitAll()
-                    .requestMatchers(HttpMethod.DELETE, openEndpoints.getErrorURL())
+                    .requestMatchers(HttpMethod.DELETE, openEndpoints.getErrorUrl())
                     .permitAll()
                     .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                     .permitAll()
-                    .requestMatchers(HttpMethod.POST, openEndpoints.getLoginURL())
+                    .requestMatchers(HttpMethod.POST, openEndpoints.getLoginUrl())
                     .permitAll()
-                    .requestMatchers(HttpMethod.GET, openEndpoints.getLogoutURL())
+                    .requestMatchers(HttpMethod.GET, openEndpoints.getLogoutUrl())
                     .permitAll()
                     .anyRequest()
                     .authenticated());
 
-    //        httpSecurity.authenticationProvider(authenticationProvider());
-    httpSecurity.authenticationProvider(customAuthenticationProvider);
-    httpSecurity.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-    return httpSecurity.build();
+    // http.authenticationProvider(authenticationProvider());
+    http.authenticationProvider(customAuthProvider);
+    http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+    return http.build();
   }
 
   //    @Bean

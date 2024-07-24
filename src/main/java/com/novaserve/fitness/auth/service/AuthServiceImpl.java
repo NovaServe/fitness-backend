@@ -3,12 +3,12 @@
 */
 package com.novaserve.fitness.auth.service;
 
-import com.novaserve.fitness.auth.dto.LoginProcessData;
-import com.novaserve.fitness.auth.dto.LoginRequestDto;
-import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
-import com.novaserve.fitness.exception.ExceptionMessage;
-import com.novaserve.fitness.exception.ServerException;
-import com.novaserve.fitness.security.auth.JWTTokenProvider;
+import com.novaserve.fitness.auth.dto.LoginProcess;
+import com.novaserve.fitness.auth.dto.LoginReqDto;
+import com.novaserve.fitness.auth.dto.ValidateTokenResDto;
+import com.novaserve.fitness.exception.ExMessage;
+import com.novaserve.fitness.exception.ServerEx;
+import com.novaserve.fitness.security.auth.JwtTokenProvider;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
 
   @Autowired AuthenticationManager authenticationManager;
 
-  @Autowired JWTTokenProvider jwtTokenProvider;
+  @Autowired JwtTokenProvider jwtTokenProvider;
 
   @Autowired AuthUtil authUtil;
 
@@ -37,37 +37,35 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   @Transactional
-  public LoginProcessData login(LoginRequestDto requestDto) {
+  public LoginProcess login(LoginReqDto reqDto) {
     try {
       Authentication authentication =
           authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(
-                  requestDto.getUsernameOrEmailOrPhone(), requestDto.getPassword()));
+                  reqDto.getUsernameOrEmailOrPhone(), reqDto.getPassword()));
       SecurityContextHolder.getContext().setAuthentication(authentication);
       String token = jwtTokenProvider.generateToken(authentication);
-      String cookieExpires =
-          authUtil.formatCookieExpirationDateTime(jwtTokenProvider.getExpirationDateFromJWT(token));
-      User user = authUtil.getUserFromAuthentication(authentication);
-      logger.info("Login successful: " + requestDto.getUsernameOrEmailOrPhone());
-      return LoginProcessData.builder()
+      String cookieExpires = authUtil.formatCookieExpire(jwtTokenProvider.getExpireFromJwt(token));
+      User user = authUtil.getUserFromAuth(authentication);
+      logger.info("Login successful: " + reqDto.getUsernameOrEmailOrPhone());
+      return LoginProcess.builder()
           .token(token)
           .role(user.getRole().getName())
           .cookieExpires(cookieExpires)
           .fullName(user.getFullName())
           .build();
     } catch (Exception e) {
-      logger.error("Login failed: " + requestDto.getUsernameOrEmailOrPhone());
+      logger.error("Login failed: " + reqDto.getUsernameOrEmailOrPhone());
       logger.error("Login error: " + e.getMessage());
-      throw new ServerException(ExceptionMessage.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
+      throw new ServerEx(ExMessage.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED);
     }
   }
 
   @Override
   @Transactional
-  public ValidateTokenResponseDto validateToken() {
+  public ValidateTokenResDto validateToken() {
     Long userId =
-        authUtil.getUserIdFromAuthentication(
-            SecurityContextHolder.getContext().getAuthentication());
+        authUtil.getUserIdFromAuth(SecurityContextHolder.getContext().getAuthentication());
     if (userId != null) {
       Optional<User> userOptional = userRepository.findById(userId);
       if (userOptional.isEmpty()) {
@@ -76,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
       }
       User user = userOptional.get();
       logger.info("Token validated for {}", user.getUsername());
-      return ValidateTokenResponseDto.builder()
+      return ValidateTokenResDto.builder()
           .fullName(user.getFullName())
           .role(user.getRole().getName())
           .build();

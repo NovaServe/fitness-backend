@@ -3,10 +3,10 @@
 */
 package com.novaserve.fitness.auth.controller;
 
-import com.novaserve.fitness.auth.dto.LoginProcessData;
-import com.novaserve.fitness.auth.dto.LoginRequestDto;
-import com.novaserve.fitness.auth.dto.LoginResponseDto;
-import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
+import com.novaserve.fitness.auth.dto.LoginProcess;
+import com.novaserve.fitness.auth.dto.LoginReqDto;
+import com.novaserve.fitness.auth.dto.LoginResDto;
+import com.novaserve.fitness.auth.dto.ValidateTokenResDto;
 import com.novaserve.fitness.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
@@ -32,40 +32,38 @@ public class AuthController {
 
   @Operation(summary = "Login")
   @PostMapping("/login")
-  public ResponseEntity<LoginResponseDto> login(
-      @Valid @RequestBody LoginRequestDto requestDto, HttpServletResponse response) {
-    LoginProcessData loginProcessData = authService.login(requestDto);
-    Cookie cookie = new Cookie("token", loginProcessData.getToken());
+  public ResponseEntity<LoginResDto> login(
+      @Valid @RequestBody LoginReqDto reqDto, HttpServletResponse res) {
+    LoginProcess process = authService.login(reqDto);
+    Cookie cookie = new Cookie("token", process.getToken());
     cookie.setHttpOnly(true);
     cookie.setPath(apiPath);
     cookie.setAttribute("SameSite", "Strict");
-    cookie.setAttribute("Expires", loginProcessData.getCookieExpires());
-    response.addCookie(cookie);
-    LoginResponseDto loginResponseDto =
-        LoginResponseDto.builder()
-            .fullName(loginProcessData.getFullName())
-            .role(loginProcessData.getRole())
-            .build();
-    return ResponseEntity.ok(loginResponseDto);
+    cookie.setAttribute("Expires", process.getCookieExpires());
+    res.addCookie(cookie);
+    LoginResDto resDto =
+        LoginResDto.builder().fullName(process.getFullName()).role(process.getRole()).build();
+    return ResponseEntity.ok(resDto);
   }
 
   @Operation(summary = "Logout")
   @GetMapping("/logout")
-  public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-    logger.info("Logout attempt from {}", request.getRemoteAddr());
+  public ResponseEntity<?> logout(HttpServletRequest req, HttpServletResponse res) {
+    logger.info("Logout attempt from {}", req.getRemoteAddr());
     Cookie cookie = new Cookie("token", "");
     cookie.setHttpOnly(true);
     cookie.setPath(apiPath);
     cookie.setAttribute("SameSite", "Strict");
     cookie.setMaxAge(0);
-    response.addCookie(cookie);
-    logger.info("Token cookie is deleted {}", request.getRemoteAddr());
+    res.addCookie(cookie);
+    logger.info("Token cookie is deleted {}", req.getRemoteAddr());
     return ResponseEntity.ok().build();
   }
 
   @Operation(summary = "Validate token")
   @GetMapping("/validate")
-  public ResponseEntity<ValidateTokenResponseDto> validateToken(HttpServletResponse response) {
+  public ResponseEntity<ValidateTokenResDto> validateToken(HttpServletResponse res) {
+    // todo
     return ResponseEntity.ok(authService.validateToken());
   }
 }

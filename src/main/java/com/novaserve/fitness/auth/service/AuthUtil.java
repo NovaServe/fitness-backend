@@ -8,9 +8,9 @@ import java.util.Date;
 import org.springframework.security.core.Authentication;
 
 public interface AuthUtil {
-  Long getUserIdFromAuthentication(Authentication authentication);
+  Long getUserIdFromAuth(Authentication auth);
 
-  User getUserFromAuthentication(Authentication authentication);
+  User getUserFromAuth(Authentication auth);
 
-  String formatCookieExpirationDateTime(Date date);
+  String formatCookieExpire(Date date);
 }

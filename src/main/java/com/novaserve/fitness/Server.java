@@ -11,11 +11,11 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
 @ConfigurationPropertiesScan
-public class FitnessApplication {
-  private static final Logger logger = LoggerFactory.getLogger(FitnessApplication.class);
+public class Server {
+  private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
   public static void main(String[] args) {
-    SpringApplication.run(FitnessApplication.class, args);
-    logger.info("Application starts!");
+    SpringApplication.run(Server.class, args);
+    logger.info("Server runs...");
   }
 }

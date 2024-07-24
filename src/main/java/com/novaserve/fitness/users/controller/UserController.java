@@ -19,14 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("${api.basePath}/${api.version}/users")
 public class UserController {
-
   @Autowired UserService userService;
 
   @Operation(summary = "Create user")
   @PostMapping
   @PreAuthorize("hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')")
-  public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserReqDto requestDto) {
-    userService.createUser(requestDto);
+  public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserReqDto reqDto) {
+    userService.createUser(reqDto);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 }

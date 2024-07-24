@@ -3,10 +3,10 @@
 */
 package com.novaserve.fitness.security.auth;
 
-import static com.novaserve.fitness.exception.ExceptionMessage.INVALID_CREDENTIALS;
+import static com.novaserve.fitness.exception.ExMessage.INVALID_CREDENTIALS;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaserve.fitness.exception.ExceptionDto;
+import com.novaserve.fitness.exception.ExDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -27,53 +27,54 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
-public class JWTAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter extends OncePerRequestFilter {
+  @Autowired CustomUserDetails customUserDetails;
 
-  @Autowired CustomUserDetailsService customUserDetailsService;
-
-  @Autowired JWTTokenProvider jwtTokenProvider;
+  @Autowired JwtTokenProvider jwtTokenProvider;
 
   @Override
   public void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      HttpServletRequest req, HttpServletResponse res, FilterChain filterChain)
       throws ServletException, IOException {
-    String token = getFWTFromRequestCookie(request);
+
+    String token = getFwtFromReqCookie(req);
     if (token != null) {
       if (jwtTokenProvider.validateToken(token)) {
-        String username = jwtTokenProvider.getUsernameFromJWT(token);
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        String username = jwtTokenProvider.getUsernameFromJwt(token);
+        UserDetails userDetails = customUserDetails.loadUserByUsername(username);
+
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
             new UsernamePasswordAuthenticationToken(
                 userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+
         usernamePasswordAuthenticationToken.setDetails(
-            new WebAuthenticationDetailsSource().buildDetails(request));
+            new WebAuthenticationDetailsSource().buildDetails(req));
+
         SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
       } else {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        ExceptionDto exceptionDto = new ExceptionDto(INVALID_CREDENTIALS.getName());
-        PrintWriter out = response.getWriter();
+        res.setStatus(HttpStatus.UNAUTHORIZED.value());
+        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        ExDto dto = new ExDto(INVALID_CREDENTIALS.getName());
+        PrintWriter out = res.getWriter();
         ObjectMapper objectMapper = new ObjectMapper();
-        out.write(objectMapper.writeValueAsString(exceptionDto));
+        out.write(objectMapper.writeValueAsString(dto));
         out.flush();
       }
     }
-    filterChain.doFilter(request, response);
+    filterChain.doFilter(req, res);
   }
 
-  private String getJWTFromRequestHeader(HttpServletRequest request) {
-    if (request.getHeader("Authorization") == null) return null;
-    String bearerToken = request.getHeader("Authorization");
+  private String getJwtFromReqHeader(HttpServletRequest req) {
+    if (req.getHeader("Authorization") == null) return null;
+    String bearerToken = req.getHeader("Authorization");
     return bearerToken.substring(7);
   }
 
-  private String getFWTFromRequestCookie(HttpServletRequest request) {
-    Cookie[] cookies = request.getCookies();
+  private String getFwtFromReqCookie(HttpServletRequest req) {
+    Cookie[] cookies = req.getCookies();
     if (cookies != null && cookies.length > 0) {
       Optional<Cookie> cookie =
-          Arrays.stream(request.getCookies())
-              .filter(elt -> "token".equals(elt.getName()))
-              .findFirst();
+          Arrays.stream(req.getCookies()).filter(elt -> "token".equals(elt.getName())).findFirst();
       if (cookie.isPresent() && !"".equals(cookie.get().getValue())) {
         return cookie.get().getValue();
       }

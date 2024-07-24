@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CustomUserDetailsService implements UserDetailsService {
-
+public class CustomUserDetails implements UserDetailsService {
   @Autowired UserUtil userUtil;
 
   @Autowired SecurityUtil securityUtil;

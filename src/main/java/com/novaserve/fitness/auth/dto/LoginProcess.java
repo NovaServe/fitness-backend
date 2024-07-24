@@ -10,8 +10,9 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponseDto {
+public class LoginProcess {
+  private String token;
+  private String cookieExpires;
   private String role;
-
   private String fullName;
 }

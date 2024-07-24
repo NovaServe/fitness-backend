@@ -4,7 +4,7 @@
 package com.novaserve.fitness.security.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaserve.fitness.exception.ExceptionDto;
+import com.novaserve.fitness.exception.ExDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -16,22 +16,18 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JWTAuthEntryPoint implements AuthenticationEntryPoint {
-
+public class JwtAuthEntry implements AuthenticationEntryPoint {
   @Override
-  public void commence(
-      HttpServletRequest request,
-      HttpServletResponse response,
-      AuthenticationException authException)
+  public void commence(HttpServletRequest req, HttpServletResponse res, AuthenticationException e)
       throws IOException {
-    response.setStatus(HttpStatus.UNAUTHORIZED.value());
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    ExceptionDto exceptionDto = new ExceptionDto(authException.getMessage());
-    PrintWriter out = response.getWriter();
+    res.setStatus(HttpStatus.UNAUTHORIZED.value());
+    res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    ExDto dto = new ExDto(e.getMessage());
+    PrintWriter out = res.getWriter();
     ObjectMapper objectMapper = new ObjectMapper();
-    out.write(objectMapper.writeValueAsString(exceptionDto));
+    out.write(objectMapper.writeValueAsString(dto));
     out.flush();
-    // Alternative
-    // response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+    // Alt
+    // res.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
   }
 }
