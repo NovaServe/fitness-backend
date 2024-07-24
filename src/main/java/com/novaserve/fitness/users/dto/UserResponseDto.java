@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResDto {
+public class UserResponseDto {
   private Long id;
   private String username;
   private String fullName;

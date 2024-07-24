@@ -12,7 +12,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginReqDto {
+public class LoginRequestDto {
   @NotBlank
   @Size(min = 5, max = 40)
   private String usernameOrEmailOrPhone;

@@ -5,12 +5,12 @@ package com.novaserve.fitness.exception;
 
 import org.springframework.http.HttpStatus;
 
-public class NotFoundInternalErr extends NotFound {
-  public NotFoundInternalErr(Class<?> resourceClass, String searchParam) {
+public class NotFoundInternalError extends NotFound {
+  public NotFoundInternalError(Class<?> resourceClass, String searchParam) {
     super(resourceClass, searchParam);
   }
 
-  public NotFoundInternalErr(Class<?> resourceClass, long searchParam) {
+  public NotFoundInternalError(Class<?> resourceClass, long searchParam) {
     super(resourceClass, searchParam);
   }
 

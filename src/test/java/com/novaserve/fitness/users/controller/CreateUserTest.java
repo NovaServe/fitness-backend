@@ -15,10 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.novaserve.fitness.config.Docker;
 import com.novaserve.fitness.config.TestBeans;
-import com.novaserve.fitness.exception.ExMessage;
+import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.DtoHelper;
-import com.novaserve.fitness.users.dto.CreateUserReqDto;
+import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
@@ -90,13 +90,12 @@ class CreateUserTest {
     ageGroup = $db.adult();
   }
 
-  void assertHelper(CreateUserReqDto dto) {
+  void assertHelper(CreateUserRequestDto dto) {
     User actual = $db.getUser(dto.getUsername());
-    String[] comparatorIgnoringFields =
-        new String[] {"id", "password", "role", "ageGroup", "gender"};
+    String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
     assertThat(actual)
         .usingRecursiveComparison()
-        .ignoringFields(comparatorIgnoringFields)
+        .ignoringFields(comparatorIgnoreFields)
         .isEqualTo(dto);
     assertEquals(actual.getRole().getName(), dto.getRole());
     assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
@@ -110,7 +109,7 @@ class CreateUserTest {
     User superadmin =
         $db.user().seed(1).role(superadminRole).gender(gender).ageGroup(ageGroup).get();
 
-    CreateUserReqDto dto =
+    CreateUserRequestDto dto =
         $dto.createUserRequestDto()
             .seed(2)
             .role(adminRole.getName())
@@ -136,7 +135,7 @@ class CreateUserTest {
       throws Exception {
     User admin = $db.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
 
-    CreateUserReqDto dto =
+    CreateUserRequestDto dto =
         $dto.createUserRequestDto()
             .seed(2)
             .role(roleName)
@@ -167,7 +166,7 @@ class CreateUserTest {
     User user =
         $db.user().seed(1).role(getRole(creatorRoleName)).gender(gender).ageGroup(ageGroup).get();
 
-    CreateUserReqDto dto =
+    CreateUserRequestDto dto =
         $dto.createUserRequestDto()
             .seed(2)
             .role(createdRoleName)
@@ -181,7 +180,7 @@ class CreateUserTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
         .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.message", is(ExMessage.ROLES_MISMATCH.getName())))
+        .andExpect(jsonPath("$.message", is(ExceptionMessage.ROLES_MISMATCH.getName())))
         .andDo(print());
     assertNull($db.getUser(dto.getUsername()));
   }

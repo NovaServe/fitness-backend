@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ValidateTokenResDto {
+public class ValidateTokenResponseDto {
   private String role;
   private String fullName;
 }

@@ -1,6 +1,6 @@
 ## REST API
 
-### Run PostgreSQL container
+### Run Postgres container
 
 ```shell
 git clone https://github.com/NovaServe/fitness-hosting.git
@@ -10,7 +10,7 @@ cp .env_template .env
 docker compose up -d
 ```
 
-### Run backend server
+### Run server
 
 ```shell
 git clone https://github.com/NovaServe/fitness-backend.git

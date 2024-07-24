@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.users.controller;
 
-import com.novaserve.fitness.users.dto.CreateUserReqDto;
+import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -24,8 +24,8 @@ public class UserController {
   @Operation(summary = "Create user")
   @PostMapping
   @PreAuthorize("hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')")
-  public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserReqDto reqDto) {
-    userService.createUser(reqDto);
+  public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequestDto requestDto) {
+    userService.createUser(requestDto);
     return ResponseEntity.status(HttpStatus.CREATED).build();
   }
 }

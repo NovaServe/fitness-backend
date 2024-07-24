@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.helpers;
 
-import com.novaserve.fitness.users.dto.CreateUserReqDto;
+import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 
 public class DtoHelper {
   public CreateUserRequestDtoBuilder createUserRequestDto() {
@@ -16,8 +16,8 @@ public class DtoHelper {
     private String genderName;
     private String ageGroupName;
 
-    public CreateUserReqDto empty() {
-      return CreateUserReqDto.builder().build();
+    public CreateUserRequestDto empty() {
+      return CreateUserRequestDto.builder().build();
     }
 
     public CreateUserRequestDtoBuilder seed(int seed) {
@@ -40,8 +40,8 @@ public class DtoHelper {
       return this;
     }
 
-    public CreateUserReqDto get() {
-      return CreateUserReqDto.builder()
+    public CreateUserRequestDto get() {
+      return CreateUserRequestDto.builder()
           .username("username" + seed)
           .fullName("User Full Name")
           .email("username" + seed + "@email.com")

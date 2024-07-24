@@ -6,11 +6,11 @@ package com.novaserve.fitness.exception;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-public class ServerEx extends RuntimeException {
-  protected ExMessage message;
+public class ServerException extends RuntimeException {
+  protected ExceptionMessage message;
   @Getter protected HttpStatus status;
 
-  public ServerEx(ExMessage message, HttpStatus status) {
+  public ServerException(ExceptionMessage message, HttpStatus status) {
     super(message.getName());
     this.message = message;
     this.status = status;

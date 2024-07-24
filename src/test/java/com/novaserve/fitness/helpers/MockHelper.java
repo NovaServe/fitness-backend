@@ -58,7 +58,6 @@ public class MockHelper {
   }
 
   public static class UserBuilder {
-
     private int seed;
     private Role role;
     private Gender gender;

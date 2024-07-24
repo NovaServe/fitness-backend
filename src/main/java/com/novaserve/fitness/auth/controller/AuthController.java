@@ -3,10 +3,10 @@
 */
 package com.novaserve.fitness.auth.controller;
 
-import com.novaserve.fitness.auth.dto.LoginProcess;
-import com.novaserve.fitness.auth.dto.LoginReqDto;
-import com.novaserve.fitness.auth.dto.LoginResDto;
-import com.novaserve.fitness.auth.dto.ValidateTokenResDto;
+import com.novaserve.fitness.auth.dto.LoginProcessDto;
+import com.novaserve.fitness.auth.dto.LoginRequestDto;
+import com.novaserve.fitness.auth.dto.LoginResponseDto;
+import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
 import com.novaserve.fitness.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.Cookie;
@@ -32,18 +32,21 @@ public class AuthController {
 
   @Operation(summary = "Login")
   @PostMapping("/login")
-  public ResponseEntity<LoginResDto> login(
-      @Valid @RequestBody LoginReqDto reqDto, HttpServletResponse res) {
-    LoginProcess process = authService.login(reqDto);
-    Cookie cookie = new Cookie("token", process.getToken());
+  public ResponseEntity<LoginResponseDto> login(
+      @Valid @RequestBody LoginRequestDto requestDto, HttpServletResponse res) {
+    LoginProcessDto processDto = authService.login(requestDto);
+    Cookie cookie = new Cookie("token", processDto.getToken());
     cookie.setHttpOnly(true);
     cookie.setPath(apiPath);
     cookie.setAttribute("SameSite", "Strict");
-    cookie.setAttribute("Expires", process.getCookieExpires());
+    cookie.setAttribute("Expires", processDto.getCookieExpires());
     res.addCookie(cookie);
-    LoginResDto resDto =
-        LoginResDto.builder().fullName(process.getFullName()).role(process.getRole()).build();
-    return ResponseEntity.ok(resDto);
+    LoginResponseDto responseDto =
+        LoginResponseDto.builder()
+            .fullName(processDto.getFullName())
+            .role(processDto.getRole())
+            .build();
+    return ResponseEntity.ok(responseDto);
   }
 
   @Operation(summary = "Logout")
@@ -62,7 +65,7 @@ public class AuthController {
 
   @Operation(summary = "Validate token")
   @GetMapping("/validate")
-  public ResponseEntity<ValidateTokenResDto> validateToken(HttpServletResponse res) {
+  public ResponseEntity<ValidateTokenResponseDto> validateToken(HttpServletResponse res) {
     // todo
     return ResponseEntity.ok(authService.validateToken());
   }

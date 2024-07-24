@@ -18,7 +18,7 @@ import lombok.*;
       fieldMatch = "confirmPassword",
       message = "Passwords don't match")
 })
-public class CreateUserReqDto {
+public class CreateUserRequestDto {
   @NotBlank
   @Size(min = 5, max = 20)
   private String username;

@@ -5,8 +5,8 @@ package com.novaserve.fitness.users.service;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.exception.*;
-import com.novaserve.fitness.users.dto.CreateUserReqDto;
-import com.novaserve.fitness.users.dto.UserResDto;
+import com.novaserve.fitness.users.dto.CreateUserRequestDto;
+import com.novaserve.fitness.users.dto.UserResponseDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
@@ -51,29 +51,29 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public UserResDto getUserDetailById(long userId) {
+  public UserResponseDto getUserDetailById(long userId) {
     return userRepository
         .findById(userId)
-        .map(user -> modelMapper.map(user, UserResDto.class))
+        .map(user -> modelMapper.map(user, UserResponseDto.class))
         .orElseThrow(() -> new NotFound(User.class, userId));
   }
 
   @Override
   @Transactional
-  public User createUser(CreateUserReqDto dto) {
+  public User createUser(CreateUserRequestDto dto) {
     User user = authUtil.getUserFromAuth(SecurityContextHolder.getContext().getAuthentication());
     Role roleAdmin =
         roleRepository
             .findByName("ROLE_ADMIN")
-            .orElseThrow(() -> new NotFoundInternalErr(Role.class, "ROLE_ADMIN"));
+            .orElseThrow(() -> new NotFoundInternalError(Role.class, "ROLE_ADMIN"));
     Role roleCustomer =
         roleRepository
             .findByName("ROLE_CUSTOMER")
-            .orElseThrow(() -> new NotFoundInternalErr(Role.class, "ROLE_CUSTOMER"));
+            .orElseThrow(() -> new NotFoundInternalError(Role.class, "ROLE_CUSTOMER"));
     Role roleInstructor =
         roleRepository
             .findByName("ROLE_INSTRUCTOR")
-            .orElseThrow(() -> new NotFoundInternalErr(Role.class, "ROLE_INSTRUCTOR"));
+            .orElseThrow(() -> new NotFoundInternalError(Role.class, "ROLE_INSTRUCTOR"));
 
     boolean superadminCreatesAdminUser =
         user.getRole().getName().equals("ROLE_SUPERADMIN")
@@ -88,15 +88,15 @@ public class UserServiceImpl implements UserService {
       Gender gender =
           genderRepository
               .findByName(dto.getGender())
-              .orElseThrow(() -> new NotFoundInternalErr(Gender.class, dto.getGender()));
+              .orElseThrow(() -> new NotFoundInternalError(Gender.class, dto.getGender()));
       AgeGroup ageGroup =
           ageGroupRepository
               .findByName(dto.getAgeGroup())
-              .orElseThrow(() -> new NotFoundInternalErr(AgeGroup.class, dto.getAgeGroup()));
+              .orElseThrow(() -> new NotFoundInternalError(AgeGroup.class, dto.getAgeGroup()));
       Role role =
           roleRepository
               .findByName(dto.getRole())
-              .orElseThrow(() -> new NotFoundInternalErr(Role.class, dto.getRole()));
+              .orElseThrow(() -> new NotFoundInternalError(Role.class, dto.getRole()));
       User newUser =
           User.builder()
               .username(dto.getUsername())
@@ -116,6 +116,6 @@ public class UserServiceImpl implements UserService {
           user.getId());
       return saved;
     }
-    throw new ServerEx(ExMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
+    throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
   }
 }

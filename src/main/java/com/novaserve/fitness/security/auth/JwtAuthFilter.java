@@ -3,10 +3,10 @@
 */
 package com.novaserve.fitness.security.auth;
 
-import static com.novaserve.fitness.exception.ExMessage.INVALID_CREDENTIALS;
+import static com.novaserve.fitness.exception.ExceptionMessage.INVALID_CREDENTIALS;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaserve.fitness.exception.ExDto;
+import com.novaserve.fitness.exception.ExceptionDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -54,7 +54,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       } else {
         res.setStatus(HttpStatus.UNAUTHORIZED.value());
         res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        ExDto dto = new ExDto(INVALID_CREDENTIALS.getName());
+        ExceptionDto dto = new ExceptionDto(INVALID_CREDENTIALS.getName());
         PrintWriter out = res.getWriter();
         ObjectMapper objectMapper = new ObjectMapper();
         out.write(objectMapper.writeValueAsString(dto));

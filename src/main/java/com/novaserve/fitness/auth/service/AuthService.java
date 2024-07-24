@@ -3,12 +3,12 @@
 */
 package com.novaserve.fitness.auth.service;
 
-import com.novaserve.fitness.auth.dto.LoginProcess;
-import com.novaserve.fitness.auth.dto.LoginReqDto;
-import com.novaserve.fitness.auth.dto.ValidateTokenResDto;
+import com.novaserve.fitness.auth.dto.LoginProcessDto;
+import com.novaserve.fitness.auth.dto.LoginRequestDto;
+import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
 
 public interface AuthService {
-  LoginProcess login(LoginReqDto reqDto);
+  LoginProcessDto login(LoginRequestDto requestDto);
 
-  ValidateTokenResDto validateToken();
+  ValidateTokenResponseDto validateToken();
 }

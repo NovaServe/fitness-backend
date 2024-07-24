@@ -10,11 +10,11 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
-import com.novaserve.fitness.exception.ExMessage;
-import com.novaserve.fitness.exception.ServerEx;
+import com.novaserve.fitness.exception.ExceptionMessage;
+import com.novaserve.fitness.exception.ServerException;
 import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.helpers.MockHelper;
-import com.novaserve.fitness.users.dto.CreateUserReqDto;
+import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
@@ -55,7 +55,7 @@ class CreateUserTest {
 
   @Spy PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-  @Spy MockHelper $db;
+  @Spy MockHelper $mock;
 
   @Spy DtoHelper $dto;
 
@@ -65,17 +65,15 @@ class CreateUserTest {
   Role instructorRole;
   Gender gender;
   AgeGroup ageGroup;
-  String[] comparatorIgnoringFields;
 
   @BeforeEach
   public void beforeEach() {
-    superadminRole = $db.superadminRole();
-    adminRole = $db.adminRole();
-    customerRole = $db.customerRole();
-    instructorRole = $db.instructorRole();
-    gender = $db.female();
-    ageGroup = $db.adult();
-    comparatorIgnoringFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
+    superadminRole = $mock.superadminRole();
+    adminRole = $mock.adminRole();
+    customerRole = $mock.customerRole();
+    instructorRole = $mock.instructorRole();
+    gender = $mock.female();
+    ageGroup = $mock.adult();
 
     lenient().when(genderRepository.findByName(gender.getName())).thenReturn(Optional.of(gender));
     lenient()
@@ -96,10 +94,11 @@ class CreateUserTest {
             });
   }
 
-  void assertHelper(User actual, CreateUserReqDto dto) {
+  void assertHelper(User actual, CreateUserRequestDto dto) {
+    String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
     assertThat(actual)
         .usingRecursiveComparison()
-        .ignoringFields(comparatorIgnoringFields)
+        .ignoringFields(comparatorIgnoreFields)
         .isEqualTo(dto);
     assertEquals(actual.getRole().getName(), dto.getRole());
     assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
@@ -110,9 +109,9 @@ class CreateUserTest {
   @Test
   void createUser_shouldCreateAdmin_whenSuperadminRequests() {
     User superadmin =
-        $db.user().seed(1).role(superadminRole).gender(gender).ageGroup(ageGroup).get();
+        $mock.user().seed(1).role(superadminRole).gender(gender).ageGroup(ageGroup).get();
 
-    CreateUserReqDto dto =
+    CreateUserRequestDto dto =
         $dto.createUserRequestDto()
             .seed(2)
             .role(adminRole.getName())
@@ -129,9 +128,9 @@ class CreateUserTest {
   @ParameterizedTest
   @MethodSource("createUserParams")
   void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) {
-    User admin = $db.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
+    User admin = $mock.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
 
-    CreateUserReqDto dto =
+    CreateUserRequestDto dto =
         $dto.createUserRequestDto()
             .seed(2)
             .role(roleName)
@@ -154,14 +153,15 @@ class CreateUserTest {
   void createUser_shouldThrowException_whenRolesMismatch(
       String creatorRoleName, String createdRoleName) {
     User user =
-        $db.user()
+        $mock
+            .user()
             .seed(1)
             .role(getRoleHelper(creatorRoleName))
             .gender(gender)
             .ageGroup(ageGroup)
             .get();
 
-    CreateUserReqDto dto =
+    CreateUserRequestDto dto =
         $dto.createUserRequestDto()
             .seed(2)
             .role(createdRoleName)
@@ -171,8 +171,8 @@ class CreateUserTest {
 
     when(authUtil.getUserFromAuth(any())).thenReturn(user);
 
-    ServerEx actual = assertThrows(ServerEx.class, () -> userService.createUser(dto));
-    assertEquals(actual.getMessage(), ExMessage.ROLES_MISMATCH.getName());
+    ServerException actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
+    assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
     assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
   }
 
