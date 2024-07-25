@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.users.dto;
 
 import lombok.*;
@@ -8,17 +11,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserResponseDto {
-    private Long id;
-
-    private String username;
-
-    private String email;
-
-    private String fullName;
-
-    private Long countryId;
-
-    private Long timezoneId;
-
-    private Integer age;
+  private Long id;
+  private String username;
+  private String fullName;
+  private String email;
+  private String phone;
+  private String role;
+  private String gender;
+  private String ageGroup;
 }

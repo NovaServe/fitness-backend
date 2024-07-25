@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.security.auth;
 
 import lombok.AllArgsConstructor;
@@ -13,15 +16,15 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 @Service
 public class OpenEndpoints {
-    @Value("/error/**")
-    private String errorURL;
+  @Value("/error/**")
+  private String errorUrl;
 
-    @Value("${api.basePath}/${api.version}/auth/login")
-    private String loginURL;
+  @Value("${api.basePath}/${api.version}/auth/login")
+  private String loginUrl;
 
-    @Value("${api.basePath}/${api.version}/auth/logout")
-    private String logoutURL;
+  @Value("${api.basePath}/${api.version}/auth/logout")
+  private String logoutUrl;
 
-    @Value("${api.basePath}/${api.version}/auth/validateToken")
-    private String validateTokenURL;
+  @Value("${api.basePath}/${api.version}/auth/validateToken")
+  private String validateTokenUrl;
 }

@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.exception;
 
 import static java.util.Objects.nonNull;
@@ -22,74 +25,71 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(ApiException.class)
-    public ResponseEntity<ExceptionDto> handleApiException(ApiException exception, WebRequest webRequest) {
-        logger.error(
-                "{}, {}, {}", webRequest.getDescription(false), exception.getHttpStatus(), exception.getStackTrace());
+  @ExceptionHandler(ServerException.class)
+  public ResponseEntity<ExceptionDto> handleApiException(ServerException e, WebRequest req) {
+    logger.error("{}, {}, {}", req.getDescription(true), e.getStatus(), e.getStackTrace());
+    ExceptionDto dto = new ExceptionDto(e.getMessage());
+    return new ResponseEntity<>(dto, e.getStatus());
+  }
 
-        String message;
-        if (exception.getResourceId() != null) {
-            message = exception.getMessageWithResourceId();
-        } else {
-            message = exception.getMessage();
-        }
-        ExceptionDto exceptionDto = new ExceptionDto(message);
-        return new ResponseEntity<>(exceptionDto, exception.getHttpStatus());
+  @ExceptionHandler(NotFound.class)
+  public ResponseEntity<?> handleResourceNotFound(NotFound e, WebRequest req) {
+    logger.error("{}, {}, {}", req.getDescription(true), e.getStatusCode(), e.getStackTrace());
+    return new ResponseEntity<>(e.getStatus());
+  }
+
+  @ExceptionHandler(NotFoundInternalError.class)
+  public ResponseEntity<ExceptionDto> handleResourceNotFoundInternalError(
+      NotFoundInternalError e, WebRequest req) {
+    logger.error("{}, {}, {}", req.getDescription(true), e.getStatusCode(), e.getStackTrace());
+    return new ResponseEntity<>(e.getStatus());
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<Map<String, String>> handleConstraintViolationException(
+      ConstraintViolationException e) {
+    Map<String, String> validationResult = new HashMap<>();
+    for (ConstraintViolation<?> constraintViolation : e.getConstraintViolations()) {
+      String constraintMessage = constraintViolation.getMessage();
+      String paramName = constraintViolation.getPropertyPath().toString().split("\\.")[1];
+      validationResult.put(paramName, constraintMessage);
     }
+    return new ResponseEntity<>(validationResult, HttpStatus.BAD_REQUEST);
+  }
 
-    @ExceptionHandler(ApiExceptionCustomMessage.class)
-    public ResponseEntity<ExceptionDto> handleApiExceptionCustomMessage(
-            ApiExceptionCustomMessage exception, WebRequest webRequest) {
-        logger.error(
-                "{}, {}, {}", webRequest.getDescription(false), exception.getHttpStatus(), exception.getStackTrace());
-
-        ExceptionDto exceptionDto = new ExceptionDto(exception.getMessage());
-        return new ResponseEntity<>(exceptionDto, exception.getHttpStatus());
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Map<String, String>> handleConstraintViolationException(
-            ConstraintViolationException exception) {
-        Map<String, String> validationResult = new HashMap<>();
-        for (ConstraintViolation<?> constraintViolation : exception.getConstraintViolations()) {
-            String constraintMessage = constraintViolation.getMessage();
-            String paramName = constraintViolation.getPropertyPath().toString().split("\\.")[1];
-            validationResult.put(paramName, constraintMessage);
-        }
-        return new ResponseEntity<>(validationResult, HttpStatus.BAD_REQUEST);
-    }
-
-    /**
-     * @see FieldError
-     * @see org.springframework.validation.ObjectError
-     * @see SpringValidatorAdapter
-     */
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = "Method argument not valid";
-            if (error instanceof FieldError) {
+  /**
+   * @see FieldError
+   * @see org.springframework.validation.ObjectError
+   * @see SpringValidatorAdapter
+   */
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode code, WebRequest req) {
+    Map<String, String> errors = new HashMap<>();
+    e.getBindingResult()
+        .getAllErrors()
+        .forEach(
+            error -> {
+              String fieldName = "Method argument not valid";
+              if (error instanceof FieldError) {
                 fieldName = ((FieldError) error).getField();
-            } else {
+              } else {
                 if (nonNull(error.getArguments()) && error.getArguments().length > 1) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    for (int i = 1; i < error.getArguments().length; i++) {
-                        stringBuilder.append(error.getArguments()[i].toString());
-                        stringBuilder.append(",");
-                    }
-                    stringBuilder.deleteCharAt(stringBuilder.length() - 1);
-                    fieldName = stringBuilder.toString();
+                  StringBuilder stringBuilder = new StringBuilder();
+                  for (int i = 1; i < error.getArguments().length; i++) {
+                    stringBuilder.append(error.getArguments()[i].toString());
+                    stringBuilder.append(",");
+                  }
+                  stringBuilder.deleteCharAt(stringBuilder.length() - 1);
+                  fieldName = stringBuilder.toString();
                 }
-            }
-            String message = error.getDefaultMessage();
-            errors.put(fieldName, message);
-            logger.error("{}: {} - {}", fieldName, message, HttpStatus.BAD_REQUEST.value());
-        });
-
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
+              }
+              String message = error.getDefaultMessage();
+              errors.put(fieldName, message);
+              logger.error("{}: {} - {}", fieldName, message, HttpStatus.BAD_REQUEST.value());
+            });
+    return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+  }
 }

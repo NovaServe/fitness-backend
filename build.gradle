@@ -1,115 +1,116 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.3.1'
-	id 'io.spring.dependency-management' version '1.1.5'
-	id 'com.diffplug.spotless' version "6.19.0"
+  id 'java'
+  id 'org.springframework.boot' version '3.3.1'
+  id 'io.spring.dependency-management' version '1.1.5'
+  id 'com.diffplug.spotless' version "6.19.0"
 }
 
 group = 'com.novaserve'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17)
+  }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+  compileOnly {
+    extendsFrom annotationProcessor
+  }
 }
 
 repositories {
-	mavenCentral()
+  mavenCentral()
 }
 
 jar {
-	archivesBaseName = 'backend'
-	enabled = false
+  archivesBaseName = 'backend'
+  enabled = false
 }
 
 dependencies {
-	// Spring
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+  // Spring
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	// Data
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	runtimeOnly 'org.postgresql:postgresql'
-	implementation 'org.liquibase:liquibase-core'
+  // Data
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  runtimeOnly 'org.postgresql:postgresql'
+  implementation 'org.liquibase:liquibase-core'
 
-	// Security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
-	implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.6'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
-	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.6'
-	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
-	runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
+  // Security
+  implementation 'org.springframework.boot:spring-boot-starter-security'
+  implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.12.6'
+  runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.12.6'
+  runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.12.6'
 
-	// Logging
-	// https://mvnrepository.com/artifact/org.slf4j/slf4j-api
-	implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.13'
-	// https://mvnrepository.com/artifact/ch.qos.logback/logback-core
-	implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.6'
-	// https://mvnrepository.com/artifact/ch.qos.logback/logback-classic
-	testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.6'
+  // Logging
+  implementation group: 'org.slf4j', name: 'slf4j-api', version: '2.0.13'
+  implementation group: 'ch.qos.logback', name: 'logback-core', version: '1.5.6'
+  testImplementation group: 'ch.qos.logback', name: 'logback-classic', version: '1.5.6'
 
-	// Util
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
-	// https://mvnrepository.com/artifact/org.modelmapper/modelmapper
-	implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.2.0'
+  // Test
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
+  testImplementation 'org.springframework.security:spring-security-test'
+  testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+  testImplementation "org.testcontainers:testcontainers:1.20.0"
+  testImplementation "org.testcontainers:postgresql:1.20.0"
+  testImplementation "org.testcontainers:junit-jupiter:1.20.0"
 
-	// Test
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+  // Util
+  compileOnly 'org.projectlombok:lombok'
+  annotationProcessor 'org.projectlombok:lombok'
+  implementation group: 'org.modelmapper', name: 'modelmapper', version: '3.2.0'
 
-	// Swagger
-	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui
-	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.5.0'
+  // Swagger
+  implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.5.0'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+  useJUnitPlatform()
 }
 
 tasks.named('build').configure {
-	dependsOn 'spotlessApply'
+  dependsOn 'spotlessApply'
 }
 
 tasks.withType(JavaCompile) {
-	options.debug = true
+  options.debug = true
 }
 
 tasks.withType(Test).configureEach {
-	if (!project.hasProperty("createReports")) {
-		reports.html.required = false
-		reports.junitXml.required = false
-	}
+  if (!project.hasProperty("createReports")) {
+    reports.html.required = false
+    reports.junitXml.required = false
+  }
 }
 
 test {
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
+  testLogging {
+    events "passed", "skipped", "failed"
+  }
 }
 
 spotless {
-	format 'misc', {
-		target '*.gradle', '*.md', '.gitignore'
-
-		trimTrailingWhitespace()
-		indentWithTabs()
-		endWithNewline()
-	}
-	java {
-		palantirJavaFormat("2.38.0")
-		importOrder()
-		removeUnusedImports()
-		trimTrailingWhitespace()
-		endWithNewline()
-		formatAnnotations()
-	}
+  format 'misc', {
+    target '*.gradle', '*.md', '.gitignore'
+    trimTrailingWhitespace()
+    indentWithSpaces(2)
+//		indentWithTabs()
+//		endWithNewline()
+  }
+  java {
+    googleJavaFormat()
+    licenseHeader '/*\n' +
+            '** Copyright (C) $YEAR NovaServe\n' +
+            '*/\n'
+//    palantirJavaFormat("2.38.0")
+//    importOrder()
+//    removeUnusedImports()
+//    trimTrailingWhitespace()
+//    indentWithTabs()
+//    indentWithSpaces(2)
+//    endWithNewline()
+//    formatAnnotations()
+  }
 }

@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.auth.dto;
 
 import lombok.*;
@@ -8,7 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResponseDto {
-    private String role;
-
-    private String fullName;
+  private String role;
+  private String fullName;
 }
