@@ -39,14 +39,15 @@ public class AuthServiceImpl implements AuthService {
   @Transactional
   public LoginProcessDto login(LoginRequestDto requestDto) {
     try {
-      Authentication authentication =
+      Authentication auth =
           authenticationManager.authenticate(
               new UsernamePasswordAuthenticationToken(
                   requestDto.getUsernameOrEmailOrPhone(), requestDto.getPassword()));
-      SecurityContextHolder.getContext().setAuthentication(authentication);
-      String token = jwtTokenProvider.generateToken(authentication);
-      String cookieExpires = authUtil.formatCookieExpire(jwtTokenProvider.getExpireFromJwt(token));
-      User user = authUtil.getUserFromAuth(authentication);
+      SecurityContextHolder.getContext().setAuthentication(auth);
+      String token = jwtTokenProvider.generateToken(auth);
+      String cookieExpires =
+          authUtil.formatCookieExpires(jwtTokenProvider.getExpiresFromJwt(token));
+      User user = authUtil.getUserFromAuth(auth);
       logger.info("Login successful: " + requestDto.getUsernameOrEmailOrPhone());
       return LoginProcessDto.builder()
           .token(token)

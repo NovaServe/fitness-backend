@@ -42,7 +42,7 @@ public class AuthUtilImpl implements AuthUtil {
   }
 
   @Override
-  public String formatCookieExpire(Date date) {
+  public String formatCookieExpires(Date date) {
     ZonedDateTime zonedDateTime =
         ZonedDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.of("GMT"));
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz");
