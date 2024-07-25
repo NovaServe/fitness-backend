@@ -120,7 +120,7 @@ public class DbHelper {
               .fullName("User Full Name")
               .email("username" + seed + "@email.com")
               .phone("+312300000" + seed)
-              .password(passwordEncoder.encode("Password1!"))
+              .password(passwordEncoder.encode("Password" + seed + "!"))
               .role(role)
               .gender(gender)
               .ageGroup(ageGroup)

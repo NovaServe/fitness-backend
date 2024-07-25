@@ -12,5 +12,5 @@ public interface AuthUtil {
 
   User getUserFromAuth(Authentication auth);
 
-  String formatCookieExpire(Date date);
+  String formatCookieExpires(Date date);
 }

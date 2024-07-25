@@ -66,8 +66,9 @@
         </createTable>
 
         <sqlFile path="sql/roles.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
-        <sqlFile path="sql/age_groups.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
         <sqlFile path="sql/genders.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="sql/age_groups.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="sql/dummy_users.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
     </changeSet>
 
 </databaseChangeLog>

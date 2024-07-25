@@ -59,7 +59,7 @@ class CreateUserTest {
 
   @Autowired DtoHelper $dto;
 
-  static String CREATE_USER_URL = "/api/v1/users";
+  final String CREATE_USER_URL = "/api/v1/users";
 
   @Container
   static PostgreSQLContainer<?> postgresqlContainer =
@@ -203,13 +203,12 @@ class CreateUserTest {
   }
 
   Role getRole(String roleName) {
-    Role role = null;
-    switch (roleName) {
-      case "ROLE_SUPERADMIN" -> role = superadminRole;
-      case "ROLE_ADMIN" -> role = adminRole;
-      case "ROLE_CUSTOMER" -> role = customerRole;
-      case "ROLE_INSTRUCTOR" -> role = instructorRole;
-    }
-    return role;
+    return switch (roleName) {
+      case "ROLE_SUPERADMIN" -> superadminRole;
+      case "ROLE_ADMIN" -> adminRole;
+      case "ROLE_CUSTOMER" -> customerRole;
+      case "ROLE_INSTRUCTOR" -> instructorRole;
+      default -> throw new IllegalStateException("Unexpected value: " + roleName);
+    };
   }
 }

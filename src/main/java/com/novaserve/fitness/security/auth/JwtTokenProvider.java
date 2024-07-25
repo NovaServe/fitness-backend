@@ -21,12 +21,13 @@ public class JwtTokenProvider {
 
   public String generateToken(Authentication auth) {
     User user = (User) (auth.getPrincipal());
-    Date curr = new Date(); // In UTC
-    Date expire = new Date(curr.getTime() + securityProps.Jwt().expiresInMilliseconds()); // In UTC
+    Date current = new Date(); // In UTC
+    Date expires =
+        new Date(current.getTime() + securityProps.Jwt().expiresInMilliseconds()); // In UTC
     return Jwts.builder()
         .subject(user.getUsername())
-        .issuedAt(curr)
-        .expiration(expire)
+        .issuedAt(current)
+        .expiration(expires)
         .signWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()), Jwts.SIG.HS512)
         .compact();
   }
@@ -41,7 +42,7 @@ public class JwtTokenProvider {
     return claims.getSubject();
   }
 
-  public Date getExpireFromJwt(String token) {
+  public Date getExpiresFromJwt(String token) {
     Claims claims =
         Jwts.parser()
             .verifyWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()))
