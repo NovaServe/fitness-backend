@@ -66,7 +66,6 @@ public class AuthController {
   @Operation(summary = "Validate token")
   @GetMapping("/validate")
   public ResponseEntity<ValidateTokenResponseDto> validateToken(HttpServletResponse res) {
-    // todo
     return ResponseEntity.ok(authService.validateToken());
   }
 }

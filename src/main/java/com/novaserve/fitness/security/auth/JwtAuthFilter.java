@@ -33,11 +33,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
   @Autowired JwtTokenProvider jwtTokenProvider;
 
   @Override
-  public void doFilterInternal(
-      HttpServletRequest req, HttpServletResponse res, FilterChain filterChain)
+  public void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
       throws ServletException, IOException {
 
-    String token = getFwtFromReqCookie(req);
+    String token = getFwtFromRequestCookie(req);
     if (token != null) {
       if (jwtTokenProvider.validateToken(token)) {
         String username = jwtTokenProvider.getUsernameFromJwt(token);
@@ -61,16 +60,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         out.flush();
       }
     }
-    filterChain.doFilter(req, res);
+    chain.doFilter(req, res);
   }
 
-  private String getJwtFromReqHeader(HttpServletRequest req) {
+  private String getJwtFromRequestHeader(HttpServletRequest req) {
     if (req.getHeader("Authorization") == null) return null;
     String bearerToken = req.getHeader("Authorization");
     return bearerToken.substring(7);
   }
 
-  private String getFwtFromReqCookie(HttpServletRequest req) {
+  private String getFwtFromRequestCookie(HttpServletRequest req) {
     Cookie[] cookies = req.getCookies();
     if (cookies != null && cookies.length > 0) {
       Optional<Cookie> cookie =
