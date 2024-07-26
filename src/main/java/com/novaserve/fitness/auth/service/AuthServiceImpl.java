@@ -3,6 +3,8 @@
 */
 package com.novaserve.fitness.auth.service;
 
+import static java.util.Objects.isNull;
+
 import com.novaserve.fitness.auth.dto.LoginProcessDto;
 import com.novaserve.fitness.auth.dto.LoginRequestDto;
 import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
@@ -43,15 +45,14 @@ public class AuthServiceImpl implements AuthService {
             var auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getUsernameOrEmailOrPhone(), dto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(auth);
+            var user = authUtil.getUserFromAuth(auth)
+                    .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
             var token = jwtTokenProvider.generateToken(auth);
             var cookieExpires = authUtil.formatCookieExpires(jwtTokenProvider.getExpiresFromJwt(token));
-            var user = authUtil.getUserFromAuth(auth)
-                    .orElseThrow(
-                            () -> new ServerException(ExceptionMessage.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED));
-            logger.info("Login successful: " + dto.getUsernameOrEmailOrPhone());
+            logger.info("Logged in: " + dto.getUsernameOrEmailOrPhone());
             return LoginProcessDto.builder()
                     .token(token)
-                    .role(user.getRole().getName())
+                    .role(user.getRoleName())
                     .cookieExpires(cookieExpires)
                     .fullName(user.getFullName())
                     .build();
@@ -67,18 +68,18 @@ public class AuthServiceImpl implements AuthService {
     public ValidateTokenResponseDto validateToken() {
         var userId =
                 authUtil.getUserIdFromAuth(SecurityContextHolder.getContext().getAuthentication());
-        if (userId != null) {
-            var user = userRepository.findById(userId).orElseThrow(() -> {
-                logger.error("Token is not validated, user with id {} not found", userId);
-                return new ServerException(ExceptionMessage.INVALID_TOKEN, HttpStatus.UNAUTHORIZED);
-            });
-            logger.info("Token validated for {}", user.getUsername());
-            return ValidateTokenResponseDto.builder()
-                    .fullName(user.getFullName())
-                    .role(user.getRole().getName())
-                    .build();
+        if (isNull(userId)) {
+            logger.error("Token is not validated, userId is null");
+            return null;
         }
-        logger.error("Token is not validated, userId is null");
-        return null;
+        var user = userRepository.findById(userId).orElseThrow(() -> {
+            logger.error("Token is not validated, user with id {} not found", userId);
+            return new ServerException(ExceptionMessage.INVALID_TOKEN, HttpStatus.UNAUTHORIZED);
+        });
+        logger.info("Token validated for {}", user.getUsername());
+        return ValidateTokenResponseDto.builder()
+                .fullName(user.getFullName())
+                .role(user.getRoleName())
+                .build();
     }
 }
