@@ -1,7 +1,7 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.security;
+package com.novaserve.fitness.security.misc;
 
 import java.security.SecureRandom;
 import java.util.Base64;

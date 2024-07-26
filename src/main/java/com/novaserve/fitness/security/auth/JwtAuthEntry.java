@@ -26,6 +26,6 @@ public class JwtAuthEntry implements AuthenticationEntryPoint {
         PrintWriter out = res.getWriter();
         out.write(new ObjectMapper().writeValueAsString(dto));
         out.flush();
-        // Or: res.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+        // res.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
     }
 }

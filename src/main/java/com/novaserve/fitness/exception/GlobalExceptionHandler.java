@@ -5,8 +5,8 @@ package com.novaserve.fitness.exception;
 
 import static java.util.Objects.nonNull;
 
-import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -30,8 +30,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(ServerException.class)
     public ResponseEntity<ExceptionDto> handleApiException(ServerException e, WebRequest req) {
         logger.error("{}, {}, {}", req.getDescription(true), e.getStatus(), e.getStackTrace());
-        var dto = new ExceptionDto(e.getMessage());
-        return new ResponseEntity<>(dto, e.getStatus());
+        return new ResponseEntity<>(new ExceptionDto(e.getMessage()), e.getStatus());
     }
 
     @ExceptionHandler(NotFound.class)
@@ -48,13 +47,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException e) {
-        Map<String, String> validationResult = new HashMap<>();
-        for (ConstraintViolation<?> constraintViolation : e.getConstraintViolations()) {
-            String constraintMessage = constraintViolation.getMessage();
-            String paramName = constraintViolation.getPropertyPath().toString().split("\\.")[1];
-            validationResult.put(paramName, constraintMessage);
-        }
-        return new ResponseEntity<>(validationResult, HttpStatus.BAD_REQUEST);
+        Map<String, String> validation = new HashMap<>();
+        e.getConstraintViolations().forEach((elt) -> {
+            var constraintMessage = elt.getMessage();
+            var paramName = elt.getPropertyPath().toString().split("\\.")[1];
+            validation.put(paramName, constraintMessage);
+        });
+        return new ResponseEntity<>(validation, HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -72,11 +71,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 fieldName = ((FieldError) error).getField();
             } else {
                 if (nonNull(error.getArguments()) && error.getArguments().length > 1) {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    for (int i = 1; i < error.getArguments().length; i++) {
-                        stringBuilder.append(error.getArguments()[i].toString());
+                    var stringBuilder = new StringBuilder();
+                    Arrays.stream(error.getArguments()).forEach(elt -> {
+                        stringBuilder.append(elt.toString());
                         stringBuilder.append(",");
-                    }
+                    });
                     stringBuilder.deleteCharAt(stringBuilder.length() - 1);
                     fieldName = stringBuilder.toString();
                 }

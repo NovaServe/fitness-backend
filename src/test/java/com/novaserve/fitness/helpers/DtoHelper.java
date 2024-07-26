@@ -16,9 +16,11 @@ public class DtoHelper {
         private String roleName;
         private String genderName;
         private String ageGroupName;
+        boolean isEmpty;
 
-        public CreateUserRequestDto empty() {
-            return CreateUserRequestDto.builder().build();
+        public CreateUserRequestDtoBuilder empty() {
+            this.isEmpty = true;
+            return this;
         }
 
         public CreateUserRequestDtoBuilder seed(int seed) {
@@ -42,6 +44,9 @@ public class DtoHelper {
         }
 
         public CreateUserRequestDto get() {
+            if (isEmpty) {
+                return CreateUserRequestDto.builder().build();
+            }
             return CreateUserRequestDto.builder()
                     .username("username" + seed)
                     .fullName("User Full Name")
@@ -95,20 +100,19 @@ public class DtoHelper {
         public LoginRequestDto get() {
             if (isEmpty) {
                 return LoginRequestDto.builder().build();
-            } else {
-                String usernameOrEmailOrPhone = null;
-                if (withUsername) {
-                    usernameOrEmailOrPhone = "username" + seed;
-                } else if (withEmail) {
-                    usernameOrEmailOrPhone = "username" + seed + "@email.com";
-                } else if (withPhone) {
-                    usernameOrEmailOrPhone = "+312300000" + seed;
-                }
-                return LoginRequestDto.builder()
-                        .usernameOrEmailOrPhone(usernameOrEmailOrPhone)
-                        .password("Password" + seed + "!")
-                        .build();
             }
+            String usernameOrEmailOrPhone = null;
+            if (withUsername) {
+                usernameOrEmailOrPhone = "username" + seed;
+            } else if (withEmail) {
+                usernameOrEmailOrPhone = "username" + seed + "@email.com";
+            } else if (withPhone) {
+                usernameOrEmailOrPhone = "+312300000" + seed;
+            }
+            return LoginRequestDto.builder()
+                    .usernameOrEmailOrPhone(usernameOrEmailOrPhone)
+                    .password("Password" + seed + "!")
+                    .build();
         }
     }
 }

@@ -47,7 +47,7 @@ import org.testcontainers.utility.DockerImageName;
 @Import(TestBeans.class)
 class LoginTest {
     @Autowired
-    private MockMvc mockMvc;
+    MockMvc mockMvc;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -94,7 +94,7 @@ class LoginTest {
 
     @ParameterizedTest
     @MethodSource("loginCredentialTypes")
-    void login_shouldAuthorizeUser_whenValidCredentials(String roleName, String credentialType) throws Exception {
+    void login_shouldAuthenticateUser_whenValidCredentials(String roleName, String credentialType) throws Exception {
         var user = $db.user()
                 .seed(1)
                 .role(getRole(roleName))

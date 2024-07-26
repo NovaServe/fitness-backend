@@ -86,12 +86,12 @@ public class DbHelper {
     }
 
     public static class UserBuilder {
-        private final UserRepository userRepository;
-        private final PasswordEncoder passwordEncoder;
         private int seed;
         private Role role;
         private Gender gender;
         private AgeGroup ageGroup;
+        private final UserRepository userRepository;
+        private final PasswordEncoder passwordEncoder;
 
         public UserBuilder(UserRepository userRepository, PasswordEncoder passwordEncoder) {
             this.userRepository = userRepository;

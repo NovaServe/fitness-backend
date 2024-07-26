@@ -34,9 +34,9 @@ public class AuthUtilImpl implements AuthUtil {
         }
         String username = null;
         var principalClassName = auth.getPrincipal().getClass().getName();
-        if (principalClassName.equals("org.springframework.security.core.userdetails.User")) {
+        if ("org.springframework.security.core.userdetails.User".equals(principalClassName)) {
             username = ((org.springframework.security.core.userdetails.User) (auth.getPrincipal())).getUsername();
-        } else if (principalClassName.equals("com.novaserve.fitness.users.model.User")) {
+        } else if ("com.novaserve.fitness.users.model.User".equals(principalClassName)) {
             username = ((User) (auth.getPrincipal())).getUsername();
         }
         return userRepository.findByUsername(username);
@@ -44,7 +44,7 @@ public class AuthUtilImpl implements AuthUtil {
 
     @Override
     public String formatCookieExpires(Date date) {
-        ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.of("GMT"));
+        var zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.of("GMT"));
         return zonedDateTime.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz"));
     }
 }
