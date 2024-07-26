@@ -11,8 +11,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginProcessDto {
-  private String token;
-  private String cookieExpires;
-  private String role;
-  private String fullName;
+    private String token;
+    private String cookieExpires;
+    private String role;
+    private String fullName;
 }

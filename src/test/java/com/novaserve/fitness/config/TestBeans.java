@@ -14,28 +14,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @TestConfiguration
 public class TestBeans {
-  @Bean
-  public DtoHelper dtoHelper() {
-    return new DtoHelper();
-  }
+    @Bean
+    public DtoHelper dtoHelper() {
+        return new DtoHelper();
+    }
 
-  @Bean
-  public MockHelper mockHelper() {
-    return new MockHelper();
-  }
+    @Bean
+    public MockHelper mockHelper() {
+        return new MockHelper();
+    }
 
-  @Bean
-  public DbHelper dbHelper() {
-    return new DbHelper();
-  }
+    @Bean
+    public DbHelper dbHelper() {
+        return new DbHelper();
+    }
 
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
-  @Bean
-  public ObjectMapper objectMapper() {
-    return new ObjectMapper();
-  }
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 }

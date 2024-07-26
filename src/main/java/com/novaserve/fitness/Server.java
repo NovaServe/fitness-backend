@@ -12,10 +12,10 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 @SpringBootApplication
 @ConfigurationPropertiesScan
 public class Server {
-  private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
-  public static void main(String[] args) {
-    SpringApplication.run(Server.class, args);
-    logger.info("Server runs...");
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(Server.class, args);
+        logger.info("Server runs...");
+    }
 }

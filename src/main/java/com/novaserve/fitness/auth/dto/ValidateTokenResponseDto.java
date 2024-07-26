@@ -11,6 +11,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ValidateTokenResponseDto {
-  private String role;
-  private String fullName;
+    private String role;
+    private String fullName;
 }
