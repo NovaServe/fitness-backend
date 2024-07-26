@@ -96,21 +96,11 @@ spotless {
     target '*.gradle', '*.md', '.gitignore'
     trimTrailingWhitespace()
     indentWithSpaces(2)
-//		indentWithTabs()
-//		endWithNewline()
   }
   java {
-    googleJavaFormat()
+    palantirJavaFormat("2.38.0")
     licenseHeader '/*\n' +
             '** Copyright (C) $YEAR NovaServe\n' +
             '*/\n'
-//    palantirJavaFormat("2.38.0")
-//    importOrder()
-//    removeUnusedImports()
-//    trimTrailingWhitespace()
-//    indentWithTabs()
-//    indentWithSpaces(2)
-//    endWithNewline()
-//    formatAnnotations()
   }
 }

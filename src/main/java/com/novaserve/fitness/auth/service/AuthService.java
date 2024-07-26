@@ -8,7 +8,7 @@ import com.novaserve.fitness.auth.dto.LoginRequestDto;
 import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
 
 public interface AuthService {
-  LoginProcessDto login(LoginRequestDto requestDto);
+    LoginProcessDto login(LoginRequestDto requestDto);
 
-  ValidateTokenResponseDto validateToken();
+    ValidateTokenResponseDto validateToken();
 }

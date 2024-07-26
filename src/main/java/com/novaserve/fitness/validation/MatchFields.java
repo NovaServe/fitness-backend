@@ -13,20 +13,20 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = MatchFieldsValidator.class)
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MatchFieldsValidation {
-  String message() default "Fields don't match";
+public @interface MatchFields {
+    String message() default "Fields don't match";
 
-  Class<?>[] groups() default {};
+    Class<?>[] groups() default {};
 
-  Class<? extends Payload>[] payload() default {};
+    Class<? extends Payload>[] payload() default {};
 
-  String field();
+    String field();
 
-  String fieldMatch();
+    String fieldMatch();
 
-  @Target({ElementType.TYPE})
-  @Retention(RetentionPolicy.RUNTIME)
-  @interface List {
-    MatchFieldsValidation[] value();
-  }
+    @Target({ElementType.TYPE})
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface List {
+        MatchFields[] value();
+    }
 }
