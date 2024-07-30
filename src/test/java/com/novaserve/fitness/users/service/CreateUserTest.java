@@ -63,10 +63,10 @@ class CreateUserTest {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Spy
-    MockHelper $mock;
+    MockHelper helper;
 
     @Spy
-    DtoHelper $dto;
+    DtoHelper dtoHelper;
 
     Role superadminRole;
     Role adminRole;
@@ -77,12 +77,12 @@ class CreateUserTest {
 
     @BeforeEach
     public void beforeEach() {
-        superadminRole = $mock.superadminRole();
-        adminRole = $mock.adminRole();
-        customerRole = $mock.customerRole();
-        instructorRole = $mock.instructorRole();
-        gender = $mock.female();
-        ageGroup = $mock.adult();
+        superadminRole = helper.superadminRole();
+        adminRole = helper.adminRole();
+        customerRole = helper.customerRole();
+        instructorRole = helper.instructorRole();
+        gender = helper.female();
+        ageGroup = helper.adult();
 
         lenient().when(genderRepository.findByName(gender.getName())).thenReturn(Optional.of(gender));
         lenient().when(ageGroupRepository.findByName(ageGroup.getName())).thenReturn(Optional.of(ageGroup));
@@ -110,14 +110,15 @@ class CreateUserTest {
 
     @Test
     void createUser_shouldCreateAdmin_whenSuperadminRequests() {
-        var superadmin = $mock.user()
+        User superadmin = helper.user()
                 .seed(1)
                 .role(superadminRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        var dto = $dto.createUserRequestDto()
+        CreateUserRequestDto dto = dtoHelper
+                .createUserRequestDto()
                 .seed(2)
                 .role(adminRole.getName())
                 .gender(gender.getName())
@@ -126,21 +127,22 @@ class CreateUserTest {
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(superadmin));
 
-        var actual = userService.createUser(dto);
+        User actual = userService.createUser(dto);
         assertHelper(actual, dto);
     }
 
     @ParameterizedTest
     @MethodSource("createUserParams")
     void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) {
-        var admin = $mock.user()
+        User admin = helper.user()
                 .seed(1)
                 .role(adminRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        var dto = $dto.createUserRequestDto()
+        CreateUserRequestDto dto = dtoHelper
+                .createUserRequestDto()
                 .seed(2)
                 .role(roleName)
                 .gender(gender.getName())
@@ -149,7 +151,7 @@ class CreateUserTest {
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(admin));
 
-        var actual = userService.createUser(dto);
+        User actual = userService.createUser(dto);
         assertHelper(actual, dto);
     }
 
@@ -160,14 +162,15 @@ class CreateUserTest {
     @ParameterizedTest
     @MethodSource("createUserParams_rolesMismatch")
     void createUser_shouldThrowException_whenRolesMismatch(String creatorRoleName, String createdRoleName) {
-        var user = $mock.user()
+        User user = helper.user()
                 .seed(1)
-                .role(getRoleHelper(creatorRoleName))
+                .role(getRole(creatorRoleName))
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        var dto = $dto.createUserRequestDto()
+        CreateUserRequestDto dto = dtoHelper
+                .createUserRequestDto()
                 .seed(2)
                 .role(createdRoleName)
                 .gender(gender.getName())
@@ -176,7 +179,7 @@ class CreateUserTest {
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
 
-        var actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
+        ServerException actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
         assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
         assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
     }
@@ -198,7 +201,7 @@ class CreateUserTest {
                 Arguments.of("ROLE_INSTRUCTOR", "ROLE_ADMIN"));
     }
 
-    Role getRoleHelper(String roleName) {
+    Role getRole(String roleName) {
         return switch (roleName) {
             case "ROLE_SUPERADMIN" -> superadminRole;
             case "ROLE_ADMIN" -> adminRole;

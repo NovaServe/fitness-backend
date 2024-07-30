@@ -6,6 +6,7 @@ package com.novaserve.fitness.users.service;
 import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.dto.UserResponseDto;
 import com.novaserve.fitness.users.model.User;
+import org.springframework.data.domain.Page;
 
 public interface UserService {
     User getUserById(long userId);
@@ -13,4 +14,7 @@ public interface UserService {
     UserResponseDto getUserDetailById(long userId);
 
     User createUser(CreateUserRequestDto requestDto);
+
+    Page<UserResponseDto> getUsers(
+            String role, String fullName, String sortBy, String order, int pageSize, int pageNumber);
 }

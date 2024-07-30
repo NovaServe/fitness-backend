@@ -4,8 +4,6 @@
 package com.novaserve.fitness.security.auth;
 
 import static com.novaserve.fitness.exception.ExceptionMessage.INVALID_CREDENTIALS;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.novaserve.fitness.exception.ExceptionDto;
@@ -39,9 +37,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     public void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
             throws ServletException, IOException {
         String token = getFwtFromRequestCookie(req);
-        if (nonNull(token)) {
+        if (token != null) {
             if (jwtTokenProvider.validateToken(token)) {
-                var username = jwtTokenProvider.getUsernameFromJwt(token);
+                String username = jwtTokenProvider.getUsernameFromJwt(token);
                 UserDetails userDetails = customUserDetails.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                         new UsernamePasswordAuthenticationToken(
@@ -51,23 +49,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             } else {
                 res.setStatus(HttpStatus.UNAUTHORIZED.value());
                 res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                var dto = new ExceptionDto(INVALID_CREDENTIALS.getName());
                 PrintWriter out = res.getWriter();
-                out.write(new ObjectMapper().writeValueAsString(dto));
+                out.write(new ObjectMapper().writeValueAsString(new ExceptionDto(INVALID_CREDENTIALS.getName())));
                 out.flush();
             }
         }
         chain.doFilter(req, res);
     }
 
+    @Deprecated
     private String getJwtFromRequestHeader(HttpServletRequest req) {
-        if (isNull(req.getHeader("Authorization"))) return null;
+        if (req.getHeader("Authorization") == null) {
+            return null;
+        }
         return req.getHeader("Authorization").substring(7);
     }
 
     private String getFwtFromRequestCookie(HttpServletRequest req) {
         Cookie[] cookies = req.getCookies();
-        if (nonNull(cookies) && cookies.length > 0) {
+        if (cookies != null && cookies.length > 0) {
             return Stream.of(cookies)
                     .filter(elt -> "token".equals(elt.getName()))
                     .map(Cookie::getValue)

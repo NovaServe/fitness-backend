@@ -12,5 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 public class LoginResponseDto {
     private String role;
+
     private String fullName;
 }

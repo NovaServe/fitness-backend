@@ -22,6 +22,7 @@ import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.model.User;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,10 +59,10 @@ class CreateUserTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    DbHelper $db;
+    DbHelper dbHelper;
 
     @Autowired
-    DtoHelper $dto;
+    DtoHelper dtoHelper;
 
     final String CREATE_USER_URL = "/api/v1/users";
 
@@ -85,17 +86,17 @@ class CreateUserTest {
 
     @BeforeEach
     void beforeEach() {
-        $db.deleteAll();
-        superadminRole = $db.superadminRole();
-        adminRole = $db.adminRole();
-        customerRole = $db.customerRole();
-        instructorRole = $db.instructorRole();
-        gender = $db.female();
-        ageGroup = $db.adult();
+        dbHelper.deleteAll();
+        superadminRole = dbHelper.superadminRole();
+        adminRole = dbHelper.adminRole();
+        customerRole = dbHelper.customerRole();
+        instructorRole = dbHelper.instructorRole();
+        gender = dbHelper.female();
+        ageGroup = dbHelper.adult();
     }
 
     void assertHelper(CreateUserRequestDto dto) {
-        var actual = $db.getUser(dto.getUsername());
+        User actual = dbHelper.getUser(dto.getUsername());
         String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
         assertThat(actual)
                 .usingRecursiveComparison()
@@ -110,14 +111,15 @@ class CreateUserTest {
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void createUser_shouldCreateAdmin_whenSuperadminRequests() throws Exception {
-        $db.user()
+        dbHelper.user()
                 .seed(1)
                 .role(superadminRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        var dto = $dto.createUserRequestDto()
+        CreateUserRequestDto dto = dtoHelper
+                .createUserRequestDto()
                 .seed(2)
                 .role(adminRole.getName())
                 .gender(gender.getName())
@@ -137,9 +139,15 @@ class CreateUserTest {
     @MethodSource("createUserParams")
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
     void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) throws Exception {
-        $db.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
+        dbHelper.user()
+                .seed(1)
+                .role(adminRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
 
-        var dto = $dto.createUserRequestDto()
+        CreateUserRequestDto dto = dtoHelper
+                .createUserRequestDto()
                 .seed(2)
                 .role(roleName)
                 .gender(gender.getName())
@@ -164,14 +172,15 @@ class CreateUserTest {
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void createUser_shouldThrowException_whenRolesMismatch(String creatorRoleName, String createdRoleName)
             throws Exception {
-        $db.user()
+        dbHelper.user()
                 .seed(1)
                 .role(getRole(creatorRoleName))
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        var dto = $dto.createUserRequestDto()
+        CreateUserRequestDto dto = dtoHelper
+                .createUserRequestDto()
                 .seed(2)
                 .role(createdRoleName)
                 .gender(gender.getName())
@@ -184,7 +193,7 @@ class CreateUserTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ExceptionMessage.ROLES_MISMATCH.getName())))
                 .andDo(print());
-        assertNull($db.getUser(dto.getUsername()));
+        assertNull(dbHelper.getUser(dto.getUsername()));
     }
 
     static Stream<Arguments> createUserParams_rolesMismatch() {

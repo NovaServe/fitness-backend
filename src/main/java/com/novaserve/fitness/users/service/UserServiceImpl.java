@@ -23,6 +23,10 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -72,20 +76,20 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(CreateUserRequestDto dto) {
-        var createdBy = authUtil.getUserFromAuth(
+        User requestedBy = authUtil.getUserFromAuth(
                         SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
-        var roles = getRoles();
-        var superadminCreatesAdmin = createdBy.isSuperadmin() && isRoleAdmin(dto.getRole());
-        var adminCreatesCustomerOrInstructor = createdBy.isAdmin() && isRoleCustomerOrInstructor(dto.getRole());
+        Map<String, Role> roles = getRoles();
+        boolean superadminCreatesAdmin = requestedBy.isSuperadmin() && isRoleAdmin(dto.getRole());
+        boolean adminCreatesCustomerOrInstructor = requestedBy.isAdmin() && isRoleCustomerOrInstructor(dto.getRole());
 
         if (superadminCreatesAdmin || adminCreatesCustomerOrInstructor) {
-            var saved = processCreateUser(dto, roles);
+            User saved = processCreateUser(dto, roles);
             logger.info(
                     "User with id {} was created by {} with id {}",
                     saved.getId(),
-                    createdBy.getRoleName(),
-                    createdBy.getId());
+                    requestedBy.getRoleName(),
+                    requestedBy.getId());
             return saved;
         }
         throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
@@ -107,13 +111,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private User processCreateUser(CreateUserRequestDto dto, Map<String, Role> roles) {
-        var gender = genderRepository
+        Gender gender = genderRepository
                 .findByName(dto.getGender())
                 .orElseThrow(() -> new NotFoundInternalError(Gender.class, dto.getGender()));
-        var ageGroup = ageGroupRepository
+        AgeGroup ageGroup = ageGroupRepository
                 .findByName(dto.getAgeGroup())
                 .orElseThrow(() -> new NotFoundInternalError(AgeGroup.class, dto.getAgeGroup()));
-        var role = roles.get(dto.getRole());
+        Role role = roles.get(dto.getRole());
         return userRepository.save(User.builder()
                 .username(dto.getUsername())
                 .email(dto.getEmail())
@@ -124,5 +128,23 @@ public class UserServiceImpl implements UserService {
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .build());
+    }
+
+    @Override
+    public Page<UserResponseDto> getUsers(
+            String role, String fullName, String sortBy, String order, int pageSize, int pageNumber) {
+        User requestedBy = authUtil.getUserFromAuth(
+                        SecurityContextHolder.getContext().getAuthentication())
+                .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
+        boolean superadminGetsAdmins = requestedBy.isSuperadmin() && isRoleAdmin(role);
+        boolean adminGetsCustomersOrInstructors = requestedBy.isAdmin() && isRoleCustomerOrInstructor(role);
+
+        if (superadminGetsAdmins || adminGetsCustomersOrInstructors) {
+            Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
+            return userRepository
+                    .getUsers(role, fullName, pageable)
+                    .map(user -> modelMapper.map(user, UserResponseDto.class));
+        }
+        throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
     }
 }
