@@ -13,4 +13,6 @@ public interface UserService {
   UserResponseDto getUserDetailById(long userId);
 
   User createUser(CreateUserRequestDto requestDto);
+
+  UserResponseDto getUserDetails(long userId);
 }

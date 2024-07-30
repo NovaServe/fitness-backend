@@ -44,6 +44,8 @@ public class UserServiceImpl implements UserService {
 
   @Autowired AuthUtil authUtil;
 
+  @Autowired RoleService roleService;
+
   @Override
   @Transactional(propagation = Propagation.MANDATORY)
   public User getUserById(long userId) {
@@ -117,5 +119,29 @@ public class UserServiceImpl implements UserService {
       return saved;
     }
     throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
+  }
+
+  @Override
+  @Transactional
+  public UserResponseDto getUserDetails(long userId) {
+    User currentUser =
+        authUtil.getUserFromAuth(SecurityContextHolder.getContext().getAuthentication());
+    User requestedUser =
+        userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));
+
+    if (currentUser.getId().equals(requestedUser.getId())) {
+      return modelMapper.map(requestedUser, UserResponseDto.class);
+    }
+
+    if (roleService.hasRoleSuperAdmin(currentUser.getId())
+        && roleService.hasRoleAdmin(requestedUser.getId())) {
+      return modelMapper.map(requestedUser, UserResponseDto.class);
+    } else if (roleService.hasRoleAdmin(currentUser.getId())
+        && (roleService.hasRoleInstructor(requestedUser.getId())
+            || roleService.hasRoleCustomer(requestedUser.getId()))) {
+      return modelMapper.map(requestedUser, UserResponseDto.class);
+    } else {
+      throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
+    }
   }
 }
