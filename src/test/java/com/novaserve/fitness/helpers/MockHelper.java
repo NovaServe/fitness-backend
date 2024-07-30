@@ -85,6 +85,7 @@ public class MockHelper {
 
         public User get() {
             return User.builder()
+                    .id((long) seed)
                     .username("username" + seed)
                     .email("username" + seed + "@email.com")
                     .phone("+312300000" + seed)

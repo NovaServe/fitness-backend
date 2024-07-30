@@ -3,14 +3,16 @@
 */
 package com.novaserve.fitness.users.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.helpers.MockHelper;
-import com.novaserve.fitness.users.dto.CreateUserRequestDto;
+import com.novaserve.fitness.users.dto.UserResponseDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
@@ -21,11 +23,14 @@ import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -53,6 +58,9 @@ public class GetUsersTest {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Spy
+    ModelMapper modelMapper;
+
+    @Spy
     MockHelper helper;
 
     @Spy
@@ -65,6 +73,7 @@ public class GetUsersTest {
     Gender gender;
     AgeGroup ageGroup;
     List<User> users;
+    Map<String, Comparator<User>> comparators;
 
     @BeforeEach
     public void beforeEach() {
@@ -93,15 +102,36 @@ public class GetUsersTest {
                 .toList());
     }
 
-    void assertHelper(User actual, CreateUserRequestDto dto) {
+    void assertHelper(List<User> actual, String... filterParams) {
         String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
-        assertThat(actual)
-                .usingRecursiveComparison()
-                .ignoringFields(comparatorIgnoreFields)
-                .isEqualTo(dto);
-        assertEquals(actual.getRole().getName(), dto.getRole());
-        assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
-        assertEquals(actual.getGender().getName(), dto.getGender());
-        assertNotNull(actual.getId());
+        List<User> expected = null;
+        assertEquals(expected.size(), actual.size());
+
+        //        assertThat(actual)
+        //                .usingRecursiveComparison()
+        //                .ignoringFields(comparatorIgnoreFields)
+        //                .isEqualTo(dto);
+    }
+
+    @Test
+    void getUsers_shouldReturnPage_whenSuperadminGetsAdmins() {
+        int pageNumber = 0;
+        int pageSize = 2;
+        String sortBy = "id";
+        String order = "ASC";
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
+        Page<User> page = new PageImpl<>(
+                users.stream()
+                        .filter(user -> user.getRoleName().equals("ROLE_ADMIN"))
+                        .sorted(Comparator.comparingLong(User::getId))
+                        .toList(),
+                pageable,
+                users.size());
+        when(userRepository.getUsers("ROLE_ADMIN", null, pageable)).thenReturn(page);
+
+        Page<UserResponseDto> actual =
+                userService.getUsers("ROLE_ADMIN", null, sortBy, order, pageSize, pageNumber);
+        assertNotNull(actual);
+        // adminGetsCustomersOrInstructors
     }
 }
