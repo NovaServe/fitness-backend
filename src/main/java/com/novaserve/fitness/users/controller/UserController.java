@@ -27,13 +27,6 @@ public class UserController {
         userService.createUser(requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
-  @Operation(summary = "Create user")
-  @PostMapping
-  @PreAuthorize("hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')")
-  public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequestDto requestDto) {
-    userService.createUser(requestDto);
-    return ResponseEntity.status(HttpStatus.CREATED).build();
-  }
 
   @Operation(summary = "Get user details")
   @GetMapping("/{id}")

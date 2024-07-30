@@ -53,29 +53,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     AuthUtil authUtil;
 
+    @Autowired RoleService roleService;
+
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
-  @Autowired UserRepository userRepository;
-
-  @Autowired RoleRepository roleRepository;
-
-  @Autowired GenderRepository genderRepository;
-
-  @Autowired AgeGroupRepository ageGroupRepository;
-
-  @Autowired PasswordEncoder passwordEncoder;
-
-  @Autowired ModelMapper modelMapper;
-
-  @Autowired AuthUtil authUtil;
-
-  @Autowired RoleService roleService;
-
-  @Override
-  @Transactional(propagation = Propagation.MANDATORY)
-  public User getUserById(long userId) {
-    return userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));
-  }
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
     public User getUserById(long userId) {
@@ -146,14 +127,12 @@ public class UserServiceImpl implements UserService {
                 .ageGroup(ageGroup)
                 .build());
     }
-    throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
-  }
 
   @Override
   @Transactional
   public UserResponseDto getUserDetails(long userId) {
-    User currentUser =
-        authUtil.getUserFromAuth(SecurityContextHolder.getContext().getAuthentication());
+    User currentUser = authUtil.getUserFromAuth(SecurityContextHolder.getContext().getAuthentication())
+            .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
     User requestedUser =
         userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));
 
