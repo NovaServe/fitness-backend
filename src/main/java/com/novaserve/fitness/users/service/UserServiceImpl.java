@@ -135,14 +135,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));
 
         boolean superadminRequestsOwnOrAdminDetail =
-                (user.isSuperadmin() && user.getId().equals(requestedBy.getId())) || user.isAdmin();
-        boolean adminRequestsOwnOrCustomerOrInstructorDetail =
-                (user.isAdmin() && user.getId().equals(requestedBy.getId()))
-                        || user.isCustomer()
-                        || user.isInstructor();
-        boolean customerRequestsOwnDetail = user.isCustomer() && (user.getId().equals(requestedBy.getId()));
+                requestedBy.isSuperadmin() && (user.getId().equals(requestedBy.getId()) || user.isAdmin());
+        boolean adminRequestsOwnOrCustomerOrInstructorDetail = user.isAdmin()
+                && (user.getId().equals(requestedBy.getId()) || user.isCustomer() || user.isInstructor());
+        boolean customerRequestsOwnDetail = user.isCustomer() && user.getId().equals(requestedBy.getId());
         boolean instructorRequestsOwnDetail =
-                user.isInstructor() && (user.getId().equals(requestedBy.getId()));
+                user.isInstructor() && user.getId().equals(requestedBy.getId());
 
         if (superadminRequestsOwnOrAdminDetail
                 || adminRequestsOwnOrCustomerOrInstructorDetail
