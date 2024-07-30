@@ -41,166 +41,170 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class CreateUserTest {
-  @InjectMocks UserServiceImpl userService;
+    @InjectMocks
+    UserServiceImpl userService;
 
-  @Mock AuthUtil authUtil;
+    @Mock
+    AuthUtil authUtil;
 
-  @Mock RoleRepository roleRepository;
+    @Mock
+    RoleRepository roleRepository;
 
-  @Mock GenderRepository genderRepository;
+    @Mock
+    GenderRepository genderRepository;
 
-  @Mock AgeGroupRepository ageGroupRepository;
+    @Mock
+    AgeGroupRepository ageGroupRepository;
 
-  @Mock UserRepository userRepository;
+    @Mock
+    UserRepository userRepository;
 
-  @Spy PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Spy
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-  @Spy MockHelper $mock;
+    @Spy
+    MockHelper $mock;
 
-  @Spy DtoHelper $dto;
+    @Spy
+    DtoHelper $dto;
 
-  Role superadminRole;
-  Role adminRole;
-  Role customerRole;
-  Role instructorRole;
-  Gender gender;
-  AgeGroup ageGroup;
+    Role superadminRole;
+    Role adminRole;
+    Role customerRole;
+    Role instructorRole;
+    Gender gender;
+    AgeGroup ageGroup;
 
-  @BeforeEach
-  public void beforeEach() {
-    superadminRole = $mock.superadminRole();
-    adminRole = $mock.adminRole();
-    customerRole = $mock.customerRole();
-    instructorRole = $mock.instructorRole();
-    gender = $mock.female();
-    ageGroup = $mock.adult();
+    @BeforeEach
+    public void beforeEach() {
+        superadminRole = $mock.superadminRole();
+        adminRole = $mock.adminRole();
+        customerRole = $mock.customerRole();
+        instructorRole = $mock.instructorRole();
+        gender = $mock.female();
+        ageGroup = $mock.adult();
 
-    lenient().when(genderRepository.findByName(gender.getName())).thenReturn(Optional.of(gender));
-    lenient()
-        .when(ageGroupRepository.findByName(ageGroup.getName()))
-        .thenReturn(Optional.of(ageGroup));
-    when(roleRepository.findByName(adminRole.getName())).thenReturn(Optional.of(adminRole));
-    when(roleRepository.findByName(customerRole.getName())).thenReturn(Optional.of(customerRole));
-    lenient()
-        .when(roleRepository.findByName(instructorRole.getName()))
-        .thenReturn(Optional.of(instructorRole));
-    lenient()
-        .when(userRepository.save(any(User.class)))
-        .then(
-            invocation -> {
-              User user = invocation.getArgument(0);
-              user.setId(1000L);
-              return user;
-            });
-  }
-
-  void assertHelper(User actual, CreateUserRequestDto dto) {
-    String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
-    assertThat(actual)
-        .usingRecursiveComparison()
-        .ignoringFields(comparatorIgnoreFields)
-        .isEqualTo(dto);
-    assertEquals(actual.getRole().getName(), dto.getRole());
-    assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
-    assertEquals(actual.getGender().getName(), dto.getGender());
-    assertNotNull(actual.getId());
-  }
-
-  @Test
-  void createUser_shouldCreateAdmin_whenSuperadminRequests() {
-    User superadmin =
-        $mock.user().seed(1).role(superadminRole).gender(gender).ageGroup(ageGroup).get();
-
-    CreateUserRequestDto dto =
-        $dto.createUserRequestDto()
-            .seed(2)
-            .role(adminRole.getName())
-            .gender(gender.getName())
-            .ageGroup(ageGroup.getName())
-            .get();
-
-    when(authUtil.getUserFromAuth(any())).thenReturn(superadmin);
-
-    User actual = userService.createUser(dto);
-    assertHelper(actual, dto);
-  }
-
-  @ParameterizedTest
-  @MethodSource("createUserParams")
-  void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) {
-    User admin = $mock.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
-
-    CreateUserRequestDto dto =
-        $dto.createUserRequestDto()
-            .seed(2)
-            .role(roleName)
-            .gender(gender.getName())
-            .ageGroup(ageGroup.getName())
-            .get();
-
-    when(authUtil.getUserFromAuth(any())).thenReturn(admin);
-
-    User actual = userService.createUser(dto);
-    assertHelper(actual, dto);
-  }
-
-  static Stream<Arguments> createUserParams() {
-    return Stream.of(Arguments.of("ROLE_CUSTOMER"), Arguments.of("ROLE_INSTRUCTOR"));
-  }
-
-  @ParameterizedTest
-  @MethodSource("createUserParams_rolesMismatch")
-  void createUser_shouldThrowException_whenRolesMismatch(
-      String creatorRoleName, String createdRoleName) {
-    User user =
-        $mock
-            .user()
-            .seed(1)
-            .role(getRoleHelper(creatorRoleName))
-            .gender(gender)
-            .ageGroup(ageGroup)
-            .get();
-
-    CreateUserRequestDto dto =
-        $dto.createUserRequestDto()
-            .seed(2)
-            .role(createdRoleName)
-            .gender(gender.getName())
-            .ageGroup(ageGroup.getName())
-            .get();
-
-    when(authUtil.getUserFromAuth(any())).thenReturn(user);
-
-    ServerException actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
-    assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
-    assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
-  }
-
-  static Stream<Arguments> createUserParams_rolesMismatch() {
-    return Stream.of(
-        Arguments.of("ROLE_SUPERADMIN", "ROLE_SUPERADMIN"),
-        Arguments.of("ROLE_SUPERADMIN", "ROLE_CUSTOMER"),
-        Arguments.of("ROLE_SUPERADMIN", "ROLE_INSTRUCTOR"),
-        Arguments.of("ROLE_ADMIN", "ROLE_ADMIN"),
-        Arguments.of("ROLE_ADMIN", "ROLE_SUPERADMIN"),
-        Arguments.of("ROLE_CUSTOMER", "ROLE_CUSTOMER"),
-        Arguments.of("ROLE_CUSTOMER", "ROLE_SUPERADMIN"),
-        Arguments.of("ROLE_CUSTOMER", "ROLE_ADMIN"),
-        Arguments.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR"),
-        Arguments.of("ROLE_INSTRUCTOR", "ROLE_INSTRUCTOR"),
-        Arguments.of("ROLE_INSTRUCTOR", "ROLE_CUSTOMER"),
-        Arguments.of("ROLE_INSTRUCTOR", "ROLE_SUPERADMIN"),
-        Arguments.of("ROLE_INSTRUCTOR", "ROLE_ADMIN"));
-  }
-
-  Role getRoleHelper(String roleName) {
-    Role role = null;
-    switch (roleName) {
-      case "ROLE_SUPERADMIN" -> role = superadminRole;
-      case "ROLE_ADMIN" -> role = adminRole;
-      case "ROLE_CUSTOMER" -> role = customerRole;
-      case "ROLE_INSTRUCTOR" -> role = instructorRole;
+        lenient().when(genderRepository.findByName(gender.getName())).thenReturn(Optional.of(gender));
+        lenient().when(ageGroupRepository.findByName(ageGroup.getName())).thenReturn(Optional.of(ageGroup));
+        when(roleRepository.findByName(adminRole.getName())).thenReturn(Optional.of(adminRole));
+        when(roleRepository.findByName(customerRole.getName())).thenReturn(Optional.of(customerRole));
+        lenient().when(roleRepository.findByName(instructorRole.getName())).thenReturn(Optional.of(instructorRole));
+        lenient().when(userRepository.save(any(User.class))).then(invocation -> {
+            User user = invocation.getArgument(0);
+            user.setId(1000L);
+            return user;
+        });
     }
-    return role;
-  }
+
+    void assertHelper(User actual, CreateUserRequestDto dto) {
+        String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
+        assertThat(actual)
+                .usingRecursiveComparison()
+                .ignoringFields(comparatorIgnoreFields)
+                .isEqualTo(dto);
+        assertEquals(actual.getRole().getName(), dto.getRole());
+        assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
+        assertEquals(actual.getGender().getName(), dto.getGender());
+        assertNotNull(actual.getId());
+    }
+
+    @Test
+    void createUser_shouldCreateAdmin_whenSuperadminRequests() {
+        var superadmin = $mock.user()
+                .seed(1)
+                .role(superadminRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
+
+        var dto = $dto.createUserRequestDto()
+                .seed(2)
+                .role(adminRole.getName())
+                .gender(gender.getName())
+                .ageGroup(ageGroup.getName())
+                .get();
+
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(superadmin));
+
+        var actual = userService.createUser(dto);
+        assertHelper(actual, dto);
+    }
+
+    @ParameterizedTest
+    @MethodSource("createUserParams")
+    void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) {
+        var admin = $mock.user()
+                .seed(1)
+                .role(adminRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
+
+        var dto = $dto.createUserRequestDto()
+                .seed(2)
+                .role(roleName)
+                .gender(gender.getName())
+                .ageGroup(ageGroup.getName())
+                .get();
+
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(admin));
+
+        var actual = userService.createUser(dto);
+        assertHelper(actual, dto);
+    }
+
+    static Stream<Arguments> createUserParams() {
+        return Stream.of(Arguments.of("ROLE_CUSTOMER"), Arguments.of("ROLE_INSTRUCTOR"));
+    }
+
+    @ParameterizedTest
+    @MethodSource("createUserParams_rolesMismatch")
+    void createUser_shouldThrowException_whenRolesMismatch(String creatorRoleName, String createdRoleName) {
+        var user = $mock.user()
+                .seed(1)
+                .role(getRoleHelper(creatorRoleName))
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
+
+        var dto = $dto.createUserRequestDto()
+                .seed(2)
+                .role(createdRoleName)
+                .gender(gender.getName())
+                .ageGroup(ageGroup.getName())
+                .get();
+
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
+
+        var actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
+        assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
+        assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
+    }
+
+    static Stream<Arguments> createUserParams_rolesMismatch() {
+        return Stream.of(
+                Arguments.of("ROLE_SUPERADMIN", "ROLE_SUPERADMIN"),
+                Arguments.of("ROLE_SUPERADMIN", "ROLE_CUSTOMER"),
+                Arguments.of("ROLE_SUPERADMIN", "ROLE_INSTRUCTOR"),
+                Arguments.of("ROLE_ADMIN", "ROLE_ADMIN"),
+                Arguments.of("ROLE_ADMIN", "ROLE_SUPERADMIN"),
+                Arguments.of("ROLE_CUSTOMER", "ROLE_CUSTOMER"),
+                Arguments.of("ROLE_CUSTOMER", "ROLE_SUPERADMIN"),
+                Arguments.of("ROLE_CUSTOMER", "ROLE_ADMIN"),
+                Arguments.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR"),
+                Arguments.of("ROLE_INSTRUCTOR", "ROLE_INSTRUCTOR"),
+                Arguments.of("ROLE_INSTRUCTOR", "ROLE_CUSTOMER"),
+                Arguments.of("ROLE_INSTRUCTOR", "ROLE_SUPERADMIN"),
+                Arguments.of("ROLE_INSTRUCTOR", "ROLE_ADMIN"));
+    }
+
+    Role getRoleHelper(String roleName) {
+        return switch (roleName) {
+            case "ROLE_SUPERADMIN" -> superadminRole;
+            case "ROLE_ADMIN" -> adminRole;
+            case "ROLE_CUSTOMER" -> customerRole;
+            case "ROLE_INSTRUCTOR" -> instructorRole;
+            default -> throw new IllegalStateException("Unexpected value: " + roleName);
+        };
+    }
 }

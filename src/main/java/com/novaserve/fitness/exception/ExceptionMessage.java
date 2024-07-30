@@ -3,16 +3,16 @@
 */
 package com.novaserve.fitness.exception;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum ExceptionMessage {
-  INVALID_CREDENTIALS("Invalid credentials"),
-  ROLES_MISMATCH("Roles mismatch");
+    INVALID_CREDENTIALS("Invalid credentials"),
+    INVALID_TOKEN("Invalid token"),
+    UNAUTHORIZED("Unauthorized"),
+    ROLES_MISMATCH("Roles mismatch");
 
-  private final String name;
-
-  ExceptionMessage(String name) {
-    this.name = name;
-  }
+    private final String name;
 }

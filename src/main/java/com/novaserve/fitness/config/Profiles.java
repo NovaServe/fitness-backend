@@ -11,26 +11,26 @@ import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class Profiles {
-  private static final Logger logger = LoggerFactory.getLogger(Profiles.class);
+    private static final Logger logger = LoggerFactory.getLogger(Profiles.class);
 
-  @Bean
-  @Profile("local")
-  public String profileLocal() {
-    logger.info("Profile local");
-    return null;
-  }
+    @Bean
+    @Profile("local")
+    public String profileLocal() {
+        logger.info("Profile local");
+        return null;
+    }
 
-  @Bean
-  @Profile("dev")
-  public String profileDev() {
-    logger.info("Profile dev");
-    return null;
-  }
+    @Bean
+    @Profile("dev")
+    public String profileDev() {
+        logger.info("Profile dev");
+        return null;
+    }
 
-  @Profile("prod")
-  @Bean
-  public String profileProd() {
-    logger.info("Profile prod");
-    return null;
-  }
+    @Profile("prod")
+    @Bean
+    public String profileProd() {
+        logger.info("Profile prod");
+        return null;
+    }
 }

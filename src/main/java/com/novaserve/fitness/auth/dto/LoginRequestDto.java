@@ -13,11 +13,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequestDto {
-  @NotBlank
-  @Size(min = 5, max = 40)
-  private String usernameOrEmailOrPhone;
+    @NotBlank
+    @Size(min = 5, max = 40)
+    private String usernameOrEmailOrPhone;
 
-  @NotBlank
-  @Size(min = 8, max = 20)
-  private String password;
+    @NotBlank
+    @Size(min = 8, max = 20)
+    private String password;
 }
