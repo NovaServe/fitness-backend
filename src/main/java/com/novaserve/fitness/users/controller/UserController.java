@@ -28,11 +28,10 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @Operation(summary = "Get user details")
-    @GetMapping("/{id}")
+    @Operation(summary = "Get user detail")
+    @GetMapping("/{userId}")
     @PreAuthorize("hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN','ROLE_INSTRUCTOR','ROLE_CUSTOMER')")
-    public ResponseEntity<UserResponseDto> getUserDetails(@PathVariable Long id) {
-        UserResponseDto responseDto = userService.getUserDetails(id);
-        return ResponseEntity.ok(responseDto);
+    public ResponseEntity<UserResponseDto> getUserDetails(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserDetail(userId));
     }
 }
