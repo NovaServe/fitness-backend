@@ -53,7 +53,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     AuthUtil authUtil;
 
-    @Autowired RoleService roleService;
+    @Autowired
+    RoleService roleService;
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -128,27 +129,26 @@ public class UserServiceImpl implements UserService {
                 .build());
     }
 
-  @Override
-  @Transactional
-  public UserResponseDto getUserDetails(long userId) {
-    User currentUser = authUtil.getUserFromAuth(SecurityContextHolder.getContext().getAuthentication())
-            .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
-    User requestedUser =
-        userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));
+    @Override
+    @Transactional
+    public UserResponseDto getUserDetails(long userId) {
+        User currentUser = authUtil.getUserFromAuth(
+                        SecurityContextHolder.getContext().getAuthentication())
+                .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
+        User requestedUser = userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));
 
-    if (currentUser.getId().equals(requestedUser.getId())) {
-      return modelMapper.map(requestedUser, UserResponseDto.class);
-    }
+        if (currentUser.getId().equals(requestedUser.getId())) {
+            return modelMapper.map(requestedUser, UserResponseDto.class);
+        }
 
-    if (roleService.hasRoleSuperAdmin(currentUser.getId())
-        && roleService.hasRoleAdmin(requestedUser.getId())) {
-      return modelMapper.map(requestedUser, UserResponseDto.class);
-    } else if (roleService.hasRoleAdmin(currentUser.getId())
-        && (roleService.hasRoleInstructor(requestedUser.getId())
-            || roleService.hasRoleCustomer(requestedUser.getId()))) {
-      return modelMapper.map(requestedUser, UserResponseDto.class);
-    } else {
-      throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
+        if (roleService.hasRoleSuperAdmin(currentUser.getId()) && roleService.hasRoleAdmin(requestedUser.getId())) {
+            return modelMapper.map(requestedUser, UserResponseDto.class);
+        } else if (roleService.hasRoleAdmin(currentUser.getId())
+                && (roleService.hasRoleInstructor(requestedUser.getId())
+                        || roleService.hasRoleCustomer(requestedUser.getId()))) {
+            return modelMapper.map(requestedUser, UserResponseDto.class);
+        } else {
+            throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
+        }
     }
-  }
 }
