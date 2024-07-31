@@ -72,8 +72,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(CreateUserRequestDto dto) {
-        var createdBy = authUtil.getUserFromAuth(
-                        SecurityContextHolder.getContext().getAuthentication())
+        var createdBy = authUtil.getPrincipal(SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
         var roles = getRoles();
         var superadminCreatesAdmin = createdBy.isSuperadmin() && isRoleAdmin(dto.getRole());
@@ -129,18 +128,18 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto getUserDetail(long userId) {
-        User requestedBy = authUtil.getUserFromAuth(
+        User principal = authUtil.getPrincipal(
                         SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));
 
         boolean superadminRequestsOwnOrAdminDetail =
-                requestedBy.isSuperadmin() && (user.getId().equals(requestedBy.getId()) || user.isAdmin());
-        boolean adminRequestsOwnOrCustomerOrInstructorDetail = user.isAdmin()
-                && (user.getId().equals(requestedBy.getId()) || user.isCustomer() || user.isInstructor());
-        boolean customerRequestsOwnDetail = user.isCustomer() && user.getId().equals(requestedBy.getId());
+                principal.isSuperadmin() && (user.getId().equals(principal.getId()) || user.isAdmin());
+        boolean adminRequestsOwnOrCustomerOrInstructorDetail =
+                user.isAdmin() && (user.getId().equals(principal.getId()) || user.isCustomer() || user.isInstructor());
+        boolean customerRequestsOwnDetail = user.isCustomer() && user.getId().equals(principal.getId());
         boolean instructorRequestsOwnDetail =
-                user.isInstructor() && user.getId().equals(requestedBy.getId());
+                user.isInstructor() && user.getId().equals(principal.getId());
 
         if (superadminRequestsOwnOrAdminDetail
                 || adminRequestsOwnOrCustomerOrInstructorDetail

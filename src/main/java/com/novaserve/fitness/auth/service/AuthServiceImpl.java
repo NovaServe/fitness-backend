@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
             var auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getUsernameOrEmailOrPhone(), dto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(auth);
-            var user = authUtil.getUserFromAuth(auth)
+            var user = authUtil.getPrincipal(auth)
                     .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
             var token = jwtTokenProvider.generateToken(auth);
             var cookieExpires = authUtil.formatCookieExpires(jwtTokenProvider.getExpiresFromJwt(token));
@@ -66,8 +66,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public ValidateTokenResponseDto validateToken() {
-        var userId =
-                authUtil.getUserIdFromAuth(SecurityContextHolder.getContext().getAuthentication());
+        var userId = authUtil.getPrincipalId(SecurityContextHolder.getContext().getAuthentication());
         if (isNull(userId)) {
             logger.error("Token is not validated, userId is null");
             return null;

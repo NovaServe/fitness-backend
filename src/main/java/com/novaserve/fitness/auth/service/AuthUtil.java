@@ -9,9 +9,9 @@ import java.util.Optional;
 import org.springframework.security.core.Authentication;
 
 public interface AuthUtil {
-    Long getUserIdFromAuth(Authentication auth);
+    Long getPrincipalId(Authentication auth);
 
-    Optional<User> getUserFromAuth(Authentication auth);
+    Optional<User> getPrincipal(Authentication auth);
 
     String formatCookieExpires(Date date);
 }

@@ -23,12 +23,12 @@ public class AuthUtilImpl implements AuthUtil {
     UserRepository userRepository;
 
     @Override
-    public Long getUserIdFromAuth(Authentication auth) {
-        return getUserFromAuth(auth).map(User::getId).orElse(null);
+    public Long getPrincipalId(Authentication auth) {
+        return getPrincipal(auth).map(User::getId).orElse(null);
     }
 
     @Override
-    public Optional<User> getUserFromAuth(Authentication auth) {
+    public Optional<User> getPrincipal(Authentication auth) {
         if (isNull(auth) || !auth.isAuthenticated()) {
             return Optional.empty();
         }

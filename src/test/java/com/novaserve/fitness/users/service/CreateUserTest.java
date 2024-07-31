@@ -124,7 +124,7 @@ class CreateUserTest {
                 .ageGroup(ageGroup.getName())
                 .get();
 
-        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(superadmin));
+        when(authUtil.getPrincipal(any())).thenReturn(Optional.ofNullable(superadmin));
 
         var actual = userService.createUser(dto);
         assertHelper(actual, dto);
@@ -147,7 +147,7 @@ class CreateUserTest {
                 .ageGroup(ageGroup.getName())
                 .get();
 
-        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(admin));
+        when(authUtil.getPrincipal(any())).thenReturn(Optional.ofNullable(admin));
 
         var actual = userService.createUser(dto);
         assertHelper(actual, dto);
@@ -174,7 +174,7 @@ class CreateUserTest {
                 .ageGroup(ageGroup.getName())
                 .get();
 
-        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
+        when(authUtil.getPrincipal(any())).thenReturn(Optional.ofNullable(user));
 
         var actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
         assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
