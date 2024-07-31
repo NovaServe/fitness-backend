@@ -3,8 +3,6 @@
 */
 package com.novaserve.fitness.exception;
 
-import static java.util.Objects.nonNull;
-
 import jakarta.validation.ConstraintViolationException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,8 +47,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException e) {
         Map<String, String> validation = new HashMap<>();
         e.getConstraintViolations().forEach((elt) -> {
-            var constraintMessage = elt.getMessage();
-            var paramName = elt.getPropertyPath().toString().split("\\.")[1];
+            String constraintMessage = elt.getMessage();
+            String paramName = elt.getPropertyPath().toString().split("\\.")[1];
             validation.put(paramName, constraintMessage);
         });
         return new ResponseEntity<>(validation, HttpStatus.BAD_REQUEST);
@@ -66,12 +64,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode code, WebRequest req) {
         Map<String, String> errors = new HashMap<>();
         e.getBindingResult().getAllErrors().forEach(error -> {
-            var fieldName = "Method argument not valid";
+            String fieldName = "Method argument not valid";
             if (error instanceof FieldError) {
                 fieldName = ((FieldError) error).getField();
             } else {
-                if (nonNull(error.getArguments()) && error.getArguments().length > 1) {
-                    var stringBuilder = new StringBuilder();
+                if (error.getArguments() != null && error.getArguments().length > 1) {
+                    StringBuilder stringBuilder = new StringBuilder();
                     Arrays.stream(error.getArguments()).forEach(elt -> {
                         stringBuilder.append(elt.toString());
                         stringBuilder.append(",");
@@ -80,7 +78,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                     fieldName = stringBuilder.toString();
                 }
             }
-            var message = error.getDefaultMessage();
+            String message = error.getDefaultMessage();
             errors.put(fieldName, message);
             logger.error("{}: {} - {}", fieldName, message, HttpStatus.BAD_REQUEST.value());
         });

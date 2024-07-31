@@ -3,6 +3,7 @@
 */
 package com.novaserve.fitness.auth.controller;
 
+import com.novaserve.fitness.auth.dto.LoginProcessDto;
 import com.novaserve.fitness.auth.dto.LoginRequestDto;
 import com.novaserve.fitness.auth.dto.LoginResponseDto;
 import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
@@ -34,8 +35,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(
             @Valid @RequestBody LoginRequestDto requestDto, HttpServletResponse res) {
-        var processDto = authService.login(requestDto);
-        var cookie = new Cookie("token", processDto.getToken());
+        LoginProcessDto processDto = authService.login(requestDto);
+        Cookie cookie = new Cookie("token", processDto.getToken());
         cookie.setHttpOnly(true);
         cookie.setPath(apiPath);
         cookie.setAttribute("SameSite", "Strict");
@@ -51,7 +52,7 @@ public class AuthController {
     @GetMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest req, HttpServletResponse res) {
         logger.info("Logout attempt from {}", req.getRemoteAddr());
-        var cookie = new Cookie("token", "");
+        Cookie cookie = new Cookie("token", "");
         cookie.setHttpOnly(true);
         cookie.setPath(apiPath);
         cookie.setAttribute("SameSite", "Strict");

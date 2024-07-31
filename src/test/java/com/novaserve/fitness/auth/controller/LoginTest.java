@@ -21,6 +21,8 @@ import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.model.User;
+import jakarta.servlet.http.Cookie;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,10 +58,10 @@ class LoginTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    DbHelper $db;
+    DbHelper helper;
 
     @Autowired
-    DtoHelper $dto;
+    DtoHelper dtoHelper;
 
     final String LOGIN_URL = "/api/v1/auth/login";
 
@@ -72,13 +74,13 @@ class LoginTest {
 
     @BeforeEach
     void beforeEach() {
-        $db.deleteAll();
-        superadminRole = $db.superadminRole();
-        adminRole = $db.adminRole();
-        customerRole = $db.customerRole();
-        instructorRole = $db.instructorRole();
-        gender = $db.female();
-        ageGroup = $db.adult();
+        helper.deleteAll();
+        superadminRole = helper.superadminRole();
+        adminRole = helper.adminRole();
+        customerRole = helper.customerRole();
+        instructorRole = helper.instructorRole();
+        gender = helper.female();
+        ageGroup = helper.adult();
     }
 
     @Container
@@ -95,13 +97,13 @@ class LoginTest {
     @ParameterizedTest
     @MethodSource("loginCredentialTypes")
     void login_shouldAuthenticateUser_whenValidCredentials(String roleName, String credentialType) throws Exception {
-        var user = $db.user()
+        User user = helper.user()
                 .seed(1)
                 .role(getRole(roleName))
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
-        var dto = getDto(credentialType);
+        LoginRequestDto dto = getDto(credentialType);
 
         var mvcResult = mockMvc.perform(post(LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -112,7 +114,7 @@ class LoginTest {
                 .andDo(print())
                 .andReturn();
 
-        var cookie = mvcResult.getResponse().getCookie("token");
+        Cookie cookie = mvcResult.getResponse().getCookie("token");
         assertNotNull(cookie.getValue());
         assertNotNull(cookie.getAttribute("Expires"));
         assertEquals("true", cookie.getAttribute("HttpOnly"));
@@ -148,17 +150,21 @@ class LoginTest {
 
     LoginRequestDto getDto(String credentialType) {
         return switch (credentialType) {
-            case "username" -> $dto.loginRequestDto().seed(1).withUsername().get();
-            case "email" -> $dto.loginRequestDto().seed(1).withEmail().get();
-            case "phone" -> $dto.loginRequestDto().seed(1).withPhone().get();
+            case "username" -> dtoHelper
+                    .loginRequestDto()
+                    .seed(1)
+                    .withUsername()
+                    .get();
+            case "email" -> dtoHelper.loginRequestDto().seed(1).withEmail().get();
+            case "phone" -> dtoHelper.loginRequestDto().seed(1).withPhone().get();
             default -> throw new IllegalStateException("Unexpected value: " + credentialType);
         };
     }
 
     @Test
     void login_shouldThrowException_whenInvalidCredentials() throws Exception {
-        $db.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
-        var dto = $dto.loginRequestDto().seed(2).withUsername().get();
+        helper.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
+        LoginRequestDto dto = dtoHelper.loginRequestDto().seed(2).withUsername().get();
 
         mockMvc.perform(post(LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)

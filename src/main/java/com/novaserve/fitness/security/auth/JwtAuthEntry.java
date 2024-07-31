@@ -22,9 +22,8 @@ public class JwtAuthEntry implements AuthenticationEntryPoint {
             throws IOException {
         res.setStatus(HttpStatus.UNAUTHORIZED.value());
         res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        ExceptionDto dto = new ExceptionDto(e.getMessage());
         PrintWriter out = res.getWriter();
-        out.write(new ObjectMapper().writeValueAsString(dto));
+        out.write(new ObjectMapper().writeValueAsString(new ExceptionDto(e.getMessage())));
         out.flush();
         // res.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
     }

@@ -3,6 +3,7 @@
 */
 package com.novaserve.fitness.security.auth;
 
+import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.service.UserUtil;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class CustomUserDetails implements UserDetailsService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) {
-        var user = userUtil.getUserByUsername(username)
+        User user = userUtil.getUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         String.format("User not found with provided username, email, or phone: %s", username)));
         return new org.springframework.security.core.userdetails.User(

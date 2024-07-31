@@ -12,5 +12,6 @@ import lombok.*;
 @AllArgsConstructor
 public class ValidateTokenResponseDto {
     private String role;
+
     private String fullName;
 }

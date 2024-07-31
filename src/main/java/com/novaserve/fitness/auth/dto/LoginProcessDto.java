@@ -12,7 +12,10 @@ import lombok.*;
 @AllArgsConstructor
 public class LoginProcessDto {
     private String token;
+
     private String cookieExpires;
+
     private String role;
+
     private String fullName;
 }
