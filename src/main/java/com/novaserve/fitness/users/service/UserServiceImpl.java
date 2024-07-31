@@ -16,6 +16,7 @@ import com.novaserve.fitness.users.repository.GenderRepository;
 import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -131,18 +132,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Page<UserResponseDto> getUsers(
-            String role, String fullName, String sortBy, String order, int pageSize, int pageNumber) {
-        User requestedBy = authUtil.getUserFromAuth(
+            List<String> roles, String fullName, String sortBy, String order, int pageSize, int pageNumber) {
+        User principal = authUtil.getUserFromAuth(
                         SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
-        boolean superadminGetsAdmins = requestedBy.isSuperadmin() && isRoleAdmin(role);
-        boolean adminGetsCustomersOrInstructors = requestedBy.isAdmin() && isRoleCustomerOrInstructor(role);
+        boolean superadminGetsAdmins = principal.isSuperadmin() && roles.size() == 1 && isRoleAdmin(roles.get(0));
+        boolean adminGetsCustomersOrInstructors =
+                principal.isAdmin() && roles.stream().allMatch(this::isRoleCustomerOrInstructor);
 
         if (superadminGetsAdmins || adminGetsCustomersOrInstructors) {
             Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
             return userRepository
-                    .getUsers(role, fullName, pageable)
+                    .getUsers(roles, fullName, pageable)
                     .map(user -> modelMapper.map(user, UserResponseDto.class));
         }
         throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);

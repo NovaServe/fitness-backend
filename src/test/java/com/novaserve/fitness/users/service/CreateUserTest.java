@@ -139,7 +139,7 @@ class CreateUserTest {
     }
 
     @ParameterizedTest
-    @MethodSource("createUserParams")
+    @MethodSource("createUser_methodParams")
     void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) {
         User admin = helper.user()
                 .seed(1)
@@ -162,12 +162,12 @@ class CreateUserTest {
         assertHelper(actual, dto);
     }
 
-    static Stream<Arguments> createUserParams() {
+    static Stream<Arguments> createUser_methodParams() {
         return Stream.of(Arguments.of("ROLE_CUSTOMER"), Arguments.of("ROLE_INSTRUCTOR"));
     }
 
     @ParameterizedTest
-    @MethodSource("createUserParams_rolesMismatch")
+    @MethodSource("createUser_methodParams_rolesMismatch")
     void createUser_shouldThrowException_whenRolesMismatch(String creatorRoleName, String createdRoleName) {
         User user = helper.user()
                 .seed(1)
@@ -191,7 +191,7 @@ class CreateUserTest {
         assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
     }
 
-    static Stream<Arguments> createUserParams_rolesMismatch() {
+    static Stream<Arguments> createUser_methodParams_rolesMismatch() {
         return Stream.of(
                 Arguments.of("ROLE_SUPERADMIN", "ROLE_SUPERADMIN"),
                 Arguments.of("ROLE_SUPERADMIN", "ROLE_CUSTOMER"),

@@ -89,7 +89,7 @@ public class MockHelper {
                     .username("username" + seed)
                     .email("username" + seed + "@email.com")
                     .phone("+312300000" + seed)
-                    .fullName("User Full Name")
+                    .fullName("User Full Name " + Util.getNumberName(seed))
                     .password(passwordEncoder.encode("Password" + seed + "!"))
                     .role(role)
                     .gender(gender)

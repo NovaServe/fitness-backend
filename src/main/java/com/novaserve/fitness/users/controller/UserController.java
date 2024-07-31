@@ -8,6 +8,7 @@ import com.novaserve.fitness.users.dto.UserResponseDto;
 import com.novaserve.fitness.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -33,13 +34,13 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')")
     public ResponseEntity<Page<UserResponseDto>> createUser(
-            @RequestParam(required = true) String role,
+            @RequestParam(required = true) List<String> roles,
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false, defaultValue = "id") String sortBy,
             @RequestParam(required = false, defaultValue = "ASC") String order,
             @RequestParam(required = false, defaultValue = "10") int pageSize,
             @RequestParam(required = false, defaultValue = "0") int pageNumber) {
         return ResponseEntity.status(HttpStatus.OK)
-                .body(userService.getUsers(role, fullName, sortBy, order, pageSize, pageNumber));
+                .body(userService.getUsers(roles, fullName, sortBy, order, pageSize, pageNumber));
     }
 }

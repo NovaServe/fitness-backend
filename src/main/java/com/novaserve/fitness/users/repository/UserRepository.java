@@ -4,6 +4,7 @@
 package com.novaserve.fitness.users.repository;
 
 import com.novaserve.fitness.users.model.User;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     @Query(
-            "select u from User u where (role is null or u.role.name = :role) and (fullName is null or u.fullName = :fullName)")
-    Page<User> getUsers(String role, String fullName, Pageable pageable);
+            "SELECT u FROM User u JOIN u.role r WHERE r.name IN :roles AND (:fullName IS NULL OR u.fullName ILIKE %:fullName%)")
+    Page<User> getUsers(List<String> roles, String fullName, Pageable pageable);
 }

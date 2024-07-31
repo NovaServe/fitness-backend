@@ -6,7 +6,6 @@ package com.novaserve.fitness.users.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -23,7 +22,6 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -99,7 +97,6 @@ class CreateUserTest {
 
     void assertHelper(CreateUserRequestDto dto) {
         User actual = dbHelper.getUser(dto.getUsername());
-//        String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
         String[] comparatorIgnoreFields = new String[] {"id"};
         BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
         BiPredicate<Gender, String> genderBiPredicate = (gender, genderName) -> genderName.equals(gender.getName());
@@ -114,9 +111,6 @@ class CreateUserTest {
                 .withEqualsForFields(roleBiPredicate, "role")
                 .ignoringFields(comparatorIgnoreFields)
                 .isEqualTo(dto);
-//        assertEquals(actual.getRole().getName(), dto.getRole());
-//        assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
-//        assertEquals(actual.getGender().getName(), dto.getGender());
         assertNotNull(actual.getId());
     }
 
@@ -148,7 +142,7 @@ class CreateUserTest {
     }
 
     @ParameterizedTest
-    @MethodSource("createUserParams")
+    @MethodSource("createUser_methodParams")
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
     void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) throws Exception {
         dbHelper.user()
@@ -175,12 +169,12 @@ class CreateUserTest {
         assertHelper(dto);
     }
 
-    static Stream<Arguments> createUserParams() {
+    static Stream<Arguments> createUser_methodParams() {
         return Stream.of(Arguments.of("ROLE_CUSTOMER"), Arguments.of("ROLE_INSTRUCTOR"));
     }
 
     @ParameterizedTest
-    @MethodSource("createUserParams_rolesMismatch")
+    @MethodSource("createUser_methodParams_rolesMismatch")
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void createUser_shouldThrowException_whenRolesMismatch(String creatorRoleName, String createdRoleName)
             throws Exception {
@@ -208,7 +202,7 @@ class CreateUserTest {
         assertNull(dbHelper.getUser(dto.getUsername()));
     }
 
-    static Stream<Arguments> createUserParams_rolesMismatch() {
+    static Stream<Arguments> createUser_methodParams_rolesMismatch() {
         return Stream.of(
                 Arguments.of("ROLE_SUPERADMIN", "ROLE_SUPERADMIN"),
                 Arguments.of("ROLE_SUPERADMIN", "ROLE_CUSTOMER"),

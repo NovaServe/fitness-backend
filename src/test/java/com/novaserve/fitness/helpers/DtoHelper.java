@@ -49,7 +49,7 @@ public class DtoHelper {
             }
             return CreateUserRequestDto.builder()
                     .username("username" + seed)
-                    .fullName("User Full Name")
+                    .fullName("User Full Name " + Util.getNumberName(seed))
                     .email("username" + seed + "@email.com")
                     .phone("+312300000" + seed)
                     .password("Password" + seed + "!")

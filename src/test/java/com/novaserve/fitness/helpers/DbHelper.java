@@ -121,7 +121,7 @@ public class DbHelper {
         public User get() {
             return userRepository.save(User.builder()
                     .username("username" + seed)
-                    .fullName("User Full Name")
+                    .fullName("User Full Name " + Util.getNumberName(seed))
                     .email("username" + seed + "@email.com")
                     .phone("+312300000" + seed)
                     .password(passwordEncoder.encode("Password" + seed + "!"))
