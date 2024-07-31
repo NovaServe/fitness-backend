@@ -3,10 +3,9 @@
 */
 package com.novaserve.fitness.users.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
@@ -22,6 +21,8 @@ import com.novaserve.fitness.users.repository.GenderRepository;
 import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.stream.IntStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,19 +103,33 @@ public class GetUsersTest {
                 .toList());
     }
 
-    void assertHelper(List<User> actual, String... filterParams) {
-        String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
-        List<User> expected = null;
-        assertEquals(expected.size(), actual.size());
-
-        //        assertThat(actual)
-        //                .usingRecursiveComparison()
-        //                .ignoringFields(comparatorIgnoreFields)
-        //                .isEqualTo(dto);
+    void assertHelper(Page<UserResponseDto> actual, String roleName) {
+        List<User> expected = users.stream()
+                .filter(user -> user.getRoleName().equals(roleName))
+                .sorted(Comparator.comparingLong(User::getId))
+                .toList();
+        BiPredicate<String, Gender> genderBiPredicate = (genderName, gender) -> genderName.equals(gender.getName());
+        BiPredicate<String, AgeGroup> ageGroupBiPredicate =
+                (ageGroupName, ageGroup) -> ageGroupName.equals(ageGroup.getName());
+        BiPredicate<String, Role> roleBiPredicate = (roleName_, role) -> roleName_.equals(role.getName());
+        assertEquals(expected.size(), actual.getNumberOfElements());
+        IntStream.range(0, expected.size())
+                .forEach(i -> assertThat(actual.getContent().get(i))
+                        .usingRecursiveComparison()
+                        .withEqualsForFields(genderBiPredicate, "gender")
+                        .withEqualsForFields(ageGroupBiPredicate, "ageGroup")
+                        .withEqualsForFields(roleBiPredicate, "role")
+                        .isEqualTo(expected.get(i)));
     }
 
     @Test
     void getUsers_shouldReturnPage_whenSuperadminGetsAdmins() {
+        User requestedBy = helper.user()
+                .seed(1)
+                .role(superadminRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
         int pageNumber = 0;
         int pageSize = 2;
         String sortBy = "id";
@@ -127,11 +142,12 @@ public class GetUsersTest {
                         .toList(),
                 pageable,
                 users.size());
+
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(requestedBy));
         when(userRepository.getUsers("ROLE_ADMIN", null, pageable)).thenReturn(page);
 
-        Page<UserResponseDto> actual =
-                userService.getUsers("ROLE_ADMIN", null, sortBy, order, pageSize, pageNumber);
-        assertNotNull(actual);
+        Page<UserResponseDto> actual = userService.getUsers("ROLE_ADMIN", null, sortBy, order, pageSize, pageNumber);
+        assertHelper(actual, "ROLE_ADMIN");
         // adminGetsCustomersOrInstructors
     }
 }

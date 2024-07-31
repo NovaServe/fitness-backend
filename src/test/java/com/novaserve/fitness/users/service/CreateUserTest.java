@@ -24,6 +24,7 @@ import com.novaserve.fitness.users.repository.GenderRepository;
 import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -97,14 +98,20 @@ class CreateUserTest {
     }
 
     void assertHelper(User actual, CreateUserRequestDto dto) {
-        String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
+        String[] comparatorIgnoreFields = new String[] {"id"};
+        BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
+        BiPredicate<Gender, String> genderBiPredicate = (gender, genderName) -> genderName.equals(gender.getName());
+        BiPredicate<AgeGroup, String> ageGroupBiPredicate =
+                (ageGroup, ageGroupName) -> ageGroupName.equals(ageGroup.getName());
+        BiPredicate<Role, String> roleBiPredicate = (role, roleName) -> roleName.equals(role.getName());
         assertThat(actual)
                 .usingRecursiveComparison()
+                .withEqualsForFields(passwordBiPredicate, "password")
+                .withEqualsForFields(genderBiPredicate, "gender")
+                .withEqualsForFields(ageGroupBiPredicate, "ageGroup")
+                .withEqualsForFields(roleBiPredicate, "role")
                 .ignoringFields(comparatorIgnoreFields)
                 .isEqualTo(dto);
-        assertEquals(actual.getRole().getName(), dto.getRole());
-        assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
-        assertEquals(actual.getGender().getName(), dto.getGender());
         assertNotNull(actual.getId());
     }
 
