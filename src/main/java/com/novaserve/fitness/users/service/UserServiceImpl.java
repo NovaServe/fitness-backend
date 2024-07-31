@@ -135,11 +135,12 @@ public class UserServiceImpl implements UserService {
 
         boolean superadminRequestsOwnOrAdminDetail =
                 principal.isSuperadmin() && (user.getId().equals(principal.getId()) || user.isAdmin());
-        boolean adminRequestsOwnOrCustomerOrInstructorDetail =
-                user.isAdmin() && (user.getId().equals(principal.getId()) || user.isCustomer() || user.isInstructor());
-        boolean customerRequestsOwnDetail = user.isCustomer() && user.getId().equals(principal.getId());
+        boolean adminRequestsOwnOrCustomerOrInstructorDetail = principal.isAdmin()
+                && (user.getId().equals(principal.getId()) || user.isCustomer() || user.isInstructor());
+        boolean customerRequestsOwnDetail =
+                principal.isCustomer() && user.getId().equals(principal.getId());
         boolean instructorRequestsOwnDetail =
-                user.isInstructor() && user.getId().equals(principal.getId());
+                principal.isInstructor() && user.getId().equals(principal.getId());
 
         if (superadminRequestsOwnOrAdminDetail
                 || adminRequestsOwnOrCustomerOrInstructorDetail
