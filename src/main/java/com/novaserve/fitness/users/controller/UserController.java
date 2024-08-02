@@ -33,7 +33,7 @@ public class UserController {
     @Operation(summary = "Get users list")
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')")
-    public ResponseEntity<Page<UserResponseDto>> createUser(
+    public ResponseEntity<Page<UserResponseDto>> getUsers(
             @RequestParam(required = true) List<String> roles,
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false, defaultValue = "id") String sortBy,
