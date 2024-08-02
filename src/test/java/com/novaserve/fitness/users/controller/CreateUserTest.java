@@ -59,7 +59,7 @@ class CreateUserTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    DbHelper dbHelper;
+    DbHelper helper;
 
     @Autowired
     DtoHelper dtoHelper;
@@ -86,17 +86,17 @@ class CreateUserTest {
 
     @BeforeEach
     void beforeEach() {
-        dbHelper.deleteAll();
-        superadminRole = dbHelper.superadminRole();
-        adminRole = dbHelper.adminRole();
-        customerRole = dbHelper.customerRole();
-        instructorRole = dbHelper.instructorRole();
-        gender = dbHelper.female();
-        ageGroup = dbHelper.adult();
+        helper.deleteAll();
+        superadminRole = helper.superadminRole();
+        adminRole = helper.adminRole();
+        customerRole = helper.customerRole();
+        instructorRole = helper.instructorRole();
+        gender = helper.female();
+        ageGroup = helper.adult();
     }
 
     void assertHelper(CreateUserRequestDto dto) {
-        User actual = dbHelper.getUser(dto.getUsername());
+        User actual = helper.getUser(dto.getUsername());
         String[] comparatorIgnoreFields = new String[] {"id"};
         BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
         BiPredicate<Gender, String> genderBiPredicate = (gender, genderName) -> genderName.equals(gender.getName());
@@ -117,7 +117,7 @@ class CreateUserTest {
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void createUser_shouldCreateAdmin_whenSuperadminRequests() throws Exception {
-        dbHelper.user()
+        helper.user()
                 .seed(1)
                 .role(superadminRole)
                 .gender(gender)
@@ -142,15 +142,10 @@ class CreateUserTest {
     }
 
     @ParameterizedTest
-    @MethodSource("createUser_methodParams")
+    @MethodSource("methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests")
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
     void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) throws Exception {
-        dbHelper.user()
-                .seed(1)
-                .role(adminRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        helper.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
 
         CreateUserRequestDto dto = dtoHelper
                 .createUserRequestDto()
@@ -169,16 +164,16 @@ class CreateUserTest {
         assertHelper(dto);
     }
 
-    static Stream<Arguments> createUser_methodParams() {
+    static Stream<Arguments> methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests() {
         return Stream.of(Arguments.of("ROLE_CUSTOMER"), Arguments.of("ROLE_INSTRUCTOR"));
     }
 
     @ParameterizedTest
-    @MethodSource("createUser_methodParams_rolesMismatch")
+    @MethodSource("methodParams_createUser_shouldThrowException_whenRolesMismatch")
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void createUser_shouldThrowException_whenRolesMismatch(String creatorRoleName, String createdRoleName)
             throws Exception {
-        dbHelper.user()
+        helper.user()
                 .seed(1)
                 .role(getRole(creatorRoleName))
                 .gender(gender)
@@ -199,10 +194,10 @@ class CreateUserTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ExceptionMessage.ROLES_MISMATCH.getName())))
                 .andDo(print());
-        assertNull(dbHelper.getUser(dto.getUsername()));
+        assertNull(helper.getUser(dto.getUsername()));
     }
 
-    static Stream<Arguments> createUser_methodParams_rolesMismatch() {
+    static Stream<Arguments> methodParams_createUser_shouldThrowException_whenRolesMismatch() {
         return Stream.of(
                 Arguments.of("ROLE_SUPERADMIN", "ROLE_SUPERADMIN"),
                 Arguments.of("ROLE_SUPERADMIN", "ROLE_CUSTOMER"),
@@ -217,6 +212,39 @@ class CreateUserTest {
                 Arguments.of("ROLE_INSTRUCTOR", "ROLE_CUSTOMER"),
                 Arguments.of("ROLE_INSTRUCTOR", "ROLE_SUPERADMIN"),
                 Arguments.of("ROLE_INSTRUCTOR", "ROLE_ADMIN"));
+    }
+
+    @Test
+    @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
+    void createUser_shouldThrowException_whenUserAlreadyExists() throws Exception {
+        User user = helper.user()
+                .seed(1)
+                .role(adminRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
+
+        User alreadyExists = helper.user()
+                .seed(2)
+                .role(customerRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
+
+        CreateUserRequestDto dto = dtoHelper
+                .createUserRequestDto()
+                .seed(2)
+                .role(customerRole.getName())
+                .gender(gender.getName())
+                .ageGroup(ageGroup.getName())
+                .get();
+
+        mockMvc.perform(post(CREATE_USER_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message", is(ExceptionMessage.ALREADY_EXISTS.getName())))
+                .andDo(print());
     }
 
     Role getRole(String roleName) {

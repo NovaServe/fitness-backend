@@ -112,6 +112,11 @@ public class UserServiceImpl implements UserService {
     }
 
     private User processCreateUser(CreateUserRequestDto dto, Map<String, Role> roles) {
+        userRepository
+                .findByUsernameOrEmailOrPhone(dto.getUsername(), dto.getEmail(), dto.getPhone())
+                .ifPresent(user -> {
+                    throw new ServerException(ExceptionMessage.ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
+                });
         Gender gender = genderRepository
                 .findByName(dto.getGender())
                 .orElseThrow(() -> new NotFoundInternalError(Gender.class, dto.getGender()));

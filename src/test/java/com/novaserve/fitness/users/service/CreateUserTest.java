@@ -133,13 +133,14 @@ class CreateUserTest {
                 .get();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(superadmin));
+        when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any())).thenReturn(Optional.empty());
 
         User actual = userService.createUser(dto);
         assertHelper(actual, dto);
     }
 
     @ParameterizedTest
-    @MethodSource("createUser_methodParams")
+    @MethodSource("methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests")
     void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) {
         User admin = helper.user()
                 .seed(1)
@@ -157,17 +158,18 @@ class CreateUserTest {
                 .get();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(admin));
+        when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any())).thenReturn(Optional.empty());
 
         User actual = userService.createUser(dto);
         assertHelper(actual, dto);
     }
 
-    static Stream<Arguments> createUser_methodParams() {
+    static Stream<Arguments> methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests() {
         return Stream.of(Arguments.of("ROLE_CUSTOMER"), Arguments.of("ROLE_INSTRUCTOR"));
     }
 
     @ParameterizedTest
-    @MethodSource("createUser_methodParams_rolesMismatch")
+    @MethodSource("methodParams_createUser_shouldThrowException_whenRolesMismatch")
     void createUser_shouldThrowException_whenRolesMismatch(String creatorRoleName, String createdRoleName) {
         User user = helper.user()
                 .seed(1)
@@ -191,7 +193,7 @@ class CreateUserTest {
         assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
     }
 
-    static Stream<Arguments> createUser_methodParams_rolesMismatch() {
+    static Stream<Arguments> methodParams_createUser_shouldThrowException_whenRolesMismatch() {
         return Stream.of(
                 Arguments.of("ROLE_SUPERADMIN", "ROLE_SUPERADMIN"),
                 Arguments.of("ROLE_SUPERADMIN", "ROLE_CUSTOMER"),
@@ -206,6 +208,39 @@ class CreateUserTest {
                 Arguments.of("ROLE_INSTRUCTOR", "ROLE_CUSTOMER"),
                 Arguments.of("ROLE_INSTRUCTOR", "ROLE_SUPERADMIN"),
                 Arguments.of("ROLE_INSTRUCTOR", "ROLE_ADMIN"));
+    }
+
+    @Test
+    void createUser_shouldThrowException_whenUserAlreadyExists() {
+        User user = helper.user()
+                .seed(1)
+                .role(adminRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
+
+        User alreadyExists = helper.user()
+                .seed(2)
+                .role(customerRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
+                .get();
+
+        CreateUserRequestDto dto = dtoHelper
+                .createUserRequestDto()
+                .seed(2)
+                .role(customerRole.getName())
+                .gender(gender.getName())
+                .ageGroup(ageGroup.getName())
+                .get();
+
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
+        when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any()))
+                .thenReturn(Optional.ofNullable(alreadyExists));
+
+        ServerException actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
+        assertEquals(actual.getMessage(), ExceptionMessage.ALREADY_EXISTS.getName());
+        assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
     }
 
     Role getRole(String roleName) {
