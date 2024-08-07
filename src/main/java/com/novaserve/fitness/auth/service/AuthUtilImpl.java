@@ -3,8 +3,6 @@
 */
 package com.novaserve.fitness.auth.service;
 
-import static java.util.Objects.isNull;
-
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.time.Instant;
@@ -23,17 +21,17 @@ public class AuthUtilImpl implements AuthUtil {
     UserRepository userRepository;
 
     @Override
-    public Long getPrincipalId(Authentication auth) {
-        return getPrincipal(auth).map(User::getId).orElse(null);
+    public Long getUserIdFromAuth(Authentication auth) {
+        return getUserFromAuth(auth).map(User::getId).orElse(null);
     }
 
     @Override
-    public Optional<User> getPrincipal(Authentication auth) {
-        if (isNull(auth) || !auth.isAuthenticated()) {
+    public Optional<User> getUserFromAuth(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
             return Optional.empty();
         }
         String username = null;
-        var principalClassName = auth.getPrincipal().getClass().getName();
+        String principalClassName = auth.getPrincipal().getClass().getName();
         if ("org.springframework.security.core.userdetails.User".equals(principalClassName)) {
             username = ((org.springframework.security.core.userdetails.User) (auth.getPrincipal())).getUsername();
         } else if ("com.novaserve.fitness.users.model.User".equals(principalClassName)) {
@@ -44,7 +42,7 @@ public class AuthUtilImpl implements AuthUtil {
 
     @Override
     public String formatCookieExpires(Date date) {
-        var zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.of("GMT"));
+        ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.of("GMT"));
         return zonedDateTime.format(DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz"));
     }
 }

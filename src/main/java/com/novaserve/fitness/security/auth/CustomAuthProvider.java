@@ -4,6 +4,7 @@
 package com.novaserve.fitness.security.auth;
 
 import com.novaserve.fitness.exception.ExceptionMessage;
+import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,9 @@ public class CustomAuthProvider implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication auth) throws AuthenticationException {
-        var principal = auth.getPrincipal().toString();
-        var credentials = auth.getCredentials().toString();
-        var user = userRepository
+        String principal = auth.getPrincipal().toString();
+        String credentials = auth.getCredentials().toString();
+        User user = userRepository
                 .findByUsernameOrEmailOrPhone(principal, principal, principal)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found with username, email, or phone: " + principal));
