@@ -159,7 +159,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto getUserDetail(long userId) {
-        User principal = authUtil.getPrincipal(
+        User principal = authUtil.getUserFromAuth(
                         SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));

@@ -8,7 +8,7 @@ import com.novaserve.fitness.auth.dto.LoginRequestDto;
 import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
 import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.exception.ServerException;
-import com.novaserve.fitness.security.auth.JwtTokenProvider;
+import com.novaserve.fitness.security.auth.*;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
 import org.slf4j.Logger;

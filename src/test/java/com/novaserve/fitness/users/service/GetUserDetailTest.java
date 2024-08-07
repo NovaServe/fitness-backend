@@ -114,7 +114,7 @@ class GetUserDetailTest {
                 .get();
         user.setId(userId);
 
-        when(authUtil.getPrincipal(any())).thenReturn(Optional.of(superAdmin));
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.of(superAdmin));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(modelMapper.map(any(User.class), eq(UserResponseDto.class))).thenReturn(new UserResponseDto());
         UserResponseDto response = userService.getUserDetail(userId);
@@ -146,7 +146,7 @@ class GetUserDetailTest {
                 .get();
         user.setId(userId); // Ensure ID is set
 
-        when(authUtil.getPrincipal(any())).thenReturn(Optional.of(admin));
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.of(admin));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(modelMapper.map(any(User.class), eq(UserResponseDto.class))).thenReturn(new UserResponseDto());
         UserResponseDto response = userService.getUserDetail(userId);
@@ -169,7 +169,7 @@ class GetUserDetailTest {
                 .ageGroup(ageGroup)
                 .get();
         customer.setId(2L);
-        when(authUtil.getPrincipal(any())).thenReturn(Optional.of(customer));
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.of(customer));
         when(userRepository.findById(2L)).thenReturn(Optional.of(customer));
         when(modelMapper.map(any(User.class), eq(UserResponseDto.class))).thenReturn(new UserResponseDto());
 
@@ -188,7 +188,7 @@ class GetUserDetailTest {
                 .ageGroup(ageGroup)
                 .get();
         instructor.setId(3L);
-        when(authUtil.getPrincipal(any())).thenReturn(Optional.of(instructor));
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.of(instructor));
         when(userRepository.findById(3L)).thenReturn(Optional.of(instructor));
         when(modelMapper.map(any(User.class), eq(UserResponseDto.class))).thenReturn(new UserResponseDto());
 
@@ -217,7 +217,7 @@ class GetUserDetailTest {
                 .get();
         user.setId(2L);
 
-        when(authUtil.getPrincipal(any())).thenReturn(Optional.of(principal));
+        when(authUtil.getUserFromAuth(any())).thenReturn(Optional.of(principal));
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         var actual = assertThrows(ServerException.class, () -> userService.getUserDetail(user.getId()));
