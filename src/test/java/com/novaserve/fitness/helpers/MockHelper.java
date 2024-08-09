@@ -29,30 +29,6 @@ public class MockHelper {
         return Role.builder().name("ROLE_INSTRUCTOR").build();
     }
 
-    public Gender male() {
-        return Gender.builder().name("Male").build();
-    }
-
-    public Gender female() {
-        return Gender.builder().name("Female").build();
-    }
-
-    public AgeGroup child() {
-        return AgeGroup.builder().name("Child").build();
-    }
-
-    public AgeGroup teen() {
-        return AgeGroup.builder().name("Teenager").build();
-    }
-
-    public AgeGroup adult() {
-        return AgeGroup.builder().name("Adult").build();
-    }
-
-    public AgeGroup senior() {
-        return AgeGroup.builder().name("Senior").build();
-    }
-
     public UserBuilder user() {
         return new UserBuilder();
     }

@@ -97,8 +97,8 @@ public class GetUsersTest {
         adminRole = helper.adminRole();
         customerRole = helper.customerRole();
         instructorRole = helper.instructorRole();
-        gender = helper.female();
-        ageGroup = helper.adult();
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
         final Map<Integer, Role> SEED_ROLE_MAP = Map.of(
                 1, superadminRole,
                 2, superadminRole,
@@ -297,9 +297,9 @@ public class GetUsersTest {
     }
 
     void assertHelper(List<User> expected, List<UserResponseDto> actual) {
-        BiPredicate<String, Gender> genderBiPredicate = (genderName, gender) -> genderName.equals(gender.getName());
+        BiPredicate<String, Gender> genderBiPredicate = (genderName, gender) -> genderName.equals(gender.name());
         BiPredicate<String, AgeGroup> ageGroupBiPredicate =
-                (ageGroupName, ageGroup) -> ageGroupName.equals(ageGroup.getName());
+                (ageGroupName, ageGroup) -> ageGroupName.equals(ageGroup.name());
         BiPredicate<String, Role> roleBiPredicate = (roleName_, role) -> roleName_.equals(role.getName());
         assertEquals(expected.size(), actual.size());
         IntStream.range(0, expected.size()).forEach(i -> assertThat(actual.get(i))
