@@ -19,8 +19,6 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.AgeGroupRepository;
-import com.novaserve.fitness.users.repository.GenderRepository;
 import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.*;
@@ -54,12 +52,6 @@ public class GetUsersTest {
     RoleRepository roleRepository;
 
     @Mock
-    GenderRepository genderRepository;
-
-    @Mock
-    AgeGroupRepository ageGroupRepository;
-
-    @Mock
     UserRepository userRepository;
 
     @Spy
@@ -88,8 +80,8 @@ public class GetUsersTest {
         adminRole = helper.adminRole();
         customerRole = helper.customerRole();
         instructorRole = helper.instructorRole();
-        gender = helper.female();
-        ageGroup = helper.adult();
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
         final Map<Integer, Role> SEED_ROLE_MAP = Map.of(
                 0, superadminRole,
                 1, superadminRole,
@@ -286,9 +278,9 @@ public class GetUsersTest {
     }
 
     void assertHelper(List<User> expected, List<UserResponseDto> actual, List<String> roles) {
-        BiPredicate<String, Gender> genderBiPredicate = (genderName, gender) -> genderName.equals(gender.getName());
+        BiPredicate<String, Gender> genderBiPredicate = (genderName, gender) -> genderName.equals(gender.name());
         BiPredicate<String, AgeGroup> ageGroupBiPredicate =
-                (ageGroupName, ageGroup) -> ageGroupName.equals(ageGroup.getName());
+                (ageGroupName, ageGroup) -> ageGroupName.equals(ageGroup.name());
         BiPredicate<String, Role> roleBiPredicate = (roleName_, role) -> roleName_.equals(role.getName());
         assertEquals(expected.size(), actual.size());
         IntStream.range(0, expected.size()).forEach(i -> assertThat(actual.get(i))

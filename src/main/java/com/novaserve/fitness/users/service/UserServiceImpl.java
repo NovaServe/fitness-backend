@@ -11,8 +11,6 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.AgeGroupRepository;
-import com.novaserve.fitness.users.repository.GenderRepository;
 import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Collections;
@@ -42,12 +40,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     RoleRepository roleRepository;
-
-    @Autowired
-    GenderRepository genderRepository;
-
-    @Autowired
-    AgeGroupRepository ageGroupRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -117,12 +109,6 @@ public class UserServiceImpl implements UserService {
                 .ifPresent(user -> {
                     throw new ServerException(ExceptionMessage.ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
                 });
-        Gender gender = genderRepository
-                .findByName(dto.getGender())
-                .orElseThrow(() -> new NotFoundInternalError(Gender.class, dto.getGender()));
-        AgeGroup ageGroup = ageGroupRepository
-                .findByName(dto.getAgeGroup())
-                .orElseThrow(() -> new NotFoundInternalError(AgeGroup.class, dto.getAgeGroup()));
         Role role = roles.get(dto.getRole());
         return userRepository.save(User.builder()
                 .username(dto.getUsername())
@@ -131,8 +117,8 @@ public class UserServiceImpl implements UserService {
                 .fullName(dto.getFullName())
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .role(role)
-                .gender(gender)
-                .ageGroup(ageGroup)
+                .gender(Gender.valueOf(dto.getGender()))
+                .ageGroup(AgeGroup.valueOf(dto.getAgeGroup()))
                 .build());
     }
 

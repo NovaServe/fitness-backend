@@ -7,8 +7,6 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.AgeGroupRepository;
-import com.novaserve.fitness.users.repository.GenderRepository;
 import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +20,6 @@ public class DbHelper {
     RoleRepository roleRepository;
 
     @Autowired
-    GenderRepository genderRepository;
-
-    @Autowired
-    AgeGroupRepository ageGroupRepository;
-
-    @Autowired
     UserRepository userRepository;
 
     @Autowired
@@ -37,8 +29,6 @@ public class DbHelper {
     public void deleteAll() {
         userRepository.deleteAll();
         roleRepository.deleteAll();
-        genderRepository.deleteAll();
-        ageGroupRepository.deleteAll();
     }
 
     public Role superadminRole() {
@@ -55,30 +45,6 @@ public class DbHelper {
 
     public Role instructorRole() {
         return roleRepository.save(Role.builder().name("ROLE_INSTRUCTOR").build());
-    }
-
-    public Gender male() {
-        return genderRepository.save(Gender.builder().name("Male").build());
-    }
-
-    public Gender female() {
-        return genderRepository.save(Gender.builder().name("Female").build());
-    }
-
-    public AgeGroup child() {
-        return ageGroupRepository.save(AgeGroup.builder().name("Child").build());
-    }
-
-    public AgeGroup teen() {
-        return ageGroupRepository.save(AgeGroup.builder().name("Teenager").build());
-    }
-
-    public AgeGroup adult() {
-        return ageGroupRepository.save(AgeGroup.builder().name("Adult").build());
-    }
-
-    public AgeGroup senior() {
-        return ageGroupRepository.save(AgeGroup.builder().name("Senior").build());
     }
 
     public UserBuilder user() {

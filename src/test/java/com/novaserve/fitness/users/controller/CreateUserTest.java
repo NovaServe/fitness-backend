@@ -91,17 +91,17 @@ class CreateUserTest {
         adminRole = helper.adminRole();
         customerRole = helper.customerRole();
         instructorRole = helper.instructorRole();
-        gender = helper.female();
-        ageGroup = helper.adult();
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
     }
 
     void assertHelper(CreateUserRequestDto dto) {
         User actual = helper.getUser(dto.getUsername());
         String[] comparatorIgnoreFields = new String[] {"id"};
         BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
-        BiPredicate<Gender, String> genderBiPredicate = (gender, genderName) -> genderName.equals(gender.getName());
+        BiPredicate<Gender, String> genderBiPredicate = (gender, genderName) -> genderName.equals(gender.name());
         BiPredicate<AgeGroup, String> ageGroupBiPredicate =
-                (ageGroup, ageGroupName) -> ageGroupName.equals(ageGroup.getName());
+                (ageGroup, ageGroupName) -> ageGroupName.equals(ageGroup.name());
         BiPredicate<Role, String> roleBiPredicate = (role, roleName) -> roleName.equals(role.getName());
         assertThat(actual)
                 .usingRecursiveComparison()
@@ -128,8 +128,8 @@ class CreateUserTest {
                 .createUserRequestDto()
                 .seed(2)
                 .role(adminRole.getName())
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .gender(gender.name())
+                .ageGroup(ageGroup.name())
                 .get();
 
         mockMvc.perform(post(CREATE_USER_URL)
@@ -151,8 +151,8 @@ class CreateUserTest {
                 .createUserRequestDto()
                 .seed(2)
                 .role(roleName)
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .gender(gender.name())
+                .ageGroup(ageGroup.name())
                 .get();
 
         mockMvc.perform(post(CREATE_USER_URL)
@@ -184,8 +184,8 @@ class CreateUserTest {
                 .createUserRequestDto()
                 .seed(2)
                 .role(createdRoleName)
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .gender(gender.name())
+                .ageGroup(ageGroup.name())
                 .get();
 
         mockMvc.perform(post(CREATE_USER_URL)
@@ -235,8 +235,8 @@ class CreateUserTest {
                 .createUserRequestDto()
                 .seed(2)
                 .role(customerRole.getName())
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .gender(gender.name())
+                .ageGroup(ageGroup.name())
                 .get();
 
         mockMvc.perform(post(CREATE_USER_URL)
