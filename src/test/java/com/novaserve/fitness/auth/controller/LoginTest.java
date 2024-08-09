@@ -79,8 +79,8 @@ class LoginTest {
         adminRole = helper.adminRole();
         customerRole = helper.customerRole();
         instructorRole = helper.instructorRole();
-        gender = helper.female();
-        ageGroup = helper.adult();
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
     }
 
     @Container

@@ -19,8 +19,6 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.AgeGroupRepository;
-import com.novaserve.fitness.users.repository.GenderRepository;
 import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Optional;
@@ -52,12 +50,6 @@ class CreateUserTest {
     RoleRepository roleRepository;
 
     @Mock
-    GenderRepository genderRepository;
-
-    @Mock
-    AgeGroupRepository ageGroupRepository;
-
-    @Mock
     UserRepository userRepository;
 
     @Spy
@@ -82,11 +74,9 @@ class CreateUserTest {
         adminRole = helper.adminRole();
         customerRole = helper.customerRole();
         instructorRole = helper.instructorRole();
-        gender = helper.female();
-        ageGroup = helper.adult();
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
 
-        lenient().when(genderRepository.findByName(gender.getName())).thenReturn(Optional.of(gender));
-        lenient().when(ageGroupRepository.findByName(ageGroup.getName())).thenReturn(Optional.of(ageGroup));
         when(roleRepository.findByName(adminRole.getName())).thenReturn(Optional.of(adminRole));
         when(roleRepository.findByName(customerRole.getName())).thenReturn(Optional.of(customerRole));
         lenient().when(roleRepository.findByName(instructorRole.getName())).thenReturn(Optional.of(instructorRole));
@@ -100,9 +90,9 @@ class CreateUserTest {
     void assertHelper(User actual, CreateUserRequestDto dto) {
         String[] comparatorIgnoreFields = new String[] {"id"};
         BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
-        BiPredicate<Gender, String> genderBiPredicate = (gender, genderName) -> genderName.equals(gender.getName());
+        BiPredicate<Gender, String> genderBiPredicate = (gender, genderName) -> genderName.equals(gender.name());
         BiPredicate<AgeGroup, String> ageGroupBiPredicate =
-                (ageGroup, ageGroupName) -> ageGroupName.equals(ageGroup.getName());
+                (ageGroup, ageGroupName) -> ageGroupName.equals(ageGroup.name());
         BiPredicate<Role, String> roleBiPredicate = (role, roleName) -> roleName.equals(role.getName());
         assertThat(actual)
                 .usingRecursiveComparison()
@@ -128,8 +118,8 @@ class CreateUserTest {
                 .createUserRequestDto()
                 .seed(2)
                 .role(adminRole.getName())
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .gender(gender.name())
+                .ageGroup(ageGroup.name())
                 .get();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(superadmin));
@@ -153,8 +143,8 @@ class CreateUserTest {
                 .createUserRequestDto()
                 .seed(2)
                 .role(roleName)
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .gender(gender.name())
+                .ageGroup(ageGroup.name())
                 .get();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(admin));
@@ -182,8 +172,8 @@ class CreateUserTest {
                 .createUserRequestDto()
                 .seed(2)
                 .role(createdRoleName)
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .gender(gender.name())
+                .ageGroup(ageGroup.name())
                 .get();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
@@ -230,8 +220,8 @@ class CreateUserTest {
                 .createUserRequestDto()
                 .seed(2)
                 .role(customerRole.getName())
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .gender(gender.name())
+                .ageGroup(ageGroup.name())
                 .get();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
