@@ -22,6 +22,7 @@ import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.model.User;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,6 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 @Import(TestBeans.class)
 class GetUserDetailTest {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -59,10 +59,10 @@ class GetUserDetailTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    DbHelper $db;
+    DbHelper helper;
 
     @Autowired
-    DtoHelper $dto;
+    DtoHelper dtoHelper;
 
     final String GET_USER_DETAIL_URL = "/api/v1/users/{userId}";
 
@@ -86,38 +86,38 @@ class GetUserDetailTest {
 
     @BeforeEach
     void beforeEach() {
-        $db.deleteAll();
-        superadminRole = $db.superadminRole();
-        adminRole = $db.adminRole();
-        customerRole = $db.customerRole();
-        instructorRole = $db.instructorRole();
-        gender = $db.female();
-        ageGroup = $db.adult();
+        helper.deleteAll();
+        superadminRole = helper.superadminRole();
+        adminRole = helper.adminRole();
+        customerRole = helper.customerRole();
+        instructorRole = helper.instructorRole();
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
     }
 
     void assertHelper(CreateUserRequestDto dto) {
-        var actual = $db.getUser(dto.getUsername());
+        var actual = helper.getUser(dto.getUsername());
         String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
         assertThat(actual)
                 .usingRecursiveComparison()
                 .ignoringFields(comparatorIgnoreFields)
                 .isEqualTo(dto);
         assertEquals(actual.getRole().getName(), dto.getRole());
-        assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
-        assertEquals(actual.getGender().getName(), dto.getGender());
+        assertEquals(actual.getAgeGroup().name(), dto.getAgeGroup());
+        assertEquals(actual.getGender().name(), dto.getGender());
         assertNotNull(actual.getId());
     }
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void getUserDetail_superadminRequestsOwnOrAdminDetail() throws Exception {
-        var superadmin = $db.user()
+        User superadmin = helper.user()
                 .seed(1)
                 .role(superadminRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
-        var admin = $db.user()
+        User admin = helper.user()
                 .seed(2)
                 .role(adminRole)
                 .gender(gender)
@@ -136,19 +136,19 @@ class GetUserDetailTest {
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
     void getUserDetail_adminRequestsOwnOrCustomerOrInstructorDetail() throws Exception {
-        var admin = $db.user()
+        User admin = helper.user()
                 .seed(1)
                 .role(adminRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
-        var customer = $db.user()
+        User customer = helper.user()
                 .seed(2)
                 .role(customerRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
-        var instructor = $db.user()
+        User instructor = helper.user()
                 .seed(3)
                 .role(instructorRole)
                 .gender(gender)
@@ -171,7 +171,7 @@ class GetUserDetailTest {
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "CUSTOMER")
     void getUserDetail_customerRequestsOwnDetail() throws Exception {
-        var customer = $db.user()
+        User customer = helper.user()
                 .seed(1)
                 .role(customerRole)
                 .gender(gender)
@@ -186,7 +186,7 @@ class GetUserDetailTest {
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "INSTRUCTOR")
     void getUserDetail_instructorRequestsOwnDetail() throws Exception {
-        var instructor = $db.user()
+        User instructor = helper.user()
                 .seed(1)
                 .role(instructorRole)
                 .gender(gender)
@@ -203,14 +203,14 @@ class GetUserDetailTest {
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void createUser_shouldThrowException_whenRolesMismatch(String principalRoleName, String userRoleName)
             throws Exception {
-        var principal = $db.user()
+        User principal = helper.user()
                 .seed(1)
                 .role(getRole(principalRoleName))
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        var user = $db.user()
+        User user = helper.user()
                 .seed(2)
                 .role(getRole(userRoleName))
                 .gender(gender)

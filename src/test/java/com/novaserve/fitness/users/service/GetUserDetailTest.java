@@ -17,8 +17,6 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.AgeGroupRepository;
-import com.novaserve.fitness.users.repository.GenderRepository;
 import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Optional;
@@ -41,7 +39,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class GetUserDetailTest {
-
     @InjectMocks
     UserServiceImpl userService;
 
@@ -50,12 +47,6 @@ class GetUserDetailTest {
 
     @Mock
     RoleRepository roleRepository;
-
-    @Mock
-    GenderRepository genderRepository;
-
-    @Mock
-    AgeGroupRepository ageGroupRepository;
 
     @Mock
     UserRepository userRepository;
@@ -67,10 +58,10 @@ class GetUserDetailTest {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Spy
-    MockHelper $mock;
+    MockHelper helper;
 
     @Spy
-    DtoHelper $dto;
+    DtoHelper dtoHelper;
 
     Role superadminRole;
     Role adminRole;
@@ -81,12 +72,12 @@ class GetUserDetailTest {
 
     @BeforeEach
     public void beforeEach() {
-        superadminRole = $mock.superadminRole();
-        adminRole = $mock.adminRole();
-        customerRole = $mock.customerRole();
-        instructorRole = $mock.instructorRole();
-        gender = $mock.female();
-        ageGroup = $mock.adult();
+        superadminRole = helper.superadminRole();
+        adminRole = helper.adminRole();
+        customerRole = helper.customerRole();
+        instructorRole = helper.instructorRole();
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
 
         lenient().when(userRepository.save(any(User.class))).then(invocation -> {
             User user = invocation.getArgument(0);
@@ -98,7 +89,7 @@ class GetUserDetailTest {
     @ParameterizedTest
     @MethodSource("provideUserDetailParams")
     public void getUserDetail_shouldReturnDto_whenSuperAdminRequest(Long userId, String roleName) {
-        var superAdmin = $mock.user()
+        User superAdmin = helper.user()
                 .seed(1)
                 .role(superadminRole)
                 .gender(gender)
@@ -106,7 +97,7 @@ class GetUserDetailTest {
                 .get();
         superAdmin.setId(1L);
 
-        var user = $mock.user()
+        User user = helper.user()
                 .seed(userId.intValue())
                 .role(getRoleHelper(roleName))
                 .gender(gender)
@@ -130,7 +121,7 @@ class GetUserDetailTest {
     @ParameterizedTest
     @MethodSource("provideUserDetailsParams")
     void getUserDetail_shouldReturnDto_whenAdminRequest(Long userId, String roleName) {
-        var admin = $mock.user()
+        User admin = helper.user()
                 .seed(1)
                 .role(adminRole)
                 .gender(gender)
@@ -138,7 +129,7 @@ class GetUserDetailTest {
                 .get();
         admin.setId(1L); // Ensure ID is set
 
-        var user = $mock.user()
+        User user = helper.user()
                 .seed(userId.intValue())
                 .role(getRoleHelper(roleName))
                 .gender(gender)
@@ -162,7 +153,7 @@ class GetUserDetailTest {
 
     @Test
     public void getUserDetail_shouldReturnDto_whenCustomerRequest() {
-        var customer = $mock.user()
+        var customer = helper.user()
                 .seed(2)
                 .role(customerRole)
                 .gender(gender)
@@ -181,7 +172,7 @@ class GetUserDetailTest {
 
     @Test
     public void getUserDetail_shouldReturnDto_whenSInstructorRequest() {
-        var instructor = $mock.user()
+        User instructor = helper.user()
                 .seed(3)
                 .role(instructorRole)
                 .gender(gender)
@@ -201,7 +192,7 @@ class GetUserDetailTest {
     @ParameterizedTest
     @MethodSource("getUserParams_rolesMismatch")
     void GetUserDetail_shouldThrowException_whenRolesMismatch(String principalRoleName, String userRoleName) {
-        var principal = $mock.user()
+        User principal = helper.user()
                 .seed(1)
                 .role(getRoleHelper(principalRoleName))
                 .gender(gender)
@@ -209,7 +200,7 @@ class GetUserDetailTest {
                 .get();
         principal.setId(1L);
 
-        var user = $mock.user()
+        User user = helper.user()
                 .seed(2)
                 .role(getRoleHelper(userRoleName))
                 .gender(gender)
@@ -220,7 +211,7 @@ class GetUserDetailTest {
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.of(principal));
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        var actual = assertThrows(ServerException.class, () -> userService.getUserDetail(user.getId()));
+        ServerException actual = assertThrows(ServerException.class, () -> userService.getUserDetail(user.getId()));
         Assertions.assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
         Assertions.assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
     }
