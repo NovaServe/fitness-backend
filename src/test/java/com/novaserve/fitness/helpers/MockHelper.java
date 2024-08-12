@@ -13,22 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class MockHelper {
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public Role superadminRole() {
-        return Role.builder().name("ROLE_SUPERADMIN").build();
-    }
-
-    public Role adminRole() {
-        return Role.builder().name("ROLE_ADMIN").build();
-    }
-
-    public Role customerRole() {
-        return Role.builder().name("ROLE_CUSTOMER").build();
-    }
-
-    public Role instructorRole() {
-        return Role.builder().name("ROLE_INSTRUCTOR").build();
-    }
-
     public UserBuilder user() {
         return new UserBuilder();
     }

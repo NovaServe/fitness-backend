@@ -5,6 +5,9 @@ package com.novaserve.fitness.helpers;
 
 import com.novaserve.fitness.auth.dto.LoginRequestDto;
 import com.novaserve.fitness.users.dto.CreateUserRequestDto;
+import com.novaserve.fitness.users.model.AgeGroup;
+import com.novaserve.fitness.users.model.Gender;
+import com.novaserve.fitness.users.model.Role;
 
 public class DtoHelper {
     public CreateUserRequestDtoBuilder createUserRequestDto() {
@@ -13,9 +16,9 @@ public class DtoHelper {
 
     public static class CreateUserRequestDtoBuilder {
         private int seed;
-        private String roleName;
-        private String genderName;
-        private String ageGroupName;
+        private Role role;
+        private Gender gender;
+        private AgeGroup ageGroup;
         boolean isEmpty;
 
         public CreateUserRequestDtoBuilder empty() {
@@ -28,18 +31,18 @@ public class DtoHelper {
             return this;
         }
 
-        public CreateUserRequestDtoBuilder role(String roleName) {
-            this.roleName = roleName;
+        public CreateUserRequestDtoBuilder role(Role role) {
+            this.role = role;
             return this;
         }
 
-        public CreateUserRequestDtoBuilder gender(String genderName) {
-            this.genderName = genderName;
+        public CreateUserRequestDtoBuilder gender(Gender gender) {
+            this.gender = this.gender;
             return this;
         }
 
-        public CreateUserRequestDtoBuilder ageGroup(String ageGroupName) {
-            this.ageGroupName = ageGroupName;
+        public CreateUserRequestDtoBuilder ageGroup(AgeGroup ageGroup) {
+            this.ageGroup = ageGroup;
             return this;
         }
 
@@ -54,9 +57,9 @@ public class DtoHelper {
                     .phone("+312300000" + seed)
                     .password("Password" + seed + "!")
                     .confirmPassword("Password" + seed + "!")
-                    .role(roleName)
-                    .gender(genderName)
-                    .ageGroup(ageGroupName)
+                    .role(role)
+                    .gender(gender)
+                    .ageGroup(ageGroup)
                     .build();
         }
     }

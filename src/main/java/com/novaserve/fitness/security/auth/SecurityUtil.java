@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 public class SecurityUtil {
     public Collection<? extends GrantedAuthority> mapRolesToAuthorities(Set<Role> roles) {
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority(role.getName()))
+                .map(role -> new SimpleGrantedAuthority(role.name()))
                 .toList();
     }
 }
