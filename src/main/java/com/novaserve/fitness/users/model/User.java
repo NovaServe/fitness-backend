@@ -33,8 +33,8 @@ public class User {
     @Column(name = "password", nullable = false, unique = false)
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, unique = false)
     private Role role;
 
     @Enumerated(EnumType.STRING)
@@ -46,7 +46,7 @@ public class User {
     private AgeGroup ageGroup;
 
     public String getRoleName() {
-        return role != null ? role.getName() : null;
+        return role != null ? role.name() : null;
     }
 
     public boolean isSuperadmin() {

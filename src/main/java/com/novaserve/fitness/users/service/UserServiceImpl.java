@@ -7,17 +7,10 @@ import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.exception.*;
 import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.dto.UserResponseDto;
-import com.novaserve.fitness.users.model.AgeGroup;
-import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
-
-    @Autowired
-    RoleRepository roleRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -72,12 +62,25 @@ public class UserServiceImpl implements UserService {
         User requestedBy = authUtil.getUserFromAuth(
                         SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
-        Map<String, Role> roles = getRoles();
         boolean superadminCreatesAdmin = requestedBy.isSuperadmin() && isRoleAdmin(dto.getRole());
         boolean adminCreatesCustomerOrInstructor = requestedBy.isAdmin() && isRoleCustomerOrInstructor(dto.getRole());
 
         if (superadminCreatesAdmin || adminCreatesCustomerOrInstructor) {
-            User saved = processCreateUser(dto, roles);
+            userRepository
+                    .findByUsernameOrEmailOrPhone(dto.getUsername(), dto.getEmail(), dto.getPhone())
+                    .ifPresent(user -> {
+                        throw new ServerException(ExceptionMessage.ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
+                    });
+            User saved = userRepository.save(User.builder()
+                    .username(dto.getUsername())
+                    .email(dto.getEmail())
+                    .phone(dto.getPhone())
+                    .fullName(dto.getFullName())
+                    .password(passwordEncoder.encode(dto.getPassword()))
+                    .role(dto.getRole())
+                    .gender(dto.getGender())
+                    .ageGroup(dto.getAgeGroup())
+                    .build());
             logger.info(
                     "User with id {} was created by {} with id {}",
                     saved.getId(),
@@ -88,44 +91,18 @@ public class UserServiceImpl implements UserService {
         throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
     }
 
-    private Map<String, Role> getRoles() {
-        return Collections.unmodifiableMap(Stream.of("ROLE_ADMIN", "ROLE_CUSTOMER", "ROLE_INSTRUCTOR")
-                .collect(Collectors.toMap(roleName -> roleName, roleName -> roleRepository
-                        .findByName(roleName)
-                        .orElseThrow(() -> new NotFoundInternalError(Role.class, roleName)))));
+    private boolean isRoleAdmin(Role role) {
+        return Role.ROLE_ADMIN.equals(role);
     }
 
-    private boolean isRoleAdmin(String roleName) {
-        return "ROLE_ADMIN".equals(roleName);
-    }
-
-    private boolean isRoleCustomerOrInstructor(String roleName) {
-        return "ROLE_CUSTOMER".equals(roleName) || "ROLE_INSTRUCTOR".equals(roleName);
-    }
-
-    private User processCreateUser(CreateUserRequestDto dto, Map<String, Role> roles) {
-        userRepository
-                .findByUsernameOrEmailOrPhone(dto.getUsername(), dto.getEmail(), dto.getPhone())
-                .ifPresent(user -> {
-                    throw new ServerException(ExceptionMessage.ALREADY_EXISTS, HttpStatus.BAD_REQUEST);
-                });
-        Role role = roles.get(dto.getRole());
-        return userRepository.save(User.builder()
-                .username(dto.getUsername())
-                .email(dto.getEmail())
-                .phone(dto.getPhone())
-                .fullName(dto.getFullName())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .role(role)
-                .gender(Gender.valueOf(dto.getGender()))
-                .ageGroup(AgeGroup.valueOf(dto.getAgeGroup()))
-                .build());
+    private boolean isRoleCustomerOrInstructor(Role role) {
+        return Role.ROLE_CUSTOMER.equals(role) || Role.ROLE_INSTRUCTOR.equals(role);
     }
 
     @Override
     @Transactional
     public Page<UserResponseDto> getUsers(
-            List<String> roles, String fullName, String sortBy, String order, int pageSize, int pageNumber) {
+            List<Role> roles, String fullName, String sortBy, String order, int pageSize, int pageNumber) {
         User principal = authUtil.getUserFromAuth(
                         SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));

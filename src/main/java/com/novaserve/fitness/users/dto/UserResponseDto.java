@@ -3,6 +3,8 @@
 */
 package com.novaserve.fitness.users.dto;
 
+import com.novaserve.fitness.users.model.AgeGroup;
+import com.novaserve.fitness.users.model.Gender;
 import lombok.*;
 
 @Getter
@@ -23,7 +25,7 @@ public class UserResponseDto {
 
     private String role;
 
-    private String gender;
+    private Gender gender;
 
-    private String ageGroup;
+    private AgeGroup ageGroup;
 }

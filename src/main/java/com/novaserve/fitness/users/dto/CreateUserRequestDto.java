@@ -3,6 +3,9 @@
 */
 package com.novaserve.fitness.users.dto;
 
+import com.novaserve.fitness.users.model.AgeGroup;
+import com.novaserve.fitness.users.model.Gender;
+import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.validation.MatchFields;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -38,12 +41,10 @@ public class CreateUserRequestDto {
     @Size(min = 8, max = 20)
     private String confirmPassword;
 
-    @NotBlank
-    private String role;
+    @NotNull
+    private Role role;
 
-    @NotBlank
-    private String ageGroup;
+    private AgeGroup ageGroup;
 
-    @NotBlank
-    private String gender;
+    private Gender gender;
 }

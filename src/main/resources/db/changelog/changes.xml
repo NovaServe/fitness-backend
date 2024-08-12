@@ -8,15 +8,6 @@
     <changeSet id="users" author="Oleg Kucherenko" context="structure">
         <comment>Users</comment>
 
-        <createTable tableName="roles">
-            <column name="id" type="bigint" autoIncrement="true">
-                <constraints primaryKey="true"/>
-            </column>
-            <column name="name" type="varchar">
-                <constraints nullable="false" unique="true"/>
-            </column>
-        </createTable>
-
         <createTable tableName="users">
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
@@ -36,8 +27,8 @@
             <column name="password" type="varchar">
                 <constraints nullable="false" unique="false"/>
             </column>
-            <column name="role_id" type="bigint">
-                <constraints nullable="false" foreignKeyName="fk_role_id" references="roles(id)"/>
+            <column name="role" type="varchar">
+                <constraints nullable="false" unique="false"/>
             </column>
             <column name="gender" type="varchar">
                 <constraints nullable="true" unique="false"/>
@@ -47,7 +38,6 @@
             </column>
         </createTable>
 
-        <sqlFile path="sql/roles.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
         <sqlFile path="sql/dummy_users.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
     </changeSet>
 

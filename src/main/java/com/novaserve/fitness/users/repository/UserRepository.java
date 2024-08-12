@@ -3,6 +3,7 @@
 */
 package com.novaserve.fitness.users.repository;
 
+import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +25,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
 
-    @Query(
-            "SELECT u FROM User u JOIN u.role r WHERE r.name IN :roles AND (:fullName IS NULL OR u.fullName ILIKE %:fullName%)")
-    Page<User> getUsers(List<String> roles, String fullName, Pageable pageable);
+    @Query("SELECT u FROM User u WHERE u.role IN :roles AND (:fullName IS NULL OR u.fullName ILIKE %:fullName%)")
+    Page<User> getUsers(List<Role> roles, String fullName, Pageable pageable);
 }

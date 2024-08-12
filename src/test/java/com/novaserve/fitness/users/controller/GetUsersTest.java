@@ -93,10 +93,10 @@ public class GetUsersTest {
     @BeforeEach
     void beforeEach() {
         helper.deleteAll();
-        superadminRole = helper.superadminRole();
-        adminRole = helper.adminRole();
-        customerRole = helper.customerRole();
-        instructorRole = helper.instructorRole();
+        superadminRole = Role.ROLE_SUPERADMIN;
+        adminRole = Role.ROLE_ADMIN;
+        customerRole = Role.ROLE_CUSTOMER;
+        instructorRole = Role.ROLE_INSTRUCTOR;
         gender = Gender.Female;
         ageGroup = AgeGroup.Adult;
         final Map<Integer, Role> SEED_ROLE_MAP = Map.of(
@@ -108,30 +108,30 @@ public class GetUsersTest {
                 6, customerRole,
                 7, instructorRole,
                 8, instructorRole);
-        users = Collections.unmodifiableList(SEED_ROLE_MAP.entrySet().stream()
+        users = SEED_ROLE_MAP.entrySet().stream()
                 .map(entry -> helper.user()
                         .seed(entry.getKey())
                         .role(entry.getValue())
                         .gender(gender)
                         .ageGroup(ageGroup)
                         .get())
-                .toList());
+                .toList();
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest")
     @WithMockUser(username = "username0", password = "Password0!", roles = "SUPERADMIN")
-    void getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest(String principalRoleName, List<String> roles)
+    void getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest(Role principalRole, List<Role> filterByRoles)
             throws Exception {
         User principal = helper.user()
                 .seed(0)
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        MvcResult mvc = mockMvc.perform(
-                        get(CREATE_USER_URL + getRequestParams(roles, null)).contentType(MediaType.APPLICATION_JSON))
+        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, null))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
@@ -141,27 +141,27 @@ public class GetUsersTest {
         JsonNode content = root.path("content");
         List<UserResponseDto> dto =
                 objectMapper.readValue(content.toString(), new TypeReference<List<UserResponseDto>>() {});
-        assertHelper(getExpected(roles, null), dto);
+        assertHelper(getExpected(filterByRoles, null), dto);
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest() {
-        return Stream.of(Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_ADMIN")));
+        return Stream.of(Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_ADMIN)));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest")
     @WithMockUser(username = "username0", password = "Password0!", roles = "ADMIN")
-    void getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest(String principalRoleName, List<String> roles)
+    void getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest(Role principalRole, List<Role> filterByRoles)
             throws Exception {
         User principal = helper.user()
                 .seed(0)
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        MvcResult mvc = mockMvc.perform(
-                        get(CREATE_USER_URL + getRequestParams(roles, null)).contentType(MediaType.APPLICATION_JSON))
+        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, null))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
@@ -171,29 +171,29 @@ public class GetUsersTest {
         JsonNode content = root.path("content");
         List<UserResponseDto> dto =
                 objectMapper.readValue(content.toString(), new TypeReference<List<UserResponseDto>>() {});
-        assertHelper(getExpected(roles, null), dto);
+        assertHelper(getExpected(filterByRoles, null), dto);
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest() {
         return Stream.of(
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER")),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_INSTRUCTOR")),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR")));
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER)),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_INSTRUCTOR)),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER, Role.ROLE_INSTRUCTOR)));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldReturnPageFilteredByFullName_whenSuperadminRequest")
     @WithMockUser(username = "username0", password = "Password0!", roles = "SUPERADMIN")
     void getUsers_shouldReturnPageFilteredByFullName_whenSuperadminRequest(
-            String principalRoleName, List<String> roles, String fullName) throws Exception {
+            Role principalRole, List<Role> filterByRoles, String fullName) throws Exception {
         User principal = helper.user()
                 .seed(0)
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(roles, fullName))
+        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, fullName))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -204,28 +204,28 @@ public class GetUsersTest {
         JsonNode content = root.path("content");
         List<UserResponseDto> dto =
                 objectMapper.readValue(content.toString(), new TypeReference<List<UserResponseDto>>() {});
-        assertHelper(getExpected(roles, fullName), dto);
+        assertHelper(getExpected(filterByRoles, fullName), dto);
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByFullName_whenSuperadminRequest() {
         return Stream.of(
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_ADMIN"), "Three"),
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_ADMIN"), "Zero"));
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_ADMIN), "Three"),
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_ADMIN), "Zero"));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest")
     @WithMockUser(username = "username0", password = "Password0!", roles = "SUPERADMIN")
     void getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest(
-            String principalRoleName, List<String> roles, String fullName) throws Exception {
+            Role principalRole, List<Role> filterByRoles, String fullName) throws Exception {
         User principal = helper.user()
                 .seed(0)
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(roles, fullName))
+        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, fullName))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
@@ -236,30 +236,31 @@ public class GetUsersTest {
         JsonNode content = root.path("content");
         List<UserResponseDto> dto =
                 objectMapper.readValue(content.toString(), new TypeReference<List<UserResponseDto>>() {});
-        assertHelper(getExpected(roles, fullName), dto);
+        assertHelper(getExpected(filterByRoles, fullName), dto);
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest() {
         return Stream.of(
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER"), "Five"),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_INSTRUCTOR"), "Seven"),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR"), "Seven"),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR"), "Zero"));
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER), "Five"),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_INSTRUCTOR), "Seven"),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER, Role.ROLE_INSTRUCTOR), "Seven"),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER, Role.ROLE_INSTRUCTOR), "Zero"));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldThrowException_whenSuperadminRequest_rolesMismatch")
     @WithMockUser(username = "username0", password = "Password0!", roles = "SUPERADMIN")
-    void getUsers_shouldThrowException_whenSuperadminRequest_rolesMismatch(String principalRoleName, List<String> roles)
+    void getUsers_shouldThrowException_whenSuperadminRequest_rolesMismatch(Role principalRole, List<Role> filterByRoles)
             throws Exception {
         User principal = helper.user()
                 .seed(0)
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        mockMvc.perform(get(CREATE_USER_URL + getRequestParams(roles, null)).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, null))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ExceptionMessage.ROLES_MISMATCH.getName())))
                 .andDo(print());
@@ -267,19 +268,19 @@ public class GetUsersTest {
 
     static Stream<Arguments> methodParams_getUsers_shouldThrowException_whenSuperadminRequest_rolesMismatch() {
         return Stream.of(
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_SUPERADMIN")),
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_CUSTOMER")),
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_INSTRUCTOR")));
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_SUPERADMIN)),
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_CUSTOMER)),
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_INSTRUCTOR)));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldThrowException_whenAdminRequest_rolesMismatch")
     @WithMockUser(username = "username0", password = "Password0!", roles = "ADMIN")
-    void getUsers_shouldThrowException_whenAdminRequest_rolesMismatch(String principalRoleName, List<String> roles)
+    void getUsers_shouldThrowException_whenAdminRequest_rolesMismatch(Role principalRole, List<Role> roles)
             throws Exception {
         User principal = helper.user()
                 .seed(0)
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -292,45 +293,31 @@ public class GetUsersTest {
 
     static Stream<Arguments> methodParams_getUsers_shouldThrowException_whenAdminRequest_rolesMismatch() {
         return Stream.of(
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_ADMIN")),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_SUPERADMIN")));
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_ADMIN)),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_SUPERADMIN)));
     }
 
     void assertHelper(List<User> expected, List<UserResponseDto> actual) {
-        BiPredicate<String, Gender> genderBiPredicate = (genderName, gender) -> genderName.equals(gender.name());
-        BiPredicate<String, AgeGroup> ageGroupBiPredicate =
-                (ageGroupName, ageGroup) -> ageGroupName.equals(ageGroup.name());
-        BiPredicate<String, Role> roleBiPredicate = (roleName_, role) -> roleName_.equals(role.getName());
         assertEquals(expected.size(), actual.size());
+        BiPredicate<String, Role> roleBiPredicate = (string, enumeration) -> string.equals(enumeration.name());
         IntStream.range(0, expected.size()).forEach(i -> assertThat(actual.get(i))
                 .usingRecursiveComparison()
-                .withEqualsForFields(genderBiPredicate, "gender")
-                .withEqualsForFields(ageGroupBiPredicate, "ageGroup")
                 .withEqualsForFields(roleBiPredicate, "role")
                 .isEqualTo(expected.get(i)));
     }
 
-    List<User> getExpected(List<String> roles, String fullName) {
+    List<User> getExpected(List<Role> roles, String fullName) {
         return users.stream()
-                .filter(user -> roles.contains(user.getRoleName()))
+                .filter(user -> roles.contains(user.getRole()))
                 .filter(user -> fullName == null || user.getFullName().contains(fullName))
                 .sorted(Comparator.comparingLong(User::getId))
                 .toList();
     }
 
-    Role getRole(String roleName) {
-        return switch (roleName) {
-            case "ROLE_SUPERADMIN" -> superadminRole;
-            case "ROLE_ADMIN" -> adminRole;
-            case "ROLE_CUSTOMER" -> customerRole;
-            case "ROLE_INSTRUCTOR" -> instructorRole;
-            default -> throw new IllegalStateException("Unexpected value: " + roleName);
-        };
-    }
-
-    String getRequestParams(List<String> roles, String fullName) {
+    String getRequestParams(List<Role> roles, String fullName) {
+        List<String> rolesString = roles.stream().map(Enum::name).toList();
         StringBuilder sb = new StringBuilder("?roles=");
-        sb.append(String.join(",", roles));
+        sb.append(String.join(",", rolesString));
         if (fullName != null) {
             sb.append("&fullName=");
             sb.append(fullName);
