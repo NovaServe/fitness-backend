@@ -5,6 +5,7 @@ package com.novaserve.fitness.users.controller;
 
 import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.dto.UserResponseDto;
+import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -34,7 +35,7 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_SUPERADMIN','ROLE_ADMIN')")
     public ResponseEntity<Page<UserResponseDto>> getUsers(
-            @RequestParam(required = true) List<String> roles,
+            @RequestParam(required = true) List<Role> roles,
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false, defaultValue = "id") String sortBy,
             @RequestParam(required = false, defaultValue = "ASC") String order,

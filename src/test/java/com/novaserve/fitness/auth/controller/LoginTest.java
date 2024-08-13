@@ -75,12 +75,12 @@ class LoginTest {
     @BeforeEach
     void beforeEach() {
         helper.deleteAll();
-        superadminRole = helper.superadminRole();
-        adminRole = helper.adminRole();
-        customerRole = helper.customerRole();
-        instructorRole = helper.instructorRole();
-        gender = helper.female();
-        ageGroup = helper.adult();
+        superadminRole = Role.ROLE_SUPERADMIN;
+        adminRole = Role.ROLE_ADMIN;
+        customerRole = Role.ROLE_CUSTOMER;
+        instructorRole = Role.ROLE_INSTRUCTOR;
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
     }
 
     @Container
@@ -96,10 +96,10 @@ class LoginTest {
 
     @ParameterizedTest
     @MethodSource("loginCredentialTypes")
-    void login_shouldAuthenticateUser_whenValidCredentials(String roleName, String credentialType) throws Exception {
+    void login_shouldAuthenticateUser_whenValidCredentials(Role role, String credentialType) throws Exception {
         User user = helper.user()
                 .seed(1)
-                .role(getRole(roleName))
+                .role(role)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -109,7 +109,7 @@ class LoginTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.role", is(getRole(roleName).getName())))
+                .andExpect(jsonPath("$.role", is(role.name())))
                 .andExpect(jsonPath("$.fullName", is(user.getFullName())))
                 .andDo(print())
                 .andReturn();
@@ -124,28 +124,18 @@ class LoginTest {
 
     static Stream<Arguments> loginCredentialTypes() {
         return Stream.of(
-                Arguments.of("ROLE_SUPERADMIN", "username"),
-                Arguments.of("ROLE_SUPERADMIN", "email"),
-                Arguments.of("ROLE_SUPERADMIN", "phone"),
-                Arguments.of("ROLE_ADMIN", "username"),
-                Arguments.of("ROLE_ADMIN", "email"),
-                Arguments.of("ROLE_ADMIN", "phone"),
-                Arguments.of("ROLE_CUSTOMER", "username"),
-                Arguments.of("ROLE_CUSTOMER", "email"),
-                Arguments.of("ROLE_CUSTOMER", "phone"),
-                Arguments.of("ROLE_INSTRUCTOR", "username"),
-                Arguments.of("ROLE_INSTRUCTOR", "email"),
-                Arguments.of("ROLE_INSTRUCTOR", "phone"));
-    }
-
-    Role getRole(String roleName) {
-        return switch (roleName) {
-            case "ROLE_SUPERADMIN" -> superadminRole;
-            case "ROLE_ADMIN" -> adminRole;
-            case "ROLE_CUSTOMER" -> customerRole;
-            case "ROLE_INSTRUCTOR" -> instructorRole;
-            default -> throw new IllegalStateException("Unexpected value: " + roleName);
-        };
+                Arguments.of(Role.ROLE_SUPERADMIN, "username"),
+                Arguments.of(Role.ROLE_SUPERADMIN, "email"),
+                Arguments.of(Role.ROLE_SUPERADMIN, "phone"),
+                Arguments.of(Role.ROLE_ADMIN, "username"),
+                Arguments.of(Role.ROLE_ADMIN, "email"),
+                Arguments.of(Role.ROLE_ADMIN, "phone"),
+                Arguments.of(Role.ROLE_CUSTOMER, "username"),
+                Arguments.of(Role.ROLE_CUSTOMER, "email"),
+                Arguments.of(Role.ROLE_CUSTOMER, "phone"),
+                Arguments.of(Role.ROLE_INSTRUCTOR, "username"),
+                Arguments.of(Role.ROLE_INSTRUCTOR, "email"),
+                Arguments.of(Role.ROLE_INSTRUCTOR, "phone"));
     }
 
     LoginRequestDto getDto(String credentialType) {

@@ -87,31 +87,12 @@ class CreateUserTest {
     @BeforeEach
     void beforeEach() {
         helper.deleteAll();
-        superadminRole = helper.superadminRole();
-        adminRole = helper.adminRole();
-        customerRole = helper.customerRole();
-        instructorRole = helper.instructorRole();
-        gender = helper.female();
-        ageGroup = helper.adult();
-    }
-
-    void assertHelper(CreateUserRequestDto dto) {
-        User actual = helper.getUser(dto.getUsername());
-        String[] comparatorIgnoreFields = new String[] {"id"};
-        BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
-        BiPredicate<Gender, String> genderBiPredicate = (gender, genderName) -> genderName.equals(gender.getName());
-        BiPredicate<AgeGroup, String> ageGroupBiPredicate =
-                (ageGroup, ageGroupName) -> ageGroupName.equals(ageGroup.getName());
-        BiPredicate<Role, String> roleBiPredicate = (role, roleName) -> roleName.equals(role.getName());
-        assertThat(actual)
-                .usingRecursiveComparison()
-                .withEqualsForFields(passwordBiPredicate, "password")
-                .withEqualsForFields(genderBiPredicate, "gender")
-                .withEqualsForFields(ageGroupBiPredicate, "ageGroup")
-                .withEqualsForFields(roleBiPredicate, "role")
-                .ignoringFields(comparatorIgnoreFields)
-                .isEqualTo(dto);
-        assertNotNull(actual.getId());
+        superadminRole = Role.ROLE_SUPERADMIN;
+        adminRole = Role.ROLE_ADMIN;
+        customerRole = Role.ROLE_CUSTOMER;
+        instructorRole = Role.ROLE_INSTRUCTOR;
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
     }
 
     @Test
@@ -127,9 +108,9 @@ class CreateUserTest {
         CreateUserRequestDto dto = dtoHelper
                 .createUserRequestDto()
                 .seed(2)
-                .role(adminRole.getName())
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .role(adminRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
                 .get();
 
         mockMvc.perform(post(CREATE_USER_URL)
@@ -144,15 +125,15 @@ class CreateUserTest {
     @ParameterizedTest
     @MethodSource("methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests")
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
-    void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(String roleName) throws Exception {
+    void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(Role role) throws Exception {
         helper.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
 
         CreateUserRequestDto dto = dtoHelper
                 .createUserRequestDto()
                 .seed(2)
-                .role(roleName)
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .role(role)
+                .gender(gender)
+                .ageGroup(ageGroup)
                 .get();
 
         mockMvc.perform(post(CREATE_USER_URL)
@@ -165,17 +146,16 @@ class CreateUserTest {
     }
 
     static Stream<Arguments> methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests() {
-        return Stream.of(Arguments.of("ROLE_CUSTOMER"), Arguments.of("ROLE_INSTRUCTOR"));
+        return Stream.of(Arguments.of(Role.ROLE_CUSTOMER), Arguments.of(Role.ROLE_INSTRUCTOR));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_createUser_shouldThrowException_whenRolesMismatch")
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
-    void createUser_shouldThrowException_whenRolesMismatch(String creatorRoleName, String createdRoleName)
-            throws Exception {
+    void createUser_shouldThrowException_whenRolesMismatch(Role principalRole, Role newUserRole) throws Exception {
         helper.user()
                 .seed(1)
-                .role(getRole(creatorRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -183,9 +163,9 @@ class CreateUserTest {
         CreateUserRequestDto dto = dtoHelper
                 .createUserRequestDto()
                 .seed(2)
-                .role(createdRoleName)
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .role(newUserRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
                 .get();
 
         mockMvc.perform(post(CREATE_USER_URL)
@@ -199,19 +179,19 @@ class CreateUserTest {
 
     static Stream<Arguments> methodParams_createUser_shouldThrowException_whenRolesMismatch() {
         return Stream.of(
-                Arguments.of("ROLE_SUPERADMIN", "ROLE_SUPERADMIN"),
-                Arguments.of("ROLE_SUPERADMIN", "ROLE_CUSTOMER"),
-                Arguments.of("ROLE_SUPERADMIN", "ROLE_INSTRUCTOR"),
-                Arguments.of("ROLE_ADMIN", "ROLE_ADMIN"),
-                Arguments.of("ROLE_ADMIN", "ROLE_SUPERADMIN"),
-                Arguments.of("ROLE_CUSTOMER", "ROLE_CUSTOMER"),
-                Arguments.of("ROLE_CUSTOMER", "ROLE_SUPERADMIN"),
-                Arguments.of("ROLE_CUSTOMER", "ROLE_ADMIN"),
-                Arguments.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR"),
-                Arguments.of("ROLE_INSTRUCTOR", "ROLE_INSTRUCTOR"),
-                Arguments.of("ROLE_INSTRUCTOR", "ROLE_CUSTOMER"),
-                Arguments.of("ROLE_INSTRUCTOR", "ROLE_SUPERADMIN"),
-                Arguments.of("ROLE_INSTRUCTOR", "ROLE_ADMIN"));
+                Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_SUPERADMIN),
+                Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_CUSTOMER),
+                Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_INSTRUCTOR),
+                Arguments.of(Role.ROLE_ADMIN, Role.ROLE_ADMIN),
+                Arguments.of(Role.ROLE_ADMIN, Role.ROLE_SUPERADMIN),
+                Arguments.of(Role.ROLE_CUSTOMER, Role.ROLE_CUSTOMER),
+                Arguments.of(Role.ROLE_CUSTOMER, Role.ROLE_SUPERADMIN),
+                Arguments.of(Role.ROLE_CUSTOMER, Role.ROLE_ADMIN),
+                Arguments.of(Role.ROLE_CUSTOMER, Role.ROLE_INSTRUCTOR),
+                Arguments.of(Role.ROLE_INSTRUCTOR, Role.ROLE_INSTRUCTOR),
+                Arguments.of(Role.ROLE_INSTRUCTOR, Role.ROLE_INSTRUCTOR),
+                Arguments.of(Role.ROLE_INSTRUCTOR, Role.ROLE_SUPERADMIN),
+                Arguments.of(Role.ROLE_INSTRUCTOR, Role.ROLE_ADMIN));
     }
 
     @Test
@@ -234,9 +214,9 @@ class CreateUserTest {
         CreateUserRequestDto dto = dtoHelper
                 .createUserRequestDto()
                 .seed(2)
-                .role(customerRole.getName())
-                .gender(gender.getName())
-                .ageGroup(ageGroup.getName())
+                .role(customerRole)
+                .gender(gender)
+                .ageGroup(ageGroup)
                 .get();
 
         mockMvc.perform(post(CREATE_USER_URL)
@@ -247,13 +227,15 @@ class CreateUserTest {
                 .andDo(print());
     }
 
-    Role getRole(String roleName) {
-        return switch (roleName) {
-            case "ROLE_SUPERADMIN" -> superadminRole;
-            case "ROLE_ADMIN" -> adminRole;
-            case "ROLE_CUSTOMER" -> customerRole;
-            case "ROLE_INSTRUCTOR" -> instructorRole;
-            default -> throw new IllegalStateException("Unexpected value: " + roleName);
-        };
+    void assertHelper(CreateUserRequestDto dto) {
+        User actual = helper.getUser(dto.getUsername());
+        String[] comparatorIgnoreFields = new String[] {"id"};
+        BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
+        assertThat(actual)
+                .usingRecursiveComparison()
+                .withEqualsForFields(passwordBiPredicate, "password")
+                .ignoringFields(comparatorIgnoreFields)
+                .isEqualTo(dto);
+        assertNotNull(actual.getId());
     }
 }

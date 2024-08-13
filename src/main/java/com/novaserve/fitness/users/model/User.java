@@ -33,28 +33,20 @@ public class User {
     @Column(name = "password", nullable = false, unique = false)
     private String password;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false, unique = false)
     private Role role;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "gender_id", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = true, unique = false)
     private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "age_group_id", nullable = false, unique = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "age_group", nullable = true, unique = false)
     private AgeGroup ageGroup;
 
     public String getRoleName() {
-        return role != null ? role.getName() : null;
-    }
-
-    public String getGenderName() {
-        return gender != null ? gender.getName() : null;
-    }
-
-    public String getAgeGroupName() {
-        return ageGroup != null ? ageGroup.getName() : null;
+        return role != null ? role.name() : null;
     }
 
     public boolean isSuperadmin() {

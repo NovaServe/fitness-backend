@@ -19,9 +19,6 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.AgeGroupRepository;
-import com.novaserve.fitness.users.repository.GenderRepository;
-import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.*;
 import java.util.function.BiPredicate;
@@ -51,15 +48,6 @@ public class GetUsersTest {
     AuthUtil authUtil;
 
     @Mock
-    RoleRepository roleRepository;
-
-    @Mock
-    GenderRepository genderRepository;
-
-    @Mock
-    AgeGroupRepository ageGroupRepository;
-
-    @Mock
     UserRepository userRepository;
 
     @Spy
@@ -84,12 +72,12 @@ public class GetUsersTest {
 
     @BeforeEach
     public void beforeEach() {
-        superadminRole = helper.superadminRole();
-        adminRole = helper.adminRole();
-        customerRole = helper.customerRole();
-        instructorRole = helper.instructorRole();
-        gender = helper.female();
-        ageGroup = helper.adult();
+        superadminRole = Role.ROLE_SUPERADMIN;
+        adminRole = Role.ROLE_ADMIN;
+        customerRole = Role.ROLE_CUSTOMER;
+        instructorRole = Role.ROLE_INSTRUCTOR;
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
         final Map<Integer, Role> SEED_ROLE_MAP = Map.of(
                 0, superadminRole,
                 1, superadminRole,
@@ -99,22 +87,22 @@ public class GetUsersTest {
                 5, customerRole,
                 6, instructorRole,
                 7, instructorRole);
-        users = Collections.unmodifiableList(SEED_ROLE_MAP.entrySet().stream()
+        users = SEED_ROLE_MAP.entrySet().stream()
                 .map(entry -> helper.user()
                         .seed(entry.getKey())
                         .role(entry.getValue())
                         .gender(gender)
                         .ageGroup(ageGroup)
                         .get())
-                .toList());
+                .toList();
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest")
-    void getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest(String principalRoleName, List<String> roles) {
+    void getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest(Role principalRole, List<Role> filterByRoles) {
         User principal = helper.user()
                 .seed(users.size())
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -123,25 +111,25 @@ public class GetUsersTest {
         String sortBy = "id";
         String order = "ASC";
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
-        Page<User> page = new PageImpl<>(getExpected(roles, null), pageable, users.size());
+        Page<User> page = new PageImpl<>(getExpected(filterByRoles, null), pageable, users.size());
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(principal));
-        when(userRepository.getUsers(roles, null, pageable)).thenReturn(page);
+        when(userRepository.getUsers(filterByRoles, null, pageable)).thenReturn(page);
 
-        Page<UserResponseDto> actual = userService.getUsers(roles, null, sortBy, order, pageSize, pageNumber);
-        assertHelper(page.getContent(), actual.getContent(), roles);
+        Page<UserResponseDto> actual = userService.getUsers(filterByRoles, null, sortBy, order, pageSize, pageNumber);
+        assertHelper(page.getContent(), actual.getContent());
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest() {
-        return Stream.of(Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_ADMIN")));
+        return Stream.of(Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_ADMIN)));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest")
-    void getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest(String principalRoleName, List<String> roles) {
+    void getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest(Role principalRole, List<Role> filterByRoles) {
         User principal = helper.user()
                 .seed(users.size())
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -150,29 +138,29 @@ public class GetUsersTest {
         String sortBy = "id";
         String order = "ASC";
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
-        Page<User> page = new PageImpl<>(getExpected(roles, null), pageable, users.size());
+        Page<User> page = new PageImpl<>(getExpected(filterByRoles, null), pageable, users.size());
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(principal));
-        when(userRepository.getUsers(roles, null, pageable)).thenReturn(page);
+        when(userRepository.getUsers(filterByRoles, null, pageable)).thenReturn(page);
 
-        Page<UserResponseDto> actual = userService.getUsers(roles, null, sortBy, order, pageSize, pageNumber);
-        assertHelper(page.getContent(), actual.getContent(), roles);
+        Page<UserResponseDto> actual = userService.getUsers(filterByRoles, null, sortBy, order, pageSize, pageNumber);
+        assertHelper(page.getContent(), actual.getContent());
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest() {
         return Stream.of(
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER")),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_INSTRUCTOR")),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR")));
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER)),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_INSTRUCTOR)),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER, Role.ROLE_INSTRUCTOR)));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldReturnPageFilteredByFullName_whenSuperadminRequest")
     void getUsers_shouldReturnPageFilteredByFullName_whenSuperadminRequest(
-            String principalRoleName, List<String> roles) {
+            Role principalRole, List<Role> filterByRoles, String fullName) {
         User principal = helper.user()
                 .seed(users.size())
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -181,27 +169,29 @@ public class GetUsersTest {
         String sortBy = "id";
         String order = "ASC";
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
-        Page<User> page = new PageImpl<>(getExpected(roles, null), pageable, users.size());
+        Page<User> page = new PageImpl<>(getExpected(filterByRoles, fullName), pageable, users.size());
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(principal));
-        when(userRepository.getUsers(roles, null, pageable)).thenReturn(page);
+        when(userRepository.getUsers(filterByRoles, fullName, pageable)).thenReturn(page);
 
-        Page<UserResponseDto> actual = userService.getUsers(roles, null, sortBy, order, pageSize, pageNumber);
-        assertHelper(page.getContent(), actual.getContent(), roles);
+        Page<UserResponseDto> actual =
+                userService.getUsers(filterByRoles, fullName, sortBy, order, pageSize, pageNumber);
+        assertHelper(page.getContent(), actual.getContent());
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByFullName_whenSuperadminRequest() {
         return Stream.of(
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_ADMIN"), "Three"),
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_ADMIN"), "Zero"));
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_ADMIN), "Three"),
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_ADMIN), "Zero"));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest")
-    void getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest(String principalRoleName, List<String> roles) {
+    void getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest(
+            Role principalRole, List<Role> filterByRoles, String fullName) {
         User principal = helper.user()
                 .seed(users.size())
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -210,30 +200,31 @@ public class GetUsersTest {
         String sortBy = "id";
         String order = "ASC";
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.fromString(order), sortBy));
-        Page<User> page = new PageImpl<>(getExpected(roles, null), pageable, users.size());
+        Page<User> page = new PageImpl<>(getExpected(filterByRoles, fullName), pageable, users.size());
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(principal));
-        when(userRepository.getUsers(roles, null, pageable)).thenReturn(page);
+        when(userRepository.getUsers(filterByRoles, fullName, pageable)).thenReturn(page);
 
-        Page<UserResponseDto> actual = userService.getUsers(roles, null, sortBy, order, pageSize, pageNumber);
-        assertHelper(page.getContent(), actual.getContent(), roles);
+        Page<UserResponseDto> actual =
+                userService.getUsers(filterByRoles, fullName, sortBy, order, pageSize, pageNumber);
+        assertHelper(page.getContent(), actual.getContent());
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest() {
         return Stream.of(
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER"), "Five"),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_INSTRUCTOR"), "Seven"),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR"), "Seven"),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR"), "Zero"));
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER), "Five"),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_INSTRUCTOR), "Seven"),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER, Role.ROLE_INSTRUCTOR), "Seven"),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_CUSTOMER, Role.ROLE_INSTRUCTOR), "Zero"));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldThrowException_whenSuperadminRequest_rolesMismatch")
     void getUsers_shouldThrowException_whenSuperadminRequest_rolesMismatch(
-            String principalRoleName, List<String> roles) {
+            Role principalRole, List<Role> filterByRoles) {
         User principal = helper.user()
                 .seed(users.size())
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -245,24 +236,25 @@ public class GetUsersTest {
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(principal));
 
         ServerException actual = assertThrows(
-                ServerException.class, () -> userService.getUsers(roles, null, sortBy, order, pageSize, pageNumber));
+                ServerException.class,
+                () -> userService.getUsers(filterByRoles, null, sortBy, order, pageSize, pageNumber));
         assertEquals(HttpStatus.BAD_REQUEST.value(), actual.getStatusCode());
         assertEquals(ExceptionMessage.ROLES_MISMATCH.getName(), actual.getMessage());
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldThrowException_whenSuperadminRequest_rolesMismatch() {
         return Stream.of(
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_SUPERADMIN")),
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_CUSTOMER")),
-                Arguments.of("ROLE_SUPERADMIN", List.of("ROLE_INSTRUCTOR")));
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_SUPERADMIN)),
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_CUSTOMER)),
+                Arguments.of(Role.ROLE_SUPERADMIN, List.of(Role.ROLE_INSTRUCTOR)));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_getUsers_shouldThrowException_whenAdminRequest_rolesMismatch")
-    void getUsers_shouldThrowException_whenAdminRequest_rolesMismatch(String principalRoleName, List<String> roles) {
+    void getUsers_shouldThrowException_whenAdminRequest_rolesMismatch(Role principalRole, List<Role> filterByRoles) {
         User principal = helper.user()
                 .seed(users.size())
-                .role(getRole(principalRoleName))
+                .role(principalRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -274,46 +266,32 @@ public class GetUsersTest {
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(principal));
 
         ServerException actual = assertThrows(
-                ServerException.class, () -> userService.getUsers(roles, null, sortBy, order, pageSize, pageNumber));
+                ServerException.class,
+                () -> userService.getUsers(filterByRoles, null, sortBy, order, pageSize, pageNumber));
         assertEquals(HttpStatus.BAD_REQUEST.value(), actual.getStatusCode());
         assertEquals(ExceptionMessage.ROLES_MISMATCH.getName(), actual.getMessage());
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldThrowException_whenAdminRequest_rolesMismatch() {
         return Stream.of(
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_ADMIN")),
-                Arguments.of("ROLE_ADMIN", List.of("ROLE_SUPERADMIN")));
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_ADMIN)),
+                Arguments.of(Role.ROLE_ADMIN, List.of(Role.ROLE_SUPERADMIN)));
     }
 
-    void assertHelper(List<User> expected, List<UserResponseDto> actual, List<String> roles) {
-        BiPredicate<String, Gender> genderBiPredicate = (genderName, gender) -> genderName.equals(gender.getName());
-        BiPredicate<String, AgeGroup> ageGroupBiPredicate =
-                (ageGroupName, ageGroup) -> ageGroupName.equals(ageGroup.getName());
-        BiPredicate<String, Role> roleBiPredicate = (roleName_, role) -> roleName_.equals(role.getName());
+    void assertHelper(List<User> expected, List<UserResponseDto> actual) {
         assertEquals(expected.size(), actual.size());
+        BiPredicate<String, Role> roleBiPredicate = (string, enumeration) -> string.equals(enumeration.name());
         IntStream.range(0, expected.size()).forEach(i -> assertThat(actual.get(i))
                 .usingRecursiveComparison()
-                .withEqualsForFields(genderBiPredicate, "gender")
-                .withEqualsForFields(ageGroupBiPredicate, "ageGroup")
                 .withEqualsForFields(roleBiPredicate, "role")
                 .isEqualTo(expected.get(i)));
     }
 
-    List<User> getExpected(List<String> roles, String fullName) {
+    List<User> getExpected(List<Role> roles, String fullName) {
         return users.stream()
-                .filter(user -> roles.contains(user.getRoleName()))
+                .filter(user -> roles.contains(user.getRole()))
                 .filter(user -> fullName == null || user.getFullName().contains(fullName))
                 .sorted(Comparator.comparingLong(User::getId))
                 .toList();
-    }
-
-    Role getRole(String roleName) {
-        return switch (roleName) {
-            case "ROLE_SUPERADMIN" -> superadminRole;
-            case "ROLE_ADMIN" -> adminRole;
-            case "ROLE_CUSTOMER" -> customerRole;
-            case "ROLE_INSTRUCTOR" -> instructorRole;
-            default -> throw new IllegalStateException("Unexpected value: " + roleName);
-        };
     }
 }
