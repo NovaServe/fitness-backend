@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="001" author="Oleg Kucherenko" context="structure">
+        <comment>Create trainings and relates tables</comment>
+
+        <createTable tableName="areas">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="trainings">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="varchar(255)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="description" type="varchar(1000)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="kind" type="varchar(50)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="type" type="varchar(50)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="intensity" type="varchar(50)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="level" type="varchar(50)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="location" type="varchar(1000)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="total_places" type="integer">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="instructor_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_instructor_id" references="users(id)" />
+            </column>
+            <column name="created_at" type="timestamp with time zone">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="created_by_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_created_by_id" references="users(id)" />
+            </column>
+            <column name="last_modified_at" type="timestamp with time zone">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="last_modified_by_id" type="bigint">
+                <constraints nullable="true" unique="false"
+                             foreignKeyName="fk_last_modified_by_id" references="users(id)" />
+            </column>
+        </createTable>
+
+        <createTable tableName="repeat_options">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="training_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_training_id" references="trainings(id)" />
+            </column>
+            <column name="day_of_week" type="varchar(10)">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="start_time" type="time">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="end_time" type="time">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="repeat_since" type="date">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="repeat_until" type="date">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="repeat_times" type="integer">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="is_autoupdate" type="boolean">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="is_active" type="boolean">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="excluded_dates" type="varchar">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="deactivated_since" type="date">
+                <constraints nullable="true" unique="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="assignments">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_user_id" references="users(id)" />
+            </column>
+            <column name="repeat_option_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_repeat_option_id" references="repeat_options(id)" />
+            </column>
+            <column name="joined_at" type="timestamp with time zone">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="is_recurring" type="boolean">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="repeat_until" type="date">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="repeat_times" type="integer">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="is_active" type="boolean">
+                <constraints nullable="false" unique="false" />
+            </column>
+            <column name="excluded_dates" type="varchar">
+                <constraints nullable="true" unique="false" />
+            </column>
+            <column name="deactivated_at" type="timestamp with time zone">
+                <constraints nullable="true" unique="false" />
+            </column>
+        </createTable>
+
+        <sqlFile path="sql/init_areas.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="sql/dummy_trainings.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="sql/dummy_assignments.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+    </changeSet>
+
+</databaseChangeLog>

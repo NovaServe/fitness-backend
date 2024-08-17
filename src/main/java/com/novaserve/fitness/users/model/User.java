@@ -3,7 +3,10 @@
 */
 package com.novaserve.fitness.users.model;
 
+import com.novaserve.fitness.trainings.model.Assignment;
+import com.novaserve.fitness.trainings.model.Training;
 import jakarta.persistence.*;
+import java.util.Set;
 import lombok.*;
 
 @Getter
@@ -44,6 +47,12 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(name = "age_group", nullable = true, unique = false)
     private AgeGroup ageGroup;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private Set<Training> instructorTrainings;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private Set<Assignment> assignments;
 
     public String getRoleName() {
         return role != null ? role.name() : null;
