@@ -17,6 +17,7 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -38,12 +39,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class GetUserDetailTest {
-
     @InjectMocks
     UserServiceImpl userService;
 
     @Mock
     AuthUtil authUtil;
+
+    @Mock
+    RoleRepository roleRepository;
 
     @Mock
     UserRepository userRepository;
@@ -69,18 +72,24 @@ class GetUserDetailTest {
 
     @BeforeEach
     public void beforeEach() {
-        superadminRole = Role.ROLE_SUPERADMIN;
-        adminRole = Role.ROLE_ADMIN;
-        customerRole = Role.ROLE_CUSTOMER;
-        instructorRole = Role.ROLE_INSTRUCTOR;
+        superadminRole = helper.superadminRole();
+        adminRole = helper.adminRole();
+        customerRole = helper.customerRole();
+        instructorRole = helper.instructorRole();
         gender = Gender.Female;
         ageGroup = AgeGroup.Adult;
+
+        lenient().when(userRepository.save(any(User.class))).then(invocation -> {
+            User user = invocation.getArgument(0);
+            user.setId(1000L);
+            return user;
+        });
     }
 
     @ParameterizedTest
     @MethodSource("provideUserDetailParams")
-    public void getUserDetail_shouldReturnDto_whenSuperadminRequestsOwnOrAdminDetail(Long userId, Role roleName) {
-        var superAdmin = helper.user()
+    public void getUserDetail_shouldReturnDto_whenSuperAdminRequest(Long userId, String roleName) {
+        User superAdmin = helper.user()
                 .seed(1)
                 .role(superadminRole)
                 .gender(gender)
@@ -88,7 +97,7 @@ class GetUserDetailTest {
                 .get();
         superAdmin.setId(1L);
 
-        var user = helper.user()
+        User user = helper.user()
                 .seed(userId.intValue())
                 .role(roleName)
                 .gender(gender)
@@ -111,8 +120,8 @@ class GetUserDetailTest {
 
     @ParameterizedTest
     @MethodSource("provideUserDetailsParams")
-    void getUserDetail_shouldReturnDto_RequestsOwnOrCustomerOrInstructorDetail(Long userId, Role roleName) {
-        var admin = helper.user()
+    void getUserDetail_shouldReturnDto_whenAdminRequest(Long userId, String roleName) {
+        User admin = helper.user()
                 .seed(1)
                 .role(adminRole)
                 .gender(gender)
@@ -120,7 +129,7 @@ class GetUserDetailTest {
                 .get();
         admin.setId(1L); // Ensure ID is set
 
-        var user = helper.user()
+        User user = helper.user()
                 .seed(userId.intValue())
                 .role(roleName)
                 .gender(gender)
@@ -145,7 +154,7 @@ class GetUserDetailTest {
     }
 
     @Test
-    public void getUserDetail_shouldReturnDto_whenCustomerRequestsOwnDetail() {
+    public void getUserDetail_shouldReturnDto_whenCustomerRequest() {
         var customer = helper.user()
                 .seed(2)
                 .role(customerRole)
@@ -164,9 +173,9 @@ class GetUserDetailTest {
     }
 
     @Test
-    public void getUserDetail_shouldReturnDto_whenInstructorRequestsOwnDetail() {
-        var instructor = helper.user()
-                .seed(1)
+    public void getUserDetail_shouldReturnDto_whenSInstructorRequest() {
+        User instructor = helper.user()
+                .seed(3)
                 .role(instructorRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
@@ -183,9 +192,9 @@ class GetUserDetailTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getUserDetailParams_rolesMismatch")
-    void GetUserDetail_shouldThrowException_whenRolesMismatch(Role principalRoleName, Role userRoleName) {
-        var principal = helper.user()
+    @MethodSource("getUserParams_rolesMismatch")
+    void GetUserDetail_shouldThrowException_whenRolesMismatch(String principalRoleName, String userRoleName) {
+        User principal = helper.user()
                 .seed(1)
                 .role(principalRoleName)
                 .gender(gender)
@@ -193,7 +202,7 @@ class GetUserDetailTest {
                 .get();
         principal.setId(1L);
 
-        var user = helper.user()
+        User user = helper.user()
                 .seed(2)
                 .role(userRoleName)
                 .gender(gender)
@@ -204,7 +213,7 @@ class GetUserDetailTest {
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.of(principal));
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        var actual = assertThrows(ServerException.class, () -> userService.getUserDetail(user.getId()));
+        ServerException actual = assertThrows(ServerException.class, () -> userService.getUserDetail(user.getId()));
         Assertions.assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
         Assertions.assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
     }
