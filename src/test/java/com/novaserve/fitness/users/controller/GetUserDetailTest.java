@@ -3,10 +3,7 @@
 */
 package com.novaserve.fitness.users.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,7 +15,6 @@ import com.novaserve.fitness.config.TestBeans;
 import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.DtoHelper;
-import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
@@ -87,30 +83,17 @@ class GetUserDetailTest {
     @BeforeEach
     void beforeEach() {
         helper.deleteAll();
-        superadminRole = helper.superadminRole();
-        adminRole = helper.adminRole();
-        customerRole = helper.customerRole();
-        instructorRole = helper.instructorRole();
+        superadminRole = Role.ROLE_SUPERADMIN;
+        adminRole = Role.ROLE_ADMIN;
+        customerRole = Role.ROLE_CUSTOMER;
+        instructorRole = Role.ROLE_INSTRUCTOR;
         gender = Gender.Female;
         ageGroup = AgeGroup.Adult;
     }
 
-    void assertHelper(CreateUserRequestDto dto) {
-        var actual = helper.getUser(dto.getUsername());
-        String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
-        assertThat(actual)
-                .usingRecursiveComparison()
-                .ignoringFields(comparatorIgnoreFields)
-                .isEqualTo(dto);
-        assertEquals(actual.getRole().getName(), dto.getRole());
-        assertEquals(actual.getAgeGroup().name(), dto.getAgeGroup());
-        assertEquals(actual.getGender().name(), dto.getGender());
-        assertNotNull(actual.getId());
-    }
-
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
-    void getUserDetail_superadminRequestsOwnOrAdminDetail() throws Exception {
+    void getUserDetail_shouldReturnDto_whenSuperadminRequestsOwnOrAdminDetail() throws Exception {
         User superadmin = helper.user()
                 .seed(1)
                 .role(superadminRole)
@@ -135,7 +118,7 @@ class GetUserDetailTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
-    void getUserDetail_adminRequestsOwnOrCustomerOrInstructorDetail() throws Exception {
+    void getUserDetail_shouldReturnDto_whenAdminRequestsOwnOrCustomerOrInstructorDetail() throws Exception {
         User admin = helper.user()
                 .seed(1)
                 .role(adminRole)
@@ -170,7 +153,7 @@ class GetUserDetailTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "CUSTOMER")
-    void getUserDetail_customerRequestsOwnDetail() throws Exception {
+    void getUserDetail_shouldReturnDto_whenCustomerRequestsOwnDetail() throws Exception {
         User customer = helper.user()
                 .seed(1)
                 .role(customerRole)
@@ -185,7 +168,7 @@ class GetUserDetailTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "INSTRUCTOR")
-    void getUserDetail_instructorRequestsOwnDetail() throws Exception {
+    void getUserDetail_shouldReturnDto_whenInstructorRequestsOwnDetail() throws Exception {
         User instructor = helper.user()
                 .seed(1)
                 .role(instructorRole)
@@ -201,7 +184,7 @@ class GetUserDetailTest {
     @ParameterizedTest
     @MethodSource("getUserDetailParams_rolesMismatch")
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
-    void GetUserDetail_shouldThrowException_whenRolesMismatch(Role principalRoleName, Role userRoleName)
+    void getUserDetail_shouldThrowException_whenRolesMismatch(Role principalRoleName, Role userRoleName)
             throws Exception {
         User principal = helper.user()
                 .seed(1)

@@ -17,7 +17,6 @@ import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.RoleRepository;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -46,9 +45,6 @@ class GetUserDetailTest {
     AuthUtil authUtil;
 
     @Mock
-    RoleRepository roleRepository;
-
-    @Mock
     UserRepository userRepository;
 
     @Mock
@@ -72,10 +68,10 @@ class GetUserDetailTest {
 
     @BeforeEach
     public void beforeEach() {
-        superadminRole = helper.superadminRole();
-        adminRole = helper.adminRole();
-        customerRole = helper.customerRole();
-        instructorRole = helper.instructorRole();
+        superadminRole = Role.ROLE_SUPERADMIN;
+        adminRole = Role.ROLE_ADMIN;
+        customerRole = Role.ROLE_CUSTOMER;
+        instructorRole = Role.ROLE_INSTRUCTOR;
         gender = Gender.Female;
         ageGroup = AgeGroup.Adult;
 
@@ -88,7 +84,7 @@ class GetUserDetailTest {
 
     @ParameterizedTest
     @MethodSource("provideUserDetailParams")
-    public void getUserDetail_shouldReturnDto_whenSuperAdminRequest(Long userId, String roleName) {
+    public void getUserDetail_shouldReturnDto_whenSuperadminRequestsOwnOrAdminDetail(Long userId, Role roleName) {
         User superAdmin = helper.user()
                 .seed(1)
                 .role(superadminRole)
@@ -120,7 +116,7 @@ class GetUserDetailTest {
 
     @ParameterizedTest
     @MethodSource("provideUserDetailsParams")
-    void getUserDetail_shouldReturnDto_whenAdminRequest(Long userId, String roleName) {
+    void getUserDetail_shouldReturnDto_whenAdminRequestsOwnOrCustomerOrInstructorDetail(Long userId, Role roleName) {
         User admin = helper.user()
                 .seed(1)
                 .role(adminRole)
@@ -154,7 +150,7 @@ class GetUserDetailTest {
     }
 
     @Test
-    public void getUserDetail_shouldReturnDto_whenCustomerRequest() {
+    public void getUserDetail_shouldReturnDto_whenCustomerRequestsOwnDetail() {
         var customer = helper.user()
                 .seed(2)
                 .role(customerRole)
@@ -173,7 +169,7 @@ class GetUserDetailTest {
     }
 
     @Test
-    public void getUserDetail_shouldReturnDto_whenSInstructorRequest() {
+    public void getUserDetail_shouldReturnDto_whenInstructorRequestsOwnDetail() {
         User instructor = helper.user()
                 .seed(3)
                 .role(instructorRole)
@@ -192,8 +188,8 @@ class GetUserDetailTest {
     }
 
     @ParameterizedTest
-    @MethodSource("getUserParams_rolesMismatch")
-    void GetUserDetail_shouldThrowException_whenRolesMismatch(String principalRoleName, String userRoleName) {
+    @MethodSource("getUserDetailParams_rolesMismatch")
+    void getUserDetail_shouldThrowException_whenRolesMismatch(Role principalRoleName, Role userRoleName) {
         User principal = helper.user()
                 .seed(1)
                 .role(principalRoleName)
