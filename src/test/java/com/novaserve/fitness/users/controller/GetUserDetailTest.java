@@ -3,10 +3,7 @@
 */
 package com.novaserve.fitness.users.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -18,7 +15,6 @@ import com.novaserve.fitness.config.TestBeans;
 import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.DtoHelper;
-import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
@@ -59,10 +55,10 @@ class GetUserDetailTest {
     ObjectMapper objectMapper;
 
     @Autowired
-    DbHelper $db;
+    DbHelper helper;
 
     @Autowired
-    DtoHelper $dto;
+    DtoHelper dtoHelper;
 
     final String GET_USER_DETAIL_URL = "/api/v1/users/{userId}";
 
@@ -86,38 +82,25 @@ class GetUserDetailTest {
 
     @BeforeEach
     void beforeEach() {
-        $db.deleteAll();
-        superadminRole = $db.superadminRole();
-        adminRole = $db.adminRole();
-        customerRole = $db.customerRole();
-        instructorRole = $db.instructorRole();
-        gender = $db.female();
-        ageGroup = $db.adult();
-    }
-
-    void assertHelper(CreateUserRequestDto dto) {
-        var actual = $db.getUser(dto.getUsername());
-        String[] comparatorIgnoreFields = new String[] {"id", "password", "role", "ageGroup", "gender"};
-        assertThat(actual)
-                .usingRecursiveComparison()
-                .ignoringFields(comparatorIgnoreFields)
-                .isEqualTo(dto);
-        assertEquals(actual.getRole().getName(), dto.getRole());
-        assertEquals(actual.getAgeGroup().getName(), dto.getAgeGroup());
-        assertEquals(actual.getGender().getName(), dto.getGender());
-        assertNotNull(actual.getId());
+        helper.deleteAll();
+        superadminRole = Role.ROLE_SUPERADMIN;
+        adminRole = Role.ROLE_ADMIN;
+        customerRole = Role.ROLE_CUSTOMER;
+        instructorRole = Role.ROLE_INSTRUCTOR;
+        gender = Gender.Female;
+        ageGroup = AgeGroup.Adult;
     }
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
-    void getUserDetail_superadminRequestsOwnOrAdminDetail() throws Exception {
-        var superadmin = $db.user()
+    void getUserDetail_shouldReturnDto_whenSuperadminRequestsOwnOrAdminDetail() throws Exception {
+        var superadmin = helper.user()
                 .seed(1)
                 .role(superadminRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
-        var admin = $db.user()
+        var admin = helper.user()
                 .seed(2)
                 .role(adminRole)
                 .gender(gender)
@@ -135,20 +118,20 @@ class GetUserDetailTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
-    void getUserDetail_adminRequestsOwnOrCustomerOrInstructorDetail() throws Exception {
-        var admin = $db.user()
+    void getUserDetail_shouldReturnDto_whenAdminRequestsOwnOrCustomerOrInstructorDetail() throws Exception {
+        var admin = helper.user()
                 .seed(1)
                 .role(adminRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
-        var customer = $db.user()
+        var customer = helper.user()
                 .seed(2)
                 .role(customerRole)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
-        var instructor = $db.user()
+        var instructor = helper.user()
                 .seed(3)
                 .role(instructorRole)
                 .gender(gender)
@@ -170,8 +153,8 @@ class GetUserDetailTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "CUSTOMER")
-    void getUserDetail_customerRequestsOwnDetail() throws Exception {
-        var customer = $db.user()
+    void getUserDetail_shouldReturnDto_whenCustomerRequestsOwnDetail() throws Exception {
+        var customer = helper.user()
                 .seed(1)
                 .role(customerRole)
                 .gender(gender)
@@ -185,8 +168,8 @@ class GetUserDetailTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "INSTRUCTOR")
-    void getUserDetail_instructorRequestsOwnDetail() throws Exception {
-        var instructor = $db.user()
+    void getUserDetail_shouldReturnDto_whenInstructorRequestsOwnDetail() throws Exception {
+        var instructor = helper.user()
                 .seed(1)
                 .role(instructorRole)
                 .gender(gender)
@@ -201,18 +184,18 @@ class GetUserDetailTest {
     @ParameterizedTest
     @MethodSource("getUserDetailParams_rolesMismatch")
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
-    void createUser_shouldThrowException_whenRolesMismatch(String principalRoleName, String userRoleName)
+    void GetUserDetail_shouldThrowException_whenRolesMismatch(Role principalRoleName, Role userRoleName)
             throws Exception {
-        var principal = $db.user()
+        var principal = helper.user()
                 .seed(1)
-                .role(getRole(principalRoleName))
+                .role(principalRoleName)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
 
-        var user = $db.user()
+        var user = helper.user()
                 .seed(2)
-                .role(getRole(userRoleName))
+                .role(userRoleName)
                 .gender(gender)
                 .ageGroup(ageGroup)
                 .get();
@@ -225,28 +208,18 @@ class GetUserDetailTest {
 
     static Stream<Arguments> getUserDetailParams_rolesMismatch() {
         return Stream.of(
-                Arguments.of("ROLE_SUPERADMIN", "ROLE_SUPERADMIN"),
-                Arguments.of("ROLE_SUPERADMIN", "ROLE_CUSTOMER"),
-                Arguments.of("ROLE_SUPERADMIN", "ROLE_INSTRUCTOR"),
-                Arguments.of("ROLE_ADMIN", "ROLE_ADMIN"),
-                Arguments.of("ROLE_ADMIN", "ROLE_SUPERADMIN"),
-                Arguments.of("ROLE_CUSTOMER", "ROLE_CUSTOMER"),
-                Arguments.of("ROLE_CUSTOMER", "ROLE_SUPERADMIN"),
-                Arguments.of("ROLE_CUSTOMER", "ROLE_ADMIN"),
-                Arguments.of("ROLE_CUSTOMER", "ROLE_INSTRUCTOR"),
-                Arguments.of("ROLE_INSTRUCTOR", "ROLE_INSTRUCTOR"),
-                Arguments.of("ROLE_INSTRUCTOR", "ROLE_CUSTOMER"),
-                Arguments.of("ROLE_INSTRUCTOR", "ROLE_SUPERADMIN"),
-                Arguments.of("ROLE_INSTRUCTOR", "ROLE_ADMIN"));
-    }
-
-    Role getRole(String roleName) {
-        return switch (roleName) {
-            case "ROLE_SUPERADMIN" -> superadminRole;
-            case "ROLE_ADMIN" -> adminRole;
-            case "ROLE_CUSTOMER" -> customerRole;
-            case "ROLE_INSTRUCTOR" -> instructorRole;
-            default -> throw new IllegalStateException("Unexpected value: " + roleName);
-        };
+                Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_SUPERADMIN),
+                Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_CUSTOMER),
+                Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_INSTRUCTOR),
+                Arguments.of(Role.ROLE_ADMIN, Role.ROLE_ADMIN),
+                Arguments.of(Role.ROLE_ADMIN, Role.ROLE_SUPERADMIN),
+                Arguments.of(Role.ROLE_CUSTOMER, Role.ROLE_CUSTOMER),
+                Arguments.of(Role.ROLE_CUSTOMER, Role.ROLE_SUPERADMIN),
+                Arguments.of(Role.ROLE_CUSTOMER, Role.ROLE_ADMIN),
+                Arguments.of(Role.ROLE_CUSTOMER, Role.ROLE_INSTRUCTOR),
+                Arguments.of(Role.ROLE_INSTRUCTOR, Role.ROLE_INSTRUCTOR),
+                Arguments.of(Role.ROLE_INSTRUCTOR, Role.ROLE_CUSTOMER),
+                Arguments.of(Role.ROLE_INSTRUCTOR, Role.ROLE_SUPERADMIN),
+                Arguments.of(Role.ROLE_INSTRUCTOR, Role.ROLE_ADMIN));
     }
 }
