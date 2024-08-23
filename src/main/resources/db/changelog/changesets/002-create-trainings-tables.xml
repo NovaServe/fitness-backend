@@ -49,19 +49,33 @@
                 <constraints nullable="false" unique="false"
                              foreignKeyName="fk_instructor_id" references="users(id)" />
             </column>
-            <column name="created_at" type="timestamp with time zone">
+            <column name="created_at" type="timestamp">
                 <constraints nullable="false" unique="false" />
             </column>
             <column name="created_by_id" type="bigint">
                 <constraints nullable="false" unique="false"
                              foreignKeyName="fk_created_by_id" references="users(id)" />
             </column>
-            <column name="last_modified_at" type="timestamp with time zone">
+            <column name="last_modified_at" type="timestamp">
                 <constraints nullable="true" unique="false" />
             </column>
             <column name="last_modified_by_id" type="bigint">
                 <constraints nullable="true" unique="false"
                              foreignKeyName="fk_last_modified_by_id" references="users(id)" />
+            </column>
+        </createTable>
+
+        <createTable tableName="trainings_areas">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="training_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_training_id" references="trainings(id)" />
+            </column>
+            <column name="area_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_area_id" references="areas(id)" />
             </column>
         </createTable>
 
@@ -100,7 +114,7 @@
             <column name="excluded_dates" type="varchar">
                 <constraints nullable="true" unique="false" />
             </column>
-            <column name="deactivated_since" type="date">
+            <column name="deactivation_since" type="date">
                 <constraints nullable="true" unique="false" />
             </column>
         </createTable>
@@ -140,9 +154,9 @@
             </column>
         </createTable>
 
-        <sqlFile path="sql/init_areas.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
-        <sqlFile path="sql/dummy_trainings.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
-        <sqlFile path="sql/dummy_assignments.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="../sql/init_areas.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="../sql/dummy_trainings.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="../sql/dummy_assignments.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
     </changeSet>
 
 </databaseChangeLog>

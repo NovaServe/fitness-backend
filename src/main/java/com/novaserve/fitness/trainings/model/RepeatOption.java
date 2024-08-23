@@ -50,12 +50,14 @@ public class RepeatOption {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
-    // "YYYY-MM-DD;YYYY-MM-DD;..."
+    /**
+     * "YYYY-MM-DD;YYYY-MM-DD;..."
+     */
     @Column(name = "excluded_dates")
     private String excludedDates;
 
-    @Column(name = "deactivated_since")
-    private LocalDate deactivatedSince;
+    @Column(name = "deactivation_since")
+    private LocalDate deactivationSince;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "repeatOption")
     private Set<Assignment> assignments;

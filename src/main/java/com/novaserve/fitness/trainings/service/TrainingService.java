@@ -1,3 +1,6 @@
+/*
+** Copyright (C) 2024 NovaServe
+*/
 package com.novaserve.fitness.trainings.service;
 
 import com.novaserve.fitness.trainings.dto.TrainingsResponseDto;
@@ -6,7 +9,6 @@ import com.novaserve.fitness.trainings.model.Kind;
 import com.novaserve.fitness.trainings.model.Level;
 import com.novaserve.fitness.trainings.model.Type;
 import com.novaserve.fitness.users.model.Role;
-
 import java.util.Date;
 import java.util.List;
 
@@ -22,6 +24,5 @@ public interface TrainingService {
             List<Level> levels,
             List<Type> types,
             List<Kind> kinds,
-            Boolean withFreePlacesOnly
-    );
+            Boolean withFreePlacesOnly);
 }

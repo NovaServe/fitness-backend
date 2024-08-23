@@ -4,19 +4,23 @@
 package com.novaserve.fitness.config;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
+import com.novaserve.fitness.users.model.User;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 
-public class SpringSecurityAuditorAware implements AuditorAware<Long> {
+@Component
+public class SpringSecurityAuditorAware implements AuditorAware<User> {
     @Autowired
     AuthUtil authUtil;
 
     @Override
-    public Optional<Long> getCurrentAuditor() {
-        Long userId =
-                authUtil.getUserIdFromAuth(SecurityContextHolder.getContext().getAuthentication());
-        return Optional.of(userId);
+    public Optional<User> getCurrentAuditor() {
+        //        Long userId =
+        //                authUtil.getUserIdFromAuth(SecurityContextHolder.getContext().getAuthentication());
+        //        return Optional.of(userId);
+        return authUtil.getUserFromAuth(SecurityContextHolder.getContext().getAuthentication());
     }
 }

@@ -5,7 +5,7 @@ package com.novaserve.fitness.trainings.model;
 
 import com.novaserve.fitness.users.model.User;
 import jakarta.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import java.util.Set;
 import lombok.*;
 import org.springframework.data.annotation.CreatedBy;
@@ -72,18 +72,20 @@ public class Training {
     @CreatedDate
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "created_at", nullable = false, updatable = false)
-    private ZonedDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @CreatedBy
-    @Column(name = "created_by_id", nullable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id", nullable = false, updatable = false)
     private User createdBy;
 
     @LastModifiedDate
     @Temporal(value = TemporalType.TIMESTAMP)
     @Column(name = "last_modified_at")
-    private ZonedDateTime lastModifiedAt;
+    private LocalDateTime lastModifiedAt;
 
     @LastModifiedBy
-    @Column(name = "last_modified_by_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_modified_by_id")
     private User lastModifiedBy;
 }

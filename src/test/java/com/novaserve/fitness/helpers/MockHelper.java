@@ -3,6 +3,8 @@
 */
 package com.novaserve.fitness.helpers;
 
+import com.novaserve.fitness.helpers.builders.AreaTestBuilder;
+import com.novaserve.fitness.trainings.model.Area;
 import com.novaserve.fitness.users.model.AgeGroup;
 import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
@@ -56,5 +58,9 @@ public class MockHelper {
                     .ageGroup(ageGroup)
                     .build();
         }
+    }
+
+    public AreaTestBuilder<Area> area() {
+        return new AreaTestBuilder<Area>();
     }
 }

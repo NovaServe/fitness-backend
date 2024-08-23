@@ -24,31 +24,31 @@ public class User {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "full_name", nullable = false, unique = false)
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "phone", nullable = true, unique = true)
+    @Column(name = "phone", unique = true)
     private String phone;
 
-    @Column(name = "password", nullable = false, unique = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, unique = false)
+    @Column(name = "role", nullable = false)
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = true, unique = false)
+    @Column(name = "gender")
     private Gender gender;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "age_group", nullable = true, unique = false)
+    @Column(name = "age_group")
     private AgeGroup ageGroup;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "instructor")
     private Set<Training> instructorTrainings;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")

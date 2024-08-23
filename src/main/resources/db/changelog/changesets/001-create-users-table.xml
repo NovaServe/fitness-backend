@@ -38,7 +38,7 @@
             </column>
         </createTable>
 
-        <sqlFile path="sql/dummy_users.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="../sql/dummy_users.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
     </changeSet>
 
 </databaseChangeLog>

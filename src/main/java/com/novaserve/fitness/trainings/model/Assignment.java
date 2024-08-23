@@ -6,7 +6,6 @@ package com.novaserve.fitness.trainings.model;
 import com.novaserve.fitness.users.model.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -53,5 +52,5 @@ public class Assignment {
     private String excludedDates;
 
     @Column(name = "deactivated_at", updatable = false)
-    private LocalDateTime deactivatedAt;
+    private ZonedDateTime deactivatedAt;
 }
