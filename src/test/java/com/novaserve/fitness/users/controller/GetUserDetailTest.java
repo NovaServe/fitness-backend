@@ -91,7 +91,8 @@ class GetUserDetailTest {
         ageGroup = AgeGroup.Adult;
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("provideUserDetailParams")
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void getUserDetail_shouldReturnDto_whenSuperadminRequestsOwnOrAdminDetail() throws Exception {
         User superadmin = helper.user()
@@ -116,7 +117,12 @@ class GetUserDetailTest {
                 .andExpect(jsonPath("$.username").value(admin.getUsername()));
     }
 
-    @Test
+    static Stream<Arguments> provideUserDetailParams() {
+        return Stream.of(Arguments.of(1L, Role.ROLE_SUPERADMIN), Arguments.of(2L, Role.ROLE_ADMIN));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideUserDetailsParams")
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
     void getUserDetail_shouldReturnDto_whenAdminRequestsOwnOrCustomerOrInstructorDetail() throws Exception {
         User admin = helper.user()
@@ -149,6 +155,13 @@ class GetUserDetailTest {
         mockMvc.perform(get(GET_USER_DETAIL_URL, instructor.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value(instructor.getUsername()));
+    }
+
+    static Stream<Arguments> provideUserDetailsParams() {
+        return Stream.of(
+                Arguments.of(1L, Role.ROLE_ADMIN),
+                Arguments.of(2L, Role.ROLE_CUSTOMER),
+                Arguments.of(3L, Role.ROLE_INSTRUCTOR));
     }
 
     @Test
