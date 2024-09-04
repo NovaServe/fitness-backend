@@ -19,15 +19,15 @@ public class RepeatOptionTestBuilder<T> {
     private LocalDate repeatUntil;
     private Integer repeatTimes;
     private Boolean isAutoupdate;
-    private boolean isActive;
+    private Boolean isActive;
     private String excludedDates;
     private LocalDate deactivatedSince;
-    private T callerOrInstance;
+    private T callerInstance;
 
     public RepeatOptionTestBuilder() {}
 
-    public RepeatOptionTestBuilder(T callerOrInstance) {
-        this.callerOrInstance = callerOrInstance;
+    public RepeatOptionTestBuilder(T callerInstance) {
+        this.callerInstance = callerInstance;
     }
 
     public RepeatOptionTestBuilder<T> training(Training training) {
@@ -82,7 +82,7 @@ public class RepeatOptionTestBuilder<T> {
         return this;
     }
 
-    public RepeatOptionTestBuilder<T> active(boolean active) {
+    public RepeatOptionTestBuilder<T> active(Boolean active) {
         isActive = active;
         return this;
     }
@@ -112,6 +112,7 @@ public class RepeatOptionTestBuilder<T> {
                 .repeatSince(repeatSince == null ? LocalDate.now().minusDays(1) : repeatSince)
                 .repeatUntil(repeatUntil)
                 .repeatTimes(repeatTimes)
+                .isActive(isActive == null || isActive)
                 .isAutoupdate(isAutoupdate == null || isAutoupdate)
                 .excludedDates(excludedDates)
                 .deactivationSince(deactivatedSince)
@@ -119,9 +120,9 @@ public class RepeatOptionTestBuilder<T> {
     }
 
     public T build() {
-        if (callerOrInstance instanceof DbHelper) {
-            ((DbHelper) callerOrInstance).setRepeatOptionInstance(instance());
-            return callerOrInstance;
+        if (callerInstance instanceof DbHelper) {
+            ((DbHelper) callerInstance).setRepeatOptionInstance(instance());
+            return callerInstance;
         } else {
             return (T) instance();
         }

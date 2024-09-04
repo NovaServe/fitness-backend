@@ -20,8 +20,6 @@ import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.users.dto.UserResponseDto;
-import com.novaserve.fitness.users.model.AgeGroup;
-import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
 import java.util.*;
@@ -36,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -82,39 +79,28 @@ public class GetUsersTest {
         registry.add("spring.datasource.password", postgresqlContainer::getPassword);
     }
 
-    Role superadminRole;
-    Role adminRole;
-    Role customerRole;
-    Role instructorRole;
-    Gender gender;
-    AgeGroup ageGroup;
     List<User> users;
 
     @BeforeEach
     void beforeEach() {
         helper.deleteAll();
-        superadminRole = Role.ROLE_SUPERADMIN;
-        adminRole = Role.ROLE_ADMIN;
-        customerRole = Role.ROLE_CUSTOMER;
-        instructorRole = Role.ROLE_INSTRUCTOR;
-        gender = Gender.Female;
-        ageGroup = AgeGroup.Adult;
+
         final Map<Integer, Role> SEED_ROLE_MAP = Map.of(
-                1, superadminRole,
-                2, superadminRole,
-                3, adminRole,
-                4, adminRole,
-                5, customerRole,
-                6, customerRole,
-                7, instructorRole,
-                8, instructorRole);
+                1, Role.ROLE_SUPERADMIN,
+                2, Role.ROLE_SUPERADMIN,
+                3, Role.ROLE_ADMIN,
+                4, Role.ROLE_ADMIN,
+                5, Role.ROLE_CUSTOMER,
+                6, Role.ROLE_CUSTOMER,
+                7, Role.ROLE_INSTRUCTOR,
+                8, Role.ROLE_INSTRUCTOR);
+
         users = SEED_ROLE_MAP.entrySet().stream()
                 .map(entry -> helper.user()
                         .seed(entry.getKey())
                         .role(entry.getValue())
-                        .gender(gender)
-                        .ageGroup(ageGroup)
-                        .get())
+                        .build()
+                        .save(User.class))
                 .toList();
     }
 
@@ -123,25 +109,20 @@ public class GetUsersTest {
     @WithMockUser(username = "username0", password = "Password0!", roles = "SUPERADMIN")
     void getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest(Role principalRole, List<Role> filterByRoles)
             throws Exception {
-        User principal = helper.user()
-                .seed(0)
-                .role(principalRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User principal = helper.user().seed(0).role(principalRole).build().save(User.class);
 
-        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, null))
+        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + buildRequestParams(filterByRoles, null))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
 
-        String res = mvc.getResponse().getContentAsString();
-        JsonNode root = objectMapper.readTree(res);
+        String response = mvc.getResponse().getContentAsString();
+        JsonNode root = objectMapper.readTree(response);
         JsonNode content = root.path("content");
         List<UserResponseDto> dto =
                 objectMapper.readValue(content.toString(), new TypeReference<List<UserResponseDto>>() {});
-        assertHelper(getExpected(filterByRoles, null), dto);
+        assertHelper(getExpectedWithFilter(filterByRoles, null), dto);
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByRoles_whenSuperadminRequest() {
@@ -153,25 +134,20 @@ public class GetUsersTest {
     @WithMockUser(username = "username0", password = "Password0!", roles = "ADMIN")
     void getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest(Role principalRole, List<Role> filterByRoles)
             throws Exception {
-        User principal = helper.user()
-                .seed(0)
-                .role(principalRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User principal = helper.user().seed(0).role(principalRole).build().save(User.class);
 
-        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, null))
+        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + buildRequestParams(filterByRoles, null))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
 
-        String res = mvc.getResponse().getContentAsString();
-        JsonNode root = objectMapper.readTree(res);
+        String response = mvc.getResponse().getContentAsString();
+        JsonNode root = objectMapper.readTree(response);
         JsonNode content = root.path("content");
         List<UserResponseDto> dto =
                 objectMapper.readValue(content.toString(), new TypeReference<List<UserResponseDto>>() {});
-        assertHelper(getExpected(filterByRoles, null), dto);
+        assertHelper(getExpectedWithFilter(filterByRoles, null), dto);
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByRoles_whenAdminRequest() {
@@ -186,25 +162,20 @@ public class GetUsersTest {
     @WithMockUser(username = "username0", password = "Password0!", roles = "SUPERADMIN")
     void getUsers_shouldReturnPageFilteredByFullName_whenSuperadminRequest(
             Role principalRole, List<Role> filterByRoles, String fullName) throws Exception {
-        User principal = helper.user()
-                .seed(0)
-                .role(principalRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User principal = helper.user().seed(0).role(principalRole).build().save(User.class);
 
-        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, fullName))
+        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + buildRequestParams(filterByRoles, fullName))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
 
-        String res = mvc.getResponse().getContentAsString();
-        JsonNode root = objectMapper.readTree(res);
+        String response = mvc.getResponse().getContentAsString();
+        JsonNode root = objectMapper.readTree(response);
         JsonNode content = root.path("content");
         List<UserResponseDto> dto =
                 objectMapper.readValue(content.toString(), new TypeReference<List<UserResponseDto>>() {});
-        assertHelper(getExpected(filterByRoles, fullName), dto);
+        assertHelper(getExpectedWithFilter(filterByRoles, fullName), dto);
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByFullName_whenSuperadminRequest() {
@@ -218,25 +189,20 @@ public class GetUsersTest {
     @WithMockUser(username = "username0", password = "Password0!", roles = "SUPERADMIN")
     void getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest(
             Role principalRole, List<Role> filterByRoles, String fullName) throws Exception {
-        User principal = helper.user()
-                .seed(0)
-                .role(principalRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User principal = helper.user().seed(0).role(principalRole).build().save(User.class);
 
-        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, fullName))
+        MvcResult mvc = mockMvc.perform(get(CREATE_USER_URL + buildRequestParams(filterByRoles, fullName))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andReturn();
 
-        String res = mvc.getResponse().getContentAsString();
-        JsonNode root = objectMapper.readTree(res);
+        String response = mvc.getResponse().getContentAsString();
+        JsonNode root = objectMapper.readTree(response);
         JsonNode content = root.path("content");
         List<UserResponseDto> dto =
                 objectMapper.readValue(content.toString(), new TypeReference<List<UserResponseDto>>() {});
-        assertHelper(getExpected(filterByRoles, fullName), dto);
+        assertHelper(getExpectedWithFilter(filterByRoles, fullName), dto);
     }
 
     static Stream<Arguments> methodParams_getUsers_shouldReturnPageFilteredByFullName_whenAdminRequest() {
@@ -252,14 +218,9 @@ public class GetUsersTest {
     @WithMockUser(username = "username0", password = "Password0!", roles = "SUPERADMIN")
     void getUsers_shouldThrowException_whenSuperadminRequest_rolesMismatch(Role principalRole, List<Role> filterByRoles)
             throws Exception {
-        User principal = helper.user()
-                .seed(0)
-                .role(principalRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User principal = helper.user().seed(0).role(principalRole).build().save(User.class);
 
-        mockMvc.perform(get(CREATE_USER_URL + getRequestParams(filterByRoles, null))
+        mockMvc.perform(get(CREATE_USER_URL + buildRequestParams(filterByRoles, null))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ExceptionMessage.ROLES_MISMATCH.getName())))
@@ -278,14 +239,9 @@ public class GetUsersTest {
     @WithMockUser(username = "username0", password = "Password0!", roles = "ADMIN")
     void getUsers_shouldThrowException_whenAdminRequest_rolesMismatch(Role principalRole, List<Role> roles)
             throws Exception {
-        User principal = helper.user()
-                .seed(0)
-                .role(principalRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User principal = helper.user().seed(0).role(principalRole).build().save(User.class);
 
-        mockMvc.perform(get(CREATE_USER_URL + getRequestParams(roles, null)).contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(get(CREATE_USER_URL + buildRequestParams(roles, null)).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ExceptionMessage.ROLES_MISMATCH.getName())))
                 .andDo(print());
@@ -299,6 +255,7 @@ public class GetUsersTest {
 
     void assertHelper(List<User> expected, List<UserResponseDto> actual) {
         assertEquals(expected.size(), actual.size());
+
         BiPredicate<String, Role> roleBiPredicate = (string, enumeration) -> string.equals(enumeration.name());
         IntStream.range(0, expected.size()).forEach(i -> assertThat(actual.get(i))
                 .usingRecursiveComparison()
@@ -306,7 +263,7 @@ public class GetUsersTest {
                 .isEqualTo(expected.get(i)));
     }
 
-    List<User> getExpected(List<Role> roles, String fullName) {
+    List<User> getExpectedWithFilter(List<Role> roles, String fullName) {
         return users.stream()
                 .filter(user -> roles.contains(user.getRole()))
                 .filter(user -> fullName == null || user.getFullName().contains(fullName))
@@ -314,7 +271,7 @@ public class GetUsersTest {
                 .toList();
     }
 
-    String getRequestParams(List<Role> roles, String fullName) {
+    String buildRequestParams(List<Role> roles, String fullName) {
         List<String> rolesString = roles.stream().map(Enum::name).toList();
         StringBuilder sb = new StringBuilder("?roles=");
         sb.append(String.join(",", rolesString));

@@ -15,8 +15,6 @@ import com.novaserve.fitness.exception.ServerException;
 import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.helpers.MockHelper;
 import com.novaserve.fitness.users.dto.CreateUserRequestDto;
-import com.novaserve.fitness.users.model.AgeGroup;
-import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
@@ -57,22 +55,8 @@ class CreateUserTest {
     @Spy
     DtoHelper dtoHelper;
 
-    Role superadminRole;
-    Role adminRole;
-    Role customerRole;
-    Role instructorRole;
-    Gender gender;
-    AgeGroup ageGroup;
-
     @BeforeEach
     public void beforeEach() {
-        superadminRole = Role.ROLE_SUPERADMIN;
-        adminRole = Role.ROLE_ADMIN;
-        customerRole = Role.ROLE_CUSTOMER;
-        instructorRole = Role.ROLE_INSTRUCTOR;
-        gender = Gender.Female;
-        ageGroup = AgeGroup.Adult;
-
         lenient().when(userRepository.save(any(User.class))).then(invocation -> {
             User user = invocation.getArgument(0);
             user.setId(1000L);
@@ -82,20 +66,10 @@ class CreateUserTest {
 
     @Test
     void createUser_shouldCreateAdmin_whenSuperadminRequests() {
-        User superadmin = helper.user()
-                .seed(1)
-                .role(superadminRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User superadmin = helper.user().seed(1).role(Role.ROLE_SUPERADMIN).build();
 
-        CreateUserRequestDto dto = dtoHelper
-                .createUserRequestDto()
-                .seed(2)
-                .role(adminRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        CreateUserRequestDto dto =
+                dtoHelper.createUserRequestDto().seed(2).role(Role.ROLE_ADMIN).build();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(superadmin));
         when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any())).thenReturn(Optional.empty());
@@ -107,20 +81,10 @@ class CreateUserTest {
     @ParameterizedTest
     @MethodSource("methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests")
     void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(Role role) {
-        User admin = helper.user()
-                .seed(1)
-                .role(adminRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User admin = helper.user().seed(1).role(Role.ROLE_ADMIN).build();
 
-        CreateUserRequestDto dto = dtoHelper
-                .createUserRequestDto()
-                .seed(2)
-                .role(role)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        CreateUserRequestDto dto =
+                dtoHelper.createUserRequestDto().seed(2).role(role).build();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(admin));
         when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any())).thenReturn(Optional.empty());
@@ -136,20 +100,10 @@ class CreateUserTest {
     @ParameterizedTest
     @MethodSource("methodParams_createUser_shouldThrowException_whenRolesMismatch")
     void createUser_shouldThrowException_whenRolesMismatch(Role principalRole, Role newUserRole) {
-        User user = helper.user()
-                .seed(1)
-                .role(principalRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User user = helper.user().seed(1).role(principalRole).build();
 
-        CreateUserRequestDto dto = dtoHelper
-                .createUserRequestDto()
-                .seed(2)
-                .role(newUserRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        CreateUserRequestDto dto =
+                dtoHelper.createUserRequestDto().seed(2).role(newUserRole).build();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
 
@@ -177,27 +131,15 @@ class CreateUserTest {
 
     @Test
     void createUser_shouldThrowException_whenUserAlreadyExists() {
-        User user = helper.user()
-                .seed(1)
-                .role(adminRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User user = helper.user().seed(1).role(Role.ROLE_ADMIN).build();
 
-        User alreadyExists = helper.user()
-                .seed(2)
-                .role(customerRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User alreadyExists = helper.user().seed(2).role(Role.ROLE_CUSTOMER).build();
 
         CreateUserRequestDto dto = dtoHelper
                 .createUserRequestDto()
                 .seed(2)
-                .role(customerRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+                .role(Role.ROLE_CUSTOMER)
+                .build();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
         when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any()))
@@ -209,8 +151,9 @@ class CreateUserTest {
     }
 
     void assertHelper(User actual, CreateUserRequestDto dto) {
-        String[] comparatorIgnoreFields = new String[] {"id"};
+        String[] comparatorIgnoreFields = new String[] {"id", "assignments", "instructorTrainings"};
         BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
+
         assertThat(actual)
                 .usingRecursiveComparison()
                 .withEqualsForFields(passwordBiPredicate, "password")

@@ -7,7 +7,7 @@ import com.novaserve.fitness.trainings.dto.TrainingsResponseDto;
 import com.novaserve.fitness.trainings.model.*;
 import com.novaserve.fitness.trainings.repository.TrainingRepository;
 import com.novaserve.fitness.users.model.Role;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +24,8 @@ public class TrainingServiceImpl implements TrainingService {
 
     @Override
     public TrainingsResponseDto getTrainings(
-            Date startRange,
-            Date endRange,
+            LocalDate startRange,
+            LocalDate endRange,
             List<String> areas,
             List<Long> instructors,
             List<Intensity> intensity,

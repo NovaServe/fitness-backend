@@ -4,7 +4,7 @@
 package com.novaserve.fitness.trainings.repository;
 
 import com.novaserve.fitness.trainings.model.*;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,8 +23,8 @@ public interface TrainingRepository extends JpaRepository<Training, Long> {
             + "AND (:types IS NULL OR t.type IN :types) "
             + "AND (:kinds IS NULL OR t.kind IN :kinds)")
     List<Training> getTrainings(
-            Date startRange,
-            Date endRange,
+            LocalDate startRange,
+            LocalDate endRange,
             List<String> areas,
             List<Long> instructors,
             List<Intensity> intensity,

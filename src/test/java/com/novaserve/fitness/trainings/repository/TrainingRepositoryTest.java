@@ -12,6 +12,8 @@ import com.novaserve.fitness.trainings.model.*;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ import org.testcontainers.utility.DockerImageName;
 @Import(TestBeans.class)
 class TrainingRepositoryTest {
     @Autowired
+    TrainingCriteriaBuilder trainingCriteriaBuilder;
+
+    @Autowired
     DbHelper helper;
 
     @Container
@@ -43,15 +48,25 @@ class TrainingRepositoryTest {
         registry.add("spring.datasource.password", postgresqlContainer::getPassword);
     }
 
+    List<Area> areas;
+    List<User> instructors;
+    List<Training> trainings;
+
     @BeforeEach
     void setUp() {
         helper.deleteAll();
-        User instructor1 = helper.user().seed(1).role(Role.ROLE_INSTRUCTOR).get();
-        User instructor2 = helper.user().seed(2).role(Role.ROLE_INSTRUCTOR).get();
+
+        User instructor1 =
+                helper.user().seed(1).role(Role.ROLE_INSTRUCTOR).build().save(User.class);
+        User instructor2 =
+                helper.user().seed(2).role(Role.ROLE_INSTRUCTOR).build().save(User.class);
+        instructors = new ArrayList<>(List.of(instructor1, instructor2));
+
         Area area1 = helper.area().seed(1).build().save(Area.class);
         Area area2 = helper.area().seed(2).build().save(Area.class);
         Area area3 = helper.area().seed(3).build().save(Area.class);
         Area area4 = helper.area().seed(4).build().save(Area.class);
+        areas = new ArrayList<>(List.of(area1, area2, area3, area4));
 
         Training training1 = helper.training()
                 .seed(1)
@@ -106,9 +121,25 @@ class TrainingRepositoryTest {
                 .training(training2)
                 .build()
                 .save(RepeatOption.class);
+
+        trainings = new ArrayList<>(List.of(training1, training2));
     }
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "INSTRUCTOR")
-    void getTrainingsWithNoFilters() {}
+    void getTrainings_shouldReturnAllActiveTrainings_whenNoFilter() {
+        LocalDate startDate = LocalDate.of(2024, 1, 1);
+        List<Training> trainings =
+                trainingCriteriaBuilder.getTrainings(startDate, null, null, null, null, null, null, null);
+        assertEquals(2, trainings.size());
+    }
+
+    @Test
+    @WithMockUser(username = "username1", password = "Password1!", roles = "INSTRUCTOR")
+    void getTrainings_shouldReturnFilteredActiveTrainings_whenFilteredByAreas() {
+        LocalDate startDate = LocalDate.of(2024, 1, 1);
+        List<Training> trainings = trainingCriteriaBuilder.getTrainings(
+                startDate, null, List.of(areas.get(2).getName()), null, null, null, null, null);
+        assertEquals(1, trainings.size());
+    }
 }

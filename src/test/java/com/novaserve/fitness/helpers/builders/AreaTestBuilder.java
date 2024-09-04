@@ -9,13 +9,13 @@ import com.novaserve.fitness.trainings.model.Area;
 public class AreaTestBuilder<T> {
     private int seed;
     private String name;
-    private T callerOrInstance;
+    private T callerInstance;
 
     public AreaTestBuilder() {}
     ;
 
-    public AreaTestBuilder(T callerOrInstance) {
-        this.callerOrInstance = callerOrInstance;
+    public AreaTestBuilder(T callerInstance) {
+        this.callerInstance = callerInstance;
     }
 
     public AreaTestBuilder<T> seed(int seed) {
@@ -33,9 +33,9 @@ public class AreaTestBuilder<T> {
     }
 
     public T build() {
-        if (callerOrInstance instanceof DbHelper) {
-            ((DbHelper) callerOrInstance).setAreaInstance(instance());
-            return callerOrInstance;
+        if (callerInstance instanceof DbHelper) {
+            ((DbHelper) callerInstance).setAreaInstance(instance());
+            return callerInstance;
         } else {
             return (T) instance();
         }

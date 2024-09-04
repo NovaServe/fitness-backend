@@ -18,12 +18,12 @@ public class TrainingTestBuilder<T> {
     private Integer totalPlaces;
     private User instructor;
     private Set<Area> areas;
-    private T callerOrInstance;
+    private T callerInstance;
 
     public TrainingTestBuilder() {}
 
-    public TrainingTestBuilder(T callerOrInstance) {
-        this.callerOrInstance = callerOrInstance;
+    public TrainingTestBuilder(T callerInstance) {
+        this.callerInstance = callerInstance;
     }
 
     public TrainingTestBuilder<T> seed(int seed) {
@@ -87,9 +87,9 @@ public class TrainingTestBuilder<T> {
     }
 
     public T build() {
-        if (callerOrInstance instanceof DbHelper) {
-            ((DbHelper) callerOrInstance).setTrainingInstance(instance());
-            return callerOrInstance;
+        if (callerInstance instanceof DbHelper) {
+            ((DbHelper) callerInstance).setTrainingInstance(instance());
+            return callerInstance;
         } else {
             return (T) instance();
         }

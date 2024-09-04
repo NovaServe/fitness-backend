@@ -9,15 +9,15 @@ import com.novaserve.fitness.trainings.model.Kind;
 import com.novaserve.fitness.trainings.model.Level;
 import com.novaserve.fitness.trainings.model.Type;
 import com.novaserve.fitness.users.model.Role;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TrainingService {
     TrainingsResponseDto getTrainingsFactory(Role role, long userId);
 
     TrainingsResponseDto getTrainings(
-            Date startRange,
-            Date endRange,
+            LocalDate startRange,
+            LocalDate endRange,
             List<String> areas,
             List<Long> instructors,
             List<Intensity> intensity,

@@ -18,8 +18,6 @@ import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.users.dto.CreateUserRequestDto;
-import com.novaserve.fitness.users.model.AgeGroup;
-import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
 import java.util.function.BiPredicate;
@@ -77,41 +75,19 @@ class CreateUserTest {
         registry.add("spring.datasource.password", postgresqlContainer::getPassword);
     }
 
-    Role superadminRole;
-    Role adminRole;
-    Role customerRole;
-    Role instructorRole;
-    Gender gender;
-    AgeGroup ageGroup;
-
     @BeforeEach
     void beforeEach() {
         helper.deleteAll();
-        superadminRole = Role.ROLE_SUPERADMIN;
-        adminRole = Role.ROLE_ADMIN;
-        customerRole = Role.ROLE_CUSTOMER;
-        instructorRole = Role.ROLE_INSTRUCTOR;
-        gender = Gender.Female;
-        ageGroup = AgeGroup.Adult;
     }
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void createUser_shouldCreateAdmin_whenSuperadminRequests() throws Exception {
-        helper.user()
-                .seed(1)
-                .role(superadminRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User superadmin =
+                helper.user().seed(1).role(Role.ROLE_SUPERADMIN).build().save(User.class);
 
-        CreateUserRequestDto dto = dtoHelper
-                .createUserRequestDto()
-                .seed(2)
-                .role(adminRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        CreateUserRequestDto dto =
+                dtoHelper.createUserRequestDto().seed(2).role(Role.ROLE_ADMIN).build();
 
         mockMvc.perform(post(CREATE_USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -126,15 +102,10 @@ class CreateUserTest {
     @MethodSource("methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests")
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
     void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(Role role) throws Exception {
-        helper.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
+        User admin = helper.user().seed(1).role(Role.ROLE_ADMIN).build().save(User.class);
 
-        CreateUserRequestDto dto = dtoHelper
-                .createUserRequestDto()
-                .seed(2)
-                .role(role)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        CreateUserRequestDto dto =
+                dtoHelper.createUserRequestDto().seed(2).role(role).build();
 
         mockMvc.perform(post(CREATE_USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -153,20 +124,10 @@ class CreateUserTest {
     @MethodSource("methodParams_createUser_shouldThrowException_whenRolesMismatch")
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
     void createUser_shouldThrowException_whenRolesMismatch(Role principalRole, Role newUserRole) throws Exception {
-        helper.user()
-                .seed(1)
-                .role(principalRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User principal = helper.user().seed(1).role(principalRole).build().save(User.class);
 
-        CreateUserRequestDto dto = dtoHelper
-                .createUserRequestDto()
-                .seed(2)
-                .role(newUserRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        CreateUserRequestDto dto =
+                dtoHelper.createUserRequestDto().seed(2).role(newUserRole).build();
 
         mockMvc.perform(post(CREATE_USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -197,27 +158,16 @@ class CreateUserTest {
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
     void createUser_shouldThrowException_whenUserAlreadyExists() throws Exception {
-        User user = helper.user()
-                .seed(1)
-                .role(adminRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User user = helper.user().seed(1).role(Role.ROLE_ADMIN).build().save(User.class);
 
-        User alreadyExists = helper.user()
-                .seed(2)
-                .role(customerRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User userAlreadyExists =
+                helper.user().seed(2).role(Role.ROLE_CUSTOMER).build().save(User.class);
 
         CreateUserRequestDto dto = dtoHelper
                 .createUserRequestDto()
                 .seed(2)
-                .role(customerRole)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+                .role(Role.ROLE_CUSTOMER)
+                .build();
 
         mockMvc.perform(post(CREATE_USER_URL)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -229,8 +179,10 @@ class CreateUserTest {
 
     void assertHelper(CreateUserRequestDto dto) {
         User actual = helper.getUser(dto.getUsername());
-        String[] comparatorIgnoreFields = new String[] {"id"};
+
+        String[] comparatorIgnoreFields = new String[] {"id", "assignments", "instructorTrainings"};
         BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
+
         assertThat(actual)
                 .usingRecursiveComparison()
                 .withEqualsForFields(passwordBiPredicate, "password")
