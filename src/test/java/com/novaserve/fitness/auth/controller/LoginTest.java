@@ -12,14 +12,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaserve.fitness.auth.dto.LoginRequestDto;
+import com.novaserve.fitness.auth.dto.request.LoginRequestDto;
 import com.novaserve.fitness.config.Docker;
 import com.novaserve.fitness.config.TestBeans;
 import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.DtoHelper;
-import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.model.enums.Role;
 import jakarta.servlet.http.Cookie;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +36,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -46,48 +47,46 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 @Import(TestBeans.class)
 class LoginTest {
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    DbHelper helper;
-
-    @Autowired
-    DtoHelper dtoHelper;
-
-    final String LOGIN_URL = "/api/v1/auth/login";
-
-    @BeforeEach
-    void beforeEach() {
-        helper.deleteAll();
-    }
-
     @Container
-    static PostgreSQLContainer<?> postgresqlContainer =
+    public static PostgreSQLContainer<?> postgresqlContainer =
             new PostgreSQLContainer<>(DockerImageName.parse(Docker.POSTGRES));
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private DbHelper helper;
+
+    @Autowired
+    private DtoHelper dtoHelper;
+
     @DynamicPropertySource
-    static void postgresProperties(DynamicPropertyRegistry registry) {
+    public static void postgresProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgresqlContainer::getUsername);
         registry.add("spring.datasource.password", postgresqlContainer::getPassword);
     }
 
+    @BeforeEach
+    public void beforeEach() {
+        helper.deleteAll();
+    }
+
     @ParameterizedTest
     @MethodSource("loginCredentialTypes")
-    void login_shouldAuthenticateUser_whenValidCredentials(Role role, String credentialType) throws Exception {
+    public void login_shouldAuthenticateUser_whenValidCredentials(Role role, String credentialType) throws Exception {
         User user = helper.user().seed(1).role(role).build().save(User.class);
-        LoginRequestDto dto = getDto(credentialType);
+        LoginRequestDto loginRequestDto = getDto(credentialType);
 
-        var mvcResult = mockMvc.perform(post(LOGIN_URL)
+        MvcResult mvcResult = mockMvc.perform(post(URL.LOGIN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(loginRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.role", is(role.name())))
                 .andExpect(jsonPath("$.fullName", is(user.getFullName())))
@@ -102,7 +101,7 @@ class LoginTest {
         assertEquals("Strict", cookie.getAttribute("SameSite"));
     }
 
-    static Stream<Arguments> loginCredentialTypes() {
+    public static Stream<Arguments> loginCredentialTypes() {
         return Stream.of(
                 Arguments.of(Role.ROLE_SUPERADMIN, "username"),
                 Arguments.of(Role.ROLE_SUPERADMIN, "email"),
@@ -118,7 +117,21 @@ class LoginTest {
                 Arguments.of(Role.ROLE_INSTRUCTOR, "phone"));
     }
 
-    LoginRequestDto getDto(String credentialType) {
+    @Test
+    public void login_shouldThrowException_whenInvalidCredentials() throws Exception {
+        User principal = helper.user().seed(1).role(Role.ROLE_ADMIN).build().save(User.class);
+        LoginRequestDto loginRequestDto =
+                dtoHelper.loginRequestDto().seed(2).withUsername().build();
+
+        mockMvc.perform(post(URL.LOGIN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequestDto)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message", is(ExceptionMessage.INVALID_CREDENTIALS.getName())))
+                .andDo(print());
+    }
+
+    private LoginRequestDto getDto(String credentialType) {
         return switch (credentialType) {
             case "username" -> dtoHelper
                     .loginRequestDto()
@@ -129,18 +142,5 @@ class LoginTest {
             case "phone" -> dtoHelper.loginRequestDto().seed(1).withPhone().build();
             default -> throw new IllegalStateException("Unexpected value: " + credentialType);
         };
-    }
-
-    @Test
-    void login_shouldThrowException_whenInvalidCredentials() throws Exception {
-        User principal = helper.user().seed(1).role(Role.ROLE_ADMIN).build().save(User.class);
-        LoginRequestDto dto = dtoHelper.loginRequestDto().seed(2).withUsername().build();
-
-        mockMvc.perform(post(LOGIN_URL)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message", is(ExceptionMessage.INVALID_CREDENTIALS.getName())))
-                .andDo(print());
     }
 }

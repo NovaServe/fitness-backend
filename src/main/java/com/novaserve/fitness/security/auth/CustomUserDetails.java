@@ -6,7 +6,6 @@ package com.novaserve.fitness.security.auth;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.service.UserUtil;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,11 +14,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomUserDetails implements UserDetailsService {
-    @Autowired
-    UserUtil userUtil;
+    private final UserUtil userUtil;
 
-    @Autowired
-    SecurityUtil securityUtil;
+    private final SecurityUtil securityUtil;
+
+    public CustomUserDetails(UserUtil userUtil, SecurityUtil securityUtil) {
+        this.userUtil = userUtil;
+        this.securityUtil = securityUtil;
+    }
 
     @Override
     @Transactional
@@ -27,7 +29,13 @@ public class CustomUserDetails implements UserDetailsService {
         User user = userUtil.getUserByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         String.format("User not found with provided username, email, or phone: %s", username)));
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(), user.getPassword(), securityUtil.mapRolesToAuthorities(Set.of(user.getRole())));
+
+        org.springframework.security.core.userdetails.User userDetailsImpl =
+                new org.springframework.security.core.userdetails.User(
+                        user.getUsername(),
+                        user.getPassword(),
+                        securityUtil.mapRolesToAuthorities(Set.of(user.getRole())));
+
+        return userDetailsImpl;
     }
 }

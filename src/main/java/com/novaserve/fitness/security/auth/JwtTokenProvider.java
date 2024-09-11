@@ -9,55 +9,62 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Date;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtTokenProvider {
-    @Autowired
-    SecurityProps securityProps;
+    private final SecurityProps securityProps;
 
-    @Autowired
-    UserUtil userUtil;
+    private final UserUtil userUtil;
+
+    public JwtTokenProvider(SecurityProps securityProps, UserUtil userUtil) {
+        this.securityProps = securityProps;
+        this.userUtil = userUtil;
+    }
 
     public String generateToken(Authentication auth) {
         User user = (User) (auth.getPrincipal());
         Date current = new Date(); // In UTC
         Date expires = new Date(current.getTime() + securityProps.Jwt().expiresInMilliseconds()); // In UTC
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .subject(user.getUsername())
                 .issuedAt(current)
                 .expiration(expires)
                 .signWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()), Jwts.SIG.HS512)
                 .compact();
+        return token;
     }
 
     public String getUsernameFromJwt(String token) {
-        return Jwts.parser()
+        String username = Jwts.parser()
                 .verifyWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+        return username;
     }
 
     public Date getExpiresDateFromJwt(String token) {
-        return Jwts.parser()
+        Date expirationDate = Jwts.parser()
                 .verifyWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
                 .getExpiration();
+        return expirationDate;
     }
 
     public boolean validateToken(String token) {
         boolean isValid = false;
+
         try {
             Jws<Claims> claims = Jwts.parser()
                     .verifyWith(Keys.hmacShaKeyFor(securityProps.Jwt().secret().getBytes()))
                     .build()
                     .parseSignedClaims(token);
+
             byte[] signature = claims.getDigest();
             if (signature == null || signature.length == 0) {
                 return isValid;

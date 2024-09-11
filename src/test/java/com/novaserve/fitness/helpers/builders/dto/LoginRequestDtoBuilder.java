@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.helpers.builders.dto;
 
-import com.novaserve.fitness.auth.dto.LoginRequestDto;
+import com.novaserve.fitness.auth.dto.request.LoginRequestDto;
 
 public class LoginRequestDtoBuilder {
     private int seed;

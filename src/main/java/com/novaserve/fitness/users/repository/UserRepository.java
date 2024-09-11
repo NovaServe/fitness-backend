@@ -3,8 +3,8 @@
 */
 package com.novaserve.fitness.users.repository;
 
-import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.model.enums.Role;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;

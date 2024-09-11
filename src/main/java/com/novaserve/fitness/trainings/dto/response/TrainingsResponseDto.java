@@ -1,7 +1,7 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.trainings.dto;
+package com.novaserve.fitness.trainings.dto.response;
 
 import java.time.LocalDate;
 import java.util.List;

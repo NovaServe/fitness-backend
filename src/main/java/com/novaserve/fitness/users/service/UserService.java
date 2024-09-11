@@ -3,10 +3,10 @@
 */
 package com.novaserve.fitness.users.service;
 
-import com.novaserve.fitness.users.dto.CreateUserRequestDto;
-import com.novaserve.fitness.users.dto.UserResponseDto;
-import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.dto.request.CreateUserRequestDto;
+import com.novaserve.fitness.users.dto.response.UserResponseDto;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.model.enums.Role;
 import java.util.List;
 import org.springframework.data.domain.Page;
 
@@ -17,7 +17,7 @@ public interface UserService {
 
     User createUser(CreateUserRequestDto requestDto);
 
-    UserResponseDto getUserDetail(long userId);
+    UserResponseDto getUserDetails(long userId);
 
     Page<UserResponseDto> getUsers(
             List<Role> roles, String fullName, String sortBy, String order, int pageSize, int pageNumber);

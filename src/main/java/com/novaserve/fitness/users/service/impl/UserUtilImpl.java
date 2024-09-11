@@ -7,13 +7,15 @@ import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
 import com.novaserve.fitness.users.service.UserUtil;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserUtilImpl implements UserUtil {
-    @Autowired
-    UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public UserUtilImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public Optional<User> getUserByUsername(String username) {

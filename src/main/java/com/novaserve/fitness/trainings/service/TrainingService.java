@@ -3,11 +3,11 @@
 */
 package com.novaserve.fitness.trainings.service;
 
-import com.novaserve.fitness.trainings.dto.TrainingsResponseDto;
-import com.novaserve.fitness.trainings.model.Intensity;
-import com.novaserve.fitness.trainings.model.Kind;
-import com.novaserve.fitness.trainings.model.Level;
-import com.novaserve.fitness.trainings.model.Type;
+import com.novaserve.fitness.trainings.dto.response.TrainingsResponseDto;
+import com.novaserve.fitness.trainings.model.enums.Intensity;
+import com.novaserve.fitness.trainings.model.enums.Kind;
+import com.novaserve.fitness.trainings.model.enums.Level;
+import com.novaserve.fitness.trainings.model.enums.Type;
 import java.time.LocalDate;
 import java.util.List;
 

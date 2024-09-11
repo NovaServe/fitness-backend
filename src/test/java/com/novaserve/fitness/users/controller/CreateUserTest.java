@@ -17,9 +17,9 @@ import com.novaserve.fitness.config.TestBeans;
 import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.DtoHelper;
-import com.novaserve.fitness.users.dto.CreateUserRequestDto;
-import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.dto.request.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.model.enums.Role;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,73 +47,71 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 @Import(TestBeans.class)
 class CreateUserTest {
+    @Container
+    public static PostgreSQLContainer<?> postgresqlContainer =
+            new PostgreSQLContainer<>(DockerImageName.parse(Docker.POSTGRES));
+
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
 
     @Autowired
-    DbHelper helper;
+    private DbHelper helper;
 
     @Autowired
-    DtoHelper dtoHelper;
-
-    final String CREATE_USER_URL = "/api/v1/users";
-
-    @Container
-    static PostgreSQLContainer<?> postgresqlContainer =
-            new PostgreSQLContainer<>(DockerImageName.parse(Docker.POSTGRES));
+    private DtoHelper dtoHelper;
 
     @DynamicPropertySource
-    static void postgresProperties(DynamicPropertyRegistry registry) {
+    public static void postgresProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgresqlContainer::getUsername);
         registry.add("spring.datasource.password", postgresqlContainer::getPassword);
     }
 
     @BeforeEach
-    void beforeEach() {
+    public void beforeEach() {
         helper.deleteAll();
     }
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
-    void createUser_shouldCreateAdmin_whenSuperadminRequests() throws Exception {
+    public void createUser_shouldCreateAdmin_whenSuperadminRequests() throws Exception {
         User superadmin =
                 helper.user().seed(1).role(Role.ROLE_SUPERADMIN).build().save(User.class);
 
-        CreateUserRequestDto dto =
+        CreateUserRequestDto createUserRequestDto =
                 dtoHelper.createUserRequestDto().seed(2).role(Role.ROLE_ADMIN).build();
 
-        mockMvc.perform(post(CREATE_USER_URL)
+        mockMvc.perform(post(URL.CREATE_USER)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(createUserRequestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$").doesNotExist())
                 .andDo(print());
-        assertHelper(dto);
+        assertHelper(createUserRequestDto);
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests")
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
-    void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(Role role) throws Exception {
+    public void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(Role role) throws Exception {
         User admin = helper.user().seed(1).role(Role.ROLE_ADMIN).build().save(User.class);
 
-        CreateUserRequestDto dto =
+        CreateUserRequestDto createUserRequestDto =
                 dtoHelper.createUserRequestDto().seed(2).role(role).build();
 
-        mockMvc.perform(post(CREATE_USER_URL)
+        mockMvc.perform(post(URL.CREATE_USER)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(createUserRequestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$").doesNotExist())
                 .andDo(print());
-        assertHelper(dto);
+        assertHelper(createUserRequestDto);
     }
 
     static Stream<Arguments> methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests() {
@@ -123,22 +121,23 @@ class CreateUserTest {
     @ParameterizedTest
     @MethodSource("methodParams_createUser_shouldThrowException_whenRolesMismatch")
     @WithMockUser(username = "username1", password = "Password1!", roles = "SUPERADMIN")
-    void createUser_shouldThrowException_whenRolesMismatch(Role principalRole, Role newUserRole) throws Exception {
+    public void createUser_shouldThrowException_whenRolesMismatch(Role principalRole, Role newUserRole)
+            throws Exception {
         User principal = helper.user().seed(1).role(principalRole).build().save(User.class);
 
-        CreateUserRequestDto dto =
+        CreateUserRequestDto createUserRequestDto =
                 dtoHelper.createUserRequestDto().seed(2).role(newUserRole).build();
 
-        mockMvc.perform(post(CREATE_USER_URL)
+        mockMvc.perform(post(URL.CREATE_USER)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(createUserRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ExceptionMessage.ROLES_MISMATCH.getName())))
                 .andDo(print());
-        assertNull(helper.getUser(dto.getUsername()));
+        assertNull(helper.getUser(createUserRequestDto.getUsername()));
     }
 
-    static Stream<Arguments> methodParams_createUser_shouldThrowException_whenRolesMismatch() {
+    public static Stream<Arguments> methodParams_createUser_shouldThrowException_whenRolesMismatch() {
         return Stream.of(
                 Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_SUPERADMIN),
                 Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_CUSTOMER),
@@ -157,27 +156,27 @@ class CreateUserTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "ADMIN")
-    void createUser_shouldThrowException_whenUserAlreadyExists() throws Exception {
+    public void createUser_shouldThrowException_whenUserAlreadyExists() throws Exception {
         User user = helper.user().seed(1).role(Role.ROLE_ADMIN).build().save(User.class);
 
         User userAlreadyExists =
                 helper.user().seed(2).role(Role.ROLE_CUSTOMER).build().save(User.class);
 
-        CreateUserRequestDto dto = dtoHelper
+        CreateUserRequestDto createUserRequestDto = dtoHelper
                 .createUserRequestDto()
                 .seed(2)
                 .role(Role.ROLE_CUSTOMER)
                 .build();
 
-        mockMvc.perform(post(CREATE_USER_URL)
+        mockMvc.perform(post(URL.CREATE_USER)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dto)))
+                        .content(objectMapper.writeValueAsString(createUserRequestDto)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", is(ExceptionMessage.ALREADY_EXISTS.getName())))
                 .andDo(print());
     }
 
-    void assertHelper(CreateUserRequestDto dto) {
+    private void assertHelper(CreateUserRequestDto dto) {
         User actual = helper.getUser(dto.getUsername());
 
         String[] comparatorIgnoreFields = new String[] {"id", "assignments", "instructorTrainings"};

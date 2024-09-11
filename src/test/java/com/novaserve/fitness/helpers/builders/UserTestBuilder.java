@@ -5,10 +5,10 @@ package com.novaserve.fitness.helpers.builders;
 
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.Util;
-import com.novaserve.fitness.users.model.AgeGroup;
-import com.novaserve.fitness.users.model.Gender;
-import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.model.enums.AgeGroup;
+import com.novaserve.fitness.users.model.enums.Gender;
+import com.novaserve.fitness.users.model.enums.Role;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 

@@ -1,11 +1,11 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.users.dto;
+package com.novaserve.fitness.users.dto.request;
 
-import com.novaserve.fitness.users.model.AgeGroup;
-import com.novaserve.fitness.users.model.Gender;
-import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.model.enums.AgeGroup;
+import com.novaserve.fitness.users.model.enums.Gender;
+import com.novaserve.fitness.users.model.enums.Role;
 import com.novaserve.fitness.validation.MatchFields;
 import jakarta.validation.constraints.*;
 import lombok.*;

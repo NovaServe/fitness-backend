@@ -4,18 +4,24 @@
 package com.novaserve.fitness.trainings.repository;
 
 import com.novaserve.fitness.trainings.model.*;
+import com.novaserve.fitness.trainings.model.enums.Intensity;
+import com.novaserve.fitness.trainings.model.enums.Kind;
+import com.novaserve.fitness.trainings.model.enums.Level;
+import com.novaserve.fitness.trainings.model.enums.Type;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TrainingCriteriaBuilder {
-    @Autowired
-    EntityManager entityManager;
+    private final EntityManager entityManager;
+
+    public TrainingCriteriaBuilder(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
 
     public List<Training> getTrainings(
             LocalDate startRange,

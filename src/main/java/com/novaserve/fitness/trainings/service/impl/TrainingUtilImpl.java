@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.trainings.service.impl;
 
-import com.novaserve.fitness.share.CustomDateTime;
+import com.novaserve.fitness.share.ServerDateTime;
 import com.novaserve.fitness.trainings.service.TrainingUtil;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -17,7 +17,7 @@ public class TrainingUtilImpl implements TrainingUtil {
     public Set<LocalDate> parseExcludedDates(String excludedDates) {
         String[] excludedDatesArr = excludedDates.split(";");
         Set<LocalDate> dates = new HashSet<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CustomDateTime.DATE_FORMAT.name());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(ServerDateTime.DATE_FORMAT.name());
         for (String dateString : excludedDatesArr) {
             dates.add(LocalDate.parse(dateString, formatter));
         }

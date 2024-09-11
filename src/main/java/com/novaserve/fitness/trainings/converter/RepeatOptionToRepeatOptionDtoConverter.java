@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.trainings.converter;
 
-import com.novaserve.fitness.trainings.dto.RepeatOptionDto;
+import com.novaserve.fitness.trainings.dto.response.RepeatOptionDto;
 import com.novaserve.fitness.trainings.model.RepeatOption;
 import com.novaserve.fitness.trainings.service.TrainingUtil;
 import java.time.LocalDate;

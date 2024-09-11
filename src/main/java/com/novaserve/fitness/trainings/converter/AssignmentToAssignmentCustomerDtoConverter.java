@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.trainings.converter;
 
-import com.novaserve.fitness.trainings.dto.AssignmentCustomerDto;
+import com.novaserve.fitness.trainings.dto.response.AssignmentCustomerDto;
 import com.novaserve.fitness.trainings.model.Assignment;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;

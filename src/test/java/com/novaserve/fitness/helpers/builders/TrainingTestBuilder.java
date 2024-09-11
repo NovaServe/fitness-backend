@@ -5,6 +5,10 @@ package com.novaserve.fitness.helpers.builders;
 
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.trainings.model.*;
+import com.novaserve.fitness.trainings.model.enums.Intensity;
+import com.novaserve.fitness.trainings.model.enums.Kind;
+import com.novaserve.fitness.trainings.model.enums.Level;
+import com.novaserve.fitness.trainings.model.enums.Type;
 import com.novaserve.fitness.users.model.User;
 import java.util.Set;
 

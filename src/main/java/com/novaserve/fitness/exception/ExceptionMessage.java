@@ -12,8 +12,7 @@ public enum ExceptionMessage {
 
     UNAUTHORIZED("Unauthorized"),
 
-    ROLES_MISMATCH("Roles mismatch"),
-    ILLEGAL_DATE_RANGE("Illegal date range");
+    ROLES_MISMATCH("Roles mismatch");
 
     private final String name;
 

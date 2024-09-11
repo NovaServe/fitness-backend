@@ -9,6 +9,7 @@ import org.springframework.beans.BeanWrapperImpl;
 
 public class MatchFieldsValidator implements ConstraintValidator<MatchFields, Object> {
     private String field;
+
     private String fieldMatch;
 
     @Override
