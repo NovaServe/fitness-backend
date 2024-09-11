@@ -1,11 +1,13 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.auth.service;
+package com.novaserve.fitness.auth.service.impl;
 
 import com.novaserve.fitness.auth.dto.LoginProcessDto;
 import com.novaserve.fitness.auth.dto.LoginRequestDto;
 import com.novaserve.fitness.auth.dto.ValidateTokenResponseDto;
+import com.novaserve.fitness.auth.service.AuthService;
+import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.exception.ServerException;
 import com.novaserve.fitness.security.auth.*;

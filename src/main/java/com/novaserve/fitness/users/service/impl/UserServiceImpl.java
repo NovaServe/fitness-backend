@@ -1,7 +1,7 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.users.service;
+package com.novaserve.fitness.users.service.impl;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.exception.*;
@@ -10,6 +10,7 @@ import com.novaserve.fitness.users.dto.UserResponseDto;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
+import com.novaserve.fitness.users.service.UserService;
 import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;

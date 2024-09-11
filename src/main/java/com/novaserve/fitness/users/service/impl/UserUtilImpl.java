@@ -1,10 +1,11 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.users.service;
+package com.novaserve.fitness.users.service.impl;
 
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
+import com.novaserve.fitness.users.service.UserUtil;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
