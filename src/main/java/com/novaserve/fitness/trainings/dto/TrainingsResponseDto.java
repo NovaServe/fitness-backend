@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.trainings.dto;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.*;
 
@@ -13,9 +13,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrainingsResponseDto {
-    private Date startRange;
+    private LocalDate startRange;
 
-    private Date endRange;
+    private LocalDate endRange;
 
-    private List<DayDto> content;
+    private List<DayDto> days;
 }

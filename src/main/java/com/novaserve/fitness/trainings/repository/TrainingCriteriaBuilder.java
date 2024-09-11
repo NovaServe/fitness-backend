@@ -26,54 +26,56 @@ public class TrainingCriteriaBuilder {
             List<Level> levels,
             List<Type> types,
             List<Kind> kinds) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Training> cq = cb.createQuery(Training.class);
-        Root<Training> training = cq.from(Training.class);
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Training> criteriaQuery = criteriaBuilder.createQuery(Training.class);
+        Root<Training> training = criteriaQuery.from(Training.class);
+
         Join<Training, RepeatOption> repeatOption = training.join("repeatOptions");
         Join<Training, Area> areaJoin = training.join("areas", JoinType.LEFT);
 
-        Predicate predicate = cb.conjunction();
+        Predicate predicate = criteriaBuilder.conjunction();
 
-        predicate = cb.and(
+        predicate = criteriaBuilder.and(
                 predicate,
-                cb.equal(repeatOption.get("isActive"), true),
-                cb.greaterThanOrEqualTo(repeatOption.get("repeatSince"), startRange));
+                criteriaBuilder.equal(repeatOption.get("isActive"), true),
+                criteriaBuilder.greaterThanOrEqualTo(repeatOption.get("repeatSince"), startRange));
 
         if (endRange != null) {
-            predicate = cb.and(
+            predicate = criteriaBuilder.and(
                     predicate,
-                    cb.or(
-                            cb.isNull(repeatOption.get("repeatUntil")),
-                            cb.lessThanOrEqualTo(repeatOption.get("repeatUntil"), endRange)));
+                    criteriaBuilder.or(
+                            criteriaBuilder.isNull(repeatOption.get("repeatUntil")),
+                            criteriaBuilder.lessThanOrEqualTo(repeatOption.get("repeatUntil"), endRange)));
         }
 
         if (areas != null && !areas.isEmpty()) {
-            predicate = cb.and(predicate, areaJoin.get("name").in(areas));
+            predicate = criteriaBuilder.and(predicate, areaJoin.get("name").in(areas));
         }
 
         if (instructors != null && !instructors.isEmpty()) {
-            predicate = cb.and(predicate, training.get("instructor").get("id").in(instructors));
+            predicate = criteriaBuilder.and(
+                    predicate, training.get("instructor").get("id").in(instructors));
         }
 
         if (intensity != null && !intensity.isEmpty()) {
-            predicate = cb.and(predicate, training.get("intensity").in(intensity));
+            predicate = criteriaBuilder.and(predicate, training.get("intensity").in(intensity));
         }
 
         if (levels != null && !levels.isEmpty()) {
-            predicate = cb.and(predicate, training.get("level").in(levels));
+            predicate = criteriaBuilder.and(predicate, training.get("level").in(levels));
         }
 
         if (types != null && !types.isEmpty()) {
-            predicate = cb.and(predicate, training.get("type").in(types));
+            predicate = criteriaBuilder.and(predicate, training.get("type").in(types));
         }
 
         if (kinds != null && !kinds.isEmpty()) {
-            predicate = cb.and(predicate, training.get("kind").in(kinds));
+            predicate = criteriaBuilder.and(predicate, training.get("kind").in(kinds));
         }
 
-        cq.where(predicate).distinct(true);
+        criteriaQuery.where(predicate).distinct(true);
 
-        TypedQuery<Training> query = entityManager.createQuery(cq);
+        TypedQuery<Training> query = entityManager.createQuery(criteriaQuery);
         return query.getResultList();
     }
 }

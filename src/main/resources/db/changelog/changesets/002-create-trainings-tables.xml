@@ -96,6 +96,9 @@
             <column name="end_time" type="time">
                 <constraints nullable="false" unique="false" />
             </column>
+            <column name="is_recurring" type="boolean">
+                <constraints nullable="false" unique="false" />
+            </column>
             <column name="repeat_since" type="date">
                 <constraints nullable="false" unique="false" />
             </column>
@@ -105,16 +108,10 @@
             <column name="repeat_times" type="integer">
                 <constraints nullable="true" unique="false" />
             </column>
-            <column name="is_autoupdate" type="boolean">
-                <constraints nullable="true" unique="false" />
-            </column>
             <column name="is_active" type="boolean">
                 <constraints nullable="false" unique="false" />
             </column>
             <column name="excluded_dates" type="varchar">
-                <constraints nullable="true" unique="false" />
-            </column>
-            <column name="deactivation_since" type="date">
                 <constraints nullable="true" unique="false" />
             </column>
         </createTable>
@@ -123,7 +120,7 @@
             <column name="id" type="bigint" autoIncrement="true">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="user_id" type="bigint">
+            <column name="customer_id" type="bigint">
                 <constraints nullable="false" unique="false"
                              foreignKeyName="fk_user_id" references="users(id)" />
             </column>
@@ -131,11 +128,11 @@
                 <constraints nullable="false" unique="false"
                              foreignKeyName="fk_repeat_option_id" references="repeat_options(id)" />
             </column>
-            <column name="joined_at" type="timestamp with time zone">
+            <column name="is_recurring" type="boolean">
                 <constraints nullable="false" unique="false" />
             </column>
-            <column name="is_recurring" type="boolean">
-                <constraints nullable="true" unique="false" />
+            <column name="repeat_since" type="date">
+                <constraints nullable="false" unique="false" />
             </column>
             <column name="repeat_until" type="date">
                 <constraints nullable="true" unique="false" />
@@ -147,9 +144,6 @@
                 <constraints nullable="false" unique="false" />
             </column>
             <column name="excluded_dates" type="varchar">
-                <constraints nullable="true" unique="false" />
-            </column>
-            <column name="deactivated_at" type="timestamp with time zone">
                 <constraints nullable="true" unique="false" />
             </column>
         </createTable>

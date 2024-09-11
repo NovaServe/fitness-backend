@@ -51,7 +51,7 @@ public class User {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "instructor")
     private Set<Training> instructorTrainings;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
     private Set<Assignment> assignments;
 
     public String getRoleName() {

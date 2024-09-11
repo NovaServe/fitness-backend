@@ -10,7 +10,7 @@ import com.novaserve.fitness.trainings.model.Level;
 import com.novaserve.fitness.trainings.model.Type;
 import com.novaserve.fitness.trainings.service.TrainingService;
 import io.swagger.v3.oas.annotations.Operation;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,15 +30,18 @@ public class TrainingController {
     @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_INSTRUCTOR', 'ROLE_CUSTOMER')")
     public ResponseEntity<TrainingsResponseDto> getTrainings(
-            @RequestParam Date startRange,
-            @RequestParam Date endRange,
+            @RequestParam LocalDate startRange,
+            @RequestParam LocalDate endRange,
             @RequestParam(required = false) List<String> areas,
             @RequestParam(required = false) List<Long> instructors,
             @RequestParam(required = false) List<Intensity> intensity,
             @RequestParam(required = false) List<Level> levels,
             @RequestParam(required = false) List<Type> types,
             @RequestParam(required = false) List<Kind> kinds,
-            @RequestParam(required = false) Boolean withFreePlacesOnly) {
-        return null;
+            @RequestParam(required = false) Boolean availableOnly) {
+
+        TrainingsResponseDto trainingsResponseDto = trainingService.getTrainings(
+                startRange, endRange, areas, instructors, intensity, levels, types, kinds, availableOnly);
+        return ResponseEntity.ok(trainingsResponseDto);
     }
 }

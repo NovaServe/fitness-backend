@@ -8,13 +8,10 @@ import com.novaserve.fitness.trainings.model.Intensity;
 import com.novaserve.fitness.trainings.model.Kind;
 import com.novaserve.fitness.trainings.model.Level;
 import com.novaserve.fitness.trainings.model.Type;
-import com.novaserve.fitness.users.model.Role;
 import java.time.LocalDate;
 import java.util.List;
 
 public interface TrainingService {
-    TrainingsResponseDto getTrainingsFactory(Role role, long userId);
-
     TrainingsResponseDto getTrainings(
             LocalDate startRange,
             LocalDate endRange,
@@ -24,5 +21,5 @@ public interface TrainingService {
             List<Level> levels,
             List<Type> types,
             List<Kind> kinds,
-            Boolean withFreePlacesOnly);
+            Boolean availableOnly);
 }

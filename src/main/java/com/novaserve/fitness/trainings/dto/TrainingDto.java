@@ -3,11 +3,7 @@
 */
 package com.novaserve.fitness.trainings.dto;
 
-import com.novaserve.fitness.trainings.model.Intensity;
-import com.novaserve.fitness.trainings.model.Kind;
-import com.novaserve.fitness.trainings.model.Level;
-import com.novaserve.fitness.trainings.model.Type;
-import java.sql.Time;
+import com.novaserve.fitness.trainings.model.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.*;
@@ -17,12 +13,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SingleTrainingDto {
+public class TrainingDto {
     private long id;
-
-    private Time start;
-
-    private Time end;
 
     private String title;
 
@@ -30,7 +22,7 @@ public class SingleTrainingDto {
 
     private InstructorDto instructor;
 
-    private List<String> areas;
+    private List<Area> areas;
 
     private Intensity intensity;
 
@@ -46,9 +38,17 @@ public class SingleTrainingDto {
 
     private int freePlaces;
 
-    private boolean isBookedByMe;
+    private RepeatOptionDto repeatOption;
+
+    private boolean isAssignedToCustomer;
+
+    private List<AssignmentCustomerDto> assignments;
 
     private LocalDateTime createdAt;
 
-    private CreatedByDto createdBy;
+    private ByDto createdBy;
+
+    private LocalDateTime lastModifiedAt;
+
+    private ByDto lastModifiedBy;
 }

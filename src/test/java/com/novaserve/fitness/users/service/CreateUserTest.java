@@ -18,6 +18,7 @@ import com.novaserve.fitness.users.dto.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
+import com.novaserve.fitness.users.service.impl.UserServiceImpl;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.stream.Stream;

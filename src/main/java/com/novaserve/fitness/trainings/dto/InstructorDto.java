@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InstructorDto {
-    private int id;
+    private long id;
 
     private String fullName;
 }

@@ -4,7 +4,7 @@
 package com.novaserve.fitness.trainings.dto;
 
 import java.time.DayOfWeek;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.*;
 
@@ -14,9 +14,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DayDto {
-    private Date date;
+    private LocalDate date;
 
     private DayOfWeek dayOfWeek;
 
-    private List<SingleTrainingDto> trainings;
+    private List<TrainingDto> trainings;
 }

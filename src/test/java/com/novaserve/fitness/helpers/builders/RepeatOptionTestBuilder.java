@@ -15,13 +15,12 @@ public class RepeatOptionTestBuilder<T> {
     private DayOfWeek dayOfWeek;
     private Time startTime;
     private Time endTime;
+    private Boolean isRecurring;
     private LocalDate repeatSince;
     private LocalDate repeatUntil;
     private Integer repeatTimes;
-    private Boolean isAutoupdate;
     private Boolean isActive;
     private String excludedDates;
-    private LocalDate deactivatedSince;
     private T callerInstance;
 
     public RepeatOptionTestBuilder() {}
@@ -56,6 +55,11 @@ public class RepeatOptionTestBuilder<T> {
         return this;
     }
 
+    public RepeatOptionTestBuilder<T> recurring(boolean isRecurring) {
+        this.isRecurring = isRecurring;
+        return this;
+    }
+
     /**
      * @param repeatSince "YYYY-MM-DD"
      */
@@ -77,11 +81,6 @@ public class RepeatOptionTestBuilder<T> {
         return this;
     }
 
-    public RepeatOptionTestBuilder<T> autoupdate(boolean autoupdate) {
-        isAutoupdate = autoupdate;
-        return this;
-    }
-
     public RepeatOptionTestBuilder<T> active(Boolean active) {
         isActive = active;
         return this;
@@ -95,27 +94,18 @@ public class RepeatOptionTestBuilder<T> {
         return this;
     }
 
-    /**
-     * @param deactivatedSince "YYYY-MM-DD"
-     */
-    public RepeatOptionTestBuilder<T> deactivatedSince(String deactivatedSince) {
-        this.deactivatedSince = LocalDate.parse(deactivatedSince);
-        return this;
-    }
-
     private RepeatOption instance() {
         return RepeatOption.builder()
                 .training(training)
                 .dayOfWeek(dayOfWeek == null ? DayOfWeek.MONDAY : dayOfWeek)
                 .startTime(startTime == null ? Time.valueOf("10:00:00") : startTime)
                 .endTime(startTime == null ? Time.valueOf("11:30:00") : endTime)
+                .isActive(isRecurring == null || isRecurring)
                 .repeatSince(repeatSince == null ? LocalDate.now().minusDays(1) : repeatSince)
                 .repeatUntil(repeatUntil)
                 .repeatTimes(repeatTimes)
                 .isActive(isActive == null || isActive)
-                .isAutoupdate(isAutoupdate == null || isAutoupdate)
                 .excludedDates(excludedDates)
-                .deactivationSince(deactivatedSince)
                 .build();
     }
 

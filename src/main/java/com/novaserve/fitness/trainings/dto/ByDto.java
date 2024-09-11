@@ -11,7 +11,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreatedByDto {
+public class ByDto {
     private long id;
 
     private String fullName;
