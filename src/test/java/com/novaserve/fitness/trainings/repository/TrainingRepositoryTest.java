@@ -9,8 +9,12 @@ import com.novaserve.fitness.config.Docker;
 import com.novaserve.fitness.config.TestBeans;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.trainings.model.*;
-import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.trainings.model.enums.Intensity;
+import com.novaserve.fitness.trainings.model.enums.Kind;
+import com.novaserve.fitness.trainings.model.enums.Level;
+import com.novaserve.fitness.trainings.model.enums.Type;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.model.enums.Role;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
@@ -31,29 +35,31 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 @Import(TestBeans.class)
 class TrainingRepositoryTest {
-    @Autowired
-    TrainingCriteriaBuilder trainingCriteriaBuilder;
-
-    @Autowired
-    DbHelper helper;
-
     @Container
-    static PostgreSQLContainer<?> postgresqlContainer =
+    public static PostgreSQLContainer<?> postgresqlContainer =
             new PostgreSQLContainer<>(DockerImageName.parse(Docker.POSTGRES));
 
+    @Autowired
+    private TrainingCriteriaBuilder trainingCriteriaBuilder;
+
+    @Autowired
+    private DbHelper helper;
+
+    private List<Area> areas;
+
+    private List<User> instructors;
+
+    private List<Training> trainings;
+
     @DynamicPropertySource
-    static void postgresProperties(DynamicPropertyRegistry registry) {
+    public static void postgresProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgresqlContainer::getJdbcUrl);
         registry.add("spring.datasource.username", postgresqlContainer::getUsername);
         registry.add("spring.datasource.password", postgresqlContainer::getPassword);
     }
 
-    List<Area> areas;
-    List<User> instructors;
-    List<Training> trainings;
-
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         helper.deleteAll();
 
         User instructor1 =
@@ -127,7 +133,7 @@ class TrainingRepositoryTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "INSTRUCTOR")
-    void getTrainings_shouldReturnAllActiveTrainings_whenNoFilter() {
+    public void getTrainings_shouldReturnAllActiveTrainings_whenNoFilter() {
         LocalDate startDate = LocalDate.of(2024, 1, 1);
         List<Training> trainings =
                 trainingCriteriaBuilder.getTrainings(startDate, null, null, null, null, null, null, null);
@@ -136,7 +142,7 @@ class TrainingRepositoryTest {
 
     @Test
     @WithMockUser(username = "username1", password = "Password1!", roles = "INSTRUCTOR")
-    void getTrainings_shouldReturnFilteredActiveTrainings_whenFilteredByAreas() {
+    public void getTrainings_shouldReturnFilteredActiveTrainings_whenFilteredByAreas() {
         LocalDate startDate = LocalDate.of(2024, 1, 1);
         List<Training> trainings = trainingCriteriaBuilder.getTrainings(
                 startDate, null, List.of(areas.get(2).getName()), null, null, null, null, null);

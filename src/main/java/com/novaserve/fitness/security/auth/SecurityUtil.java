@@ -3,8 +3,9 @@
 */
 package com.novaserve.fitness.security.auth;
 
-import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.model.enums.Role;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -13,8 +14,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class SecurityUtil {
     public Collection<? extends GrantedAuthority> mapRolesToAuthorities(Set<Role> roles) {
-        return roles.stream()
+        List<SimpleGrantedAuthority> authorities = roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.name()))
                 .toList();
+        return authorities;
     }
 }

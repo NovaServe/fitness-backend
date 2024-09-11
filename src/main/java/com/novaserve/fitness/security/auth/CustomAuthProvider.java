@@ -7,7 +7,6 @@ import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.util.Set;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,28 +18,38 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CustomAuthProvider implements AuthenticationProvider {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    SecurityUtil securityUtil;
+    private final SecurityUtil securityUtil;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    public CustomAuthProvider(
+            UserRepository userRepository, SecurityUtil securityUtil, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.securityUtil = securityUtil;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public Authentication authenticate(Authentication auth) throws AuthenticationException {
         String principal = auth.getPrincipal().toString();
         String credentials = auth.getCredentials().toString();
+
         User user = userRepository
                 .findByUsernameOrEmailOrPhone(principal, principal, principal)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found with username, email, or phone: " + principal));
+
         if (!passwordEncoder.matches(credentials, user.getPassword())) {
             throw new BadCredentialsException(ExceptionMessage.INVALID_CREDENTIALS.getName());
         }
-        return new UsernamePasswordAuthenticationToken(
-                user, credentials, securityUtil.mapRolesToAuthorities(Set.of(user.getRole())));
+
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+                new UsernamePasswordAuthenticationToken(
+                        user, credentials, securityUtil.mapRolesToAuthorities(Set.of(user.getRole())));
+
+        return usernamePasswordAuthenticationToken;
     }
 
     @Override

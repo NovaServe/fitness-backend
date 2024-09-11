@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.trainings.converter;
 
-import com.novaserve.fitness.trainings.dto.*;
+import com.novaserve.fitness.trainings.dto.response.*;
 import com.novaserve.fitness.trainings.service.impl.TrainingServiceImpl;
 import java.util.stream.Collectors;
 import org.modelmapper.Converter;

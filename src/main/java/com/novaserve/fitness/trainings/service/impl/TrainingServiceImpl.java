@@ -7,10 +7,14 @@ import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.exception.ServerException;
 import com.novaserve.fitness.share.Util;
-import com.novaserve.fitness.trainings.dto.DayDto;
-import com.novaserve.fitness.trainings.dto.TrainingDto;
-import com.novaserve.fitness.trainings.dto.TrainingsResponseDto;
+import com.novaserve.fitness.trainings.dto.response.DayDto;
+import com.novaserve.fitness.trainings.dto.response.TrainingDto;
+import com.novaserve.fitness.trainings.dto.response.TrainingsResponseDto;
 import com.novaserve.fitness.trainings.model.*;
+import com.novaserve.fitness.trainings.model.enums.Intensity;
+import com.novaserve.fitness.trainings.model.enums.Kind;
+import com.novaserve.fitness.trainings.model.enums.Level;
+import com.novaserve.fitness.trainings.model.enums.Type;
 import com.novaserve.fitness.trainings.repository.TrainingCriteriaBuilder;
 import com.novaserve.fitness.trainings.service.TrainingService;
 import com.novaserve.fitness.trainings.service.TrainingUtil;
@@ -24,24 +28,30 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class TrainingServiceImpl implements TrainingService {
-    @Autowired
-    TrainingCriteriaBuilder trainingCriteriaBuilder;
+    private final TrainingCriteriaBuilder trainingCriteriaBuilder;
 
-    @Autowired
-    TrainingUtil trainingUtil;
+    private final TrainingUtil trainingUtil;
 
-    @Autowired
-    AuthUtil authUtil;
+    private final AuthUtil authUtil;
 
-    @Autowired
-    ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
+
+    public TrainingServiceImpl(
+            TrainingCriteriaBuilder trainingCriteriaBuilder,
+            TrainingUtil trainingUtil,
+            AuthUtil authUtil,
+            ModelMapper modelMapper) {
+        this.trainingCriteriaBuilder = trainingCriteriaBuilder;
+        this.trainingUtil = trainingUtil;
+        this.authUtil = authUtil;
+        this.modelMapper = modelMapper;
+    }
 
     @Override
     public TrainingsResponseDto getTrainings(
@@ -54,7 +64,6 @@ public class TrainingServiceImpl implements TrainingService {
             List<Type> types,
             List<Kind> kinds,
             Boolean availableOnly) {
-
         List<Training> filteredTrainings = trainingCriteriaBuilder.getTrainings(
                 startRange, endRange, areas, instructors, intensity, levels, types, kinds);
 
@@ -75,6 +84,7 @@ public class TrainingServiceImpl implements TrainingService {
     private List<DayDto> generateCalendarDays(LocalDate startRange, LocalDate endRange) {
         List<DayDto> days = new ArrayList<>();
         LocalDate currentDate = startRange;
+
         while (!currentDate.isAfter(endRange)) {
             DayDto day = new DayDto();
             day.setDate(currentDate);
@@ -89,7 +99,6 @@ public class TrainingServiceImpl implements TrainingService {
      */
     private List<Assignment> getCustomersAssignments(
             RepeatOption repeatOption, LocalDate startRange, LocalDate endRange, LocalDate eventDate) {
-
         Set<LocalDate> repeatOptionExcludedDates = trainingUtil.parseExcludedDates(repeatOption.getExcludedDates());
 
         List<Assignment> assignments = new ArrayList<>();
@@ -133,7 +142,6 @@ public class TrainingServiceImpl implements TrainingService {
      */
     private Map<LocalDate, List<RepeatOptionWithAssignments>> calculateRepeatOptionDatesFromRange(
             LocalDate startRange, LocalDate endRange, RepeatOption repeatOption, User customerPrincipal) {
-
         if (repeatOption.getRepeatUntil() != null
                 && repeatOption.getRepeatUntil().isBefore(endRange)) {
             endRange = repeatOption.getRepeatUntil();

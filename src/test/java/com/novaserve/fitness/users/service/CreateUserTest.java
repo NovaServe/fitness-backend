@@ -14,9 +14,9 @@ import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.exception.ServerException;
 import com.novaserve.fitness.helpers.DtoHelper;
 import com.novaserve.fitness.helpers.MockHelper;
-import com.novaserve.fitness.users.dto.CreateUserRequestDto;
-import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.dto.request.CreateUserRequestDto;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.model.enums.Role;
 import com.novaserve.fitness.users.repository.UserRepository;
 import com.novaserve.fitness.users.service.impl.UserServiceImpl;
 import java.util.Optional;
@@ -39,22 +39,22 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @ExtendWith(MockitoExtension.class)
 class CreateUserTest {
     @InjectMocks
-    UserServiceImpl userService;
+    private UserServiceImpl userService;
 
     @Mock
-    AuthUtil authUtil;
+    private AuthUtil authUtil;
 
     @Mock
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Spy
-    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Spy
-    MockHelper helper;
+    private MockHelper helper;
 
     @Spy
-    DtoHelper dtoHelper;
+    private DtoHelper dtoHelper;
 
     @BeforeEach
     public void beforeEach() {
@@ -66,54 +66,55 @@ class CreateUserTest {
     }
 
     @Test
-    void createUser_shouldCreateAdmin_whenSuperadminRequests() {
+    public void createUser_shouldCreateAdmin_whenSuperadminRequests() {
         User superadmin = helper.user().seed(1).role(Role.ROLE_SUPERADMIN).build();
 
-        CreateUserRequestDto dto =
+        CreateUserRequestDto createUserRequestDto =
                 dtoHelper.createUserRequestDto().seed(2).role(Role.ROLE_ADMIN).build();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(superadmin));
         when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any())).thenReturn(Optional.empty());
 
-        User actual = userService.createUser(dto);
-        assertHelper(actual, dto);
+        User actual = userService.createUser(createUserRequestDto);
+        assertHelper(actual, createUserRequestDto);
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests")
-    void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(Role role) {
+    public void createUser_shouldCreateCustomerOrInstructor_whenAdminRequests(Role role) {
         User admin = helper.user().seed(1).role(Role.ROLE_ADMIN).build();
 
-        CreateUserRequestDto dto =
+        CreateUserRequestDto createUserRequestDto =
                 dtoHelper.createUserRequestDto().seed(2).role(role).build();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(admin));
         when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any())).thenReturn(Optional.empty());
 
-        User actual = userService.createUser(dto);
-        assertHelper(actual, dto);
+        User actual = userService.createUser(createUserRequestDto);
+        assertHelper(actual, createUserRequestDto);
     }
 
-    static Stream<Arguments> methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests() {
+    public static Stream<Arguments> methodParams_createUser_shouldCreateCustomerOrInstructor_whenAdminRequests() {
         return Stream.of(Arguments.of(Role.ROLE_CUSTOMER), Arguments.of(Role.ROLE_INSTRUCTOR));
     }
 
     @ParameterizedTest
     @MethodSource("methodParams_createUser_shouldThrowException_whenRolesMismatch")
-    void createUser_shouldThrowException_whenRolesMismatch(Role principalRole, Role newUserRole) {
+    public void createUser_shouldThrowException_whenRolesMismatch(Role principalRole, Role newUserRole) {
         User user = helper.user().seed(1).role(principalRole).build();
 
-        CreateUserRequestDto dto =
+        CreateUserRequestDto createUserRequestDto =
                 dtoHelper.createUserRequestDto().seed(2).role(newUserRole).build();
 
         when(authUtil.getUserFromAuth(any())).thenReturn(Optional.ofNullable(user));
 
-        ServerException actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
+        ServerException actual =
+                assertThrows(ServerException.class, () -> userService.createUser(createUserRequestDto));
         assertEquals(actual.getMessage(), ExceptionMessage.ROLES_MISMATCH.getName());
         assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
     }
 
-    static Stream<Arguments> methodParams_createUser_shouldThrowException_whenRolesMismatch() {
+    public static Stream<Arguments> methodParams_createUser_shouldThrowException_whenRolesMismatch() {
         return Stream.of(
                 Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_SUPERADMIN),
                 Arguments.of(Role.ROLE_SUPERADMIN, Role.ROLE_CUSTOMER),
@@ -131,12 +132,12 @@ class CreateUserTest {
     }
 
     @Test
-    void createUser_shouldThrowException_whenUserAlreadyExists() {
+    public void createUser_shouldThrowException_whenUserAlreadyExists() {
         User user = helper.user().seed(1).role(Role.ROLE_ADMIN).build();
 
         User alreadyExists = helper.user().seed(2).role(Role.ROLE_CUSTOMER).build();
 
-        CreateUserRequestDto dto = dtoHelper
+        CreateUserRequestDto createUserRequestDto = dtoHelper
                 .createUserRequestDto()
                 .seed(2)
                 .role(Role.ROLE_CUSTOMER)
@@ -146,12 +147,13 @@ class CreateUserTest {
         when(userRepository.findByUsernameOrEmailOrPhone(any(), any(), any()))
                 .thenReturn(Optional.ofNullable(alreadyExists));
 
-        ServerException actual = assertThrows(ServerException.class, () -> userService.createUser(dto));
+        ServerException actual =
+                assertThrows(ServerException.class, () -> userService.createUser(createUserRequestDto));
         assertEquals(actual.getMessage(), ExceptionMessage.ALREADY_EXISTS.getName());
         assertEquals(actual.getStatus(), HttpStatus.BAD_REQUEST);
     }
 
-    void assertHelper(User actual, CreateUserRequestDto dto) {
+    private void assertHelper(User actual, CreateUserRequestDto dto) {
         String[] comparatorIgnoreFields = new String[] {"id", "assignments", "instructorTrainings"};
         BiPredicate<String, String> passwordBiPredicate = (encoded, raw) -> passwordEncoder.matches(raw, encoded);
 

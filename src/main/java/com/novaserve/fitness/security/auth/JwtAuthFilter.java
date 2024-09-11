@@ -15,7 +15,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.stream.Stream;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,52 +26,64 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
-    @Autowired
-    CustomUserDetails customUserDetails;
+    private final CustomUserDetails customUserDetails;
 
-    @Autowired
-    JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    public JwtAuthFilter(CustomUserDetails customUserDetails, JwtTokenProvider jwtTokenProvider) {
+        this.customUserDetails = customUserDetails;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     @Override
-    public void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+    public void doFilterInternal(
+            HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain)
             throws ServletException, IOException {
-        String token = getFwtFromRequestCookie(req);
+        String token = getJwtFromRequestCookie(httpServletRequest);
+
         if (token != null) {
             if (jwtTokenProvider.validateToken(token)) {
                 String username = jwtTokenProvider.getUsernameFromJwt(token);
                 UserDetails userDetails = customUserDetails.loadUserByUsername(username);
+
                 UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, userDetails.getPassword(), userDetails.getAuthorities());
-                usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(req));
+
+                usernamePasswordAuthenticationToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
             } else {
-                res.setStatus(HttpStatus.UNAUTHORIZED.value());
-                res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                PrintWriter out = res.getWriter();
+                httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+                httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+                PrintWriter out = httpServletResponse.getWriter();
                 out.write(new ObjectMapper().writeValueAsString(new ExceptionDto(INVALID_CREDENTIALS.getName())));
                 out.flush();
             }
         }
-        chain.doFilter(req, res);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 
     @Deprecated
-    private String getJwtFromRequestHeader(HttpServletRequest req) {
-        if (req.getHeader("Authorization") == null) {
+    private String getJwtFromRequestHeader(HttpServletRequest httpServletRequest) {
+        if (httpServletRequest.getHeader("Authorization") == null) {
             return null;
         }
-        return req.getHeader("Authorization").substring(7);
+        String token = httpServletRequest.getHeader("Authorization").substring(7);
+        return token;
     }
 
-    private String getFwtFromRequestCookie(HttpServletRequest req) {
-        Cookie[] cookies = req.getCookies();
+    private String getJwtFromRequestCookie(HttpServletRequest httpServletRequest) {
+        Cookie[] cookies = httpServletRequest.getCookies();
+
         if (cookies != null && cookies.length > 0) {
-            return Stream.of(cookies)
+            String token = Stream.of(cookies)
                     .filter(elt -> "token".equals(elt.getName()))
                     .map(Cookie::getValue)
                     .findFirst()
                     .orElse(null);
+            return token;
         }
         return null;
     }

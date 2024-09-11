@@ -1,7 +1,7 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.trainings.dto;
+package com.novaserve.fitness.trainings.dto.response;
 
 import java.sql.Time;
 import java.time.DayOfWeek;

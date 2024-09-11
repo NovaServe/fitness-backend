@@ -18,9 +18,8 @@ public class SpringSecurityAuditorAware implements AuditorAware<User> {
 
     @Override
     public Optional<User> getCurrentAuditor() {
-        //        Long userId =
-        //                authUtil.getUserIdFromAuth(SecurityContextHolder.getContext().getAuthentication());
-        //        return Optional.of(userId);
         return authUtil.getUserFromAuth(SecurityContextHolder.getContext().getAuthentication());
+        // Long userId = authUtil.getUserIdFromAuth(SecurityContextHolder.getContext().getAuthentication());
+        // return Optional.of(userId);
     }
 }

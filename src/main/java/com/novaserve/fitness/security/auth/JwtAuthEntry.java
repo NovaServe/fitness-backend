@@ -18,13 +18,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtAuthEntry implements AuthenticationEntryPoint {
     @Override
-    public void commence(HttpServletRequest req, HttpServletResponse res, AuthenticationException e)
+    public void commence(
+            HttpServletRequest httpServletRequest,
+            HttpServletResponse httpServletResponse,
+            AuthenticationException authException)
             throws IOException {
-        res.setStatus(HttpStatus.UNAUTHORIZED.value());
-        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        PrintWriter out = res.getWriter();
-        out.write(new ObjectMapper().writeValueAsString(new ExceptionDto(e.getMessage())));
+        httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+        httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        PrintWriter out = httpServletResponse.getWriter();
+        out.write(new ObjectMapper().writeValueAsString(new ExceptionDto(authException.getMessage())));
         out.flush();
-        // res.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+
+        // httpServletResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
     }
 }

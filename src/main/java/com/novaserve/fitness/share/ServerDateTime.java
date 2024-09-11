@@ -3,13 +3,13 @@
 */
 package com.novaserve.fitness.share;
 
-public enum CustomDateTime {
+public enum ServerDateTime {
     SERVER_TIMEZONE("Europe/Kyiv"),
     DATE_FORMAT("yyyy-MM-dd");
 
     private String value;
 
-    CustomDateTime(String value) {
+    ServerDateTime(String value) {
         this.value = value;
     }
 

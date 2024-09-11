@@ -1,9 +1,8 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.trainings.dto;
+package com.novaserve.fitness.trainings.dto.response;
 
-import com.novaserve.fitness.users.model.Role;
 import lombok.*;
 
 @Getter
@@ -11,10 +10,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ByDto {
+public class InstructorDto {
     private long id;
 
     private String fullName;
-
-    private Role role;
 }

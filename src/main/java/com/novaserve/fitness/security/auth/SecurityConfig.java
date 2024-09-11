@@ -3,7 +3,6 @@
 */
 package com.novaserve.fitness.security.auth;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,20 +18,28 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    @Autowired
-    CustomUserDetails customUserDetails;
+    private final CustomUserDetails customUserDetails;
 
-    @Autowired
-    CustomAuthProvider customAuthProvider;
+    private final CustomAuthProvider customAuthProvider;
 
-    @Autowired
-    JwtAuthEntry jwtAuthEntry;
+    private final JwtAuthEntry jwtAuthEntry;
 
-    @Autowired
-    JwtAuthFilter jwtAuthFilter;
+    private final JwtAuthFilter jwtAuthFilter;
 
-    @Autowired
-    OpenEndpoints openEndpoints;
+    private final OpenEndpoints openEndpoints;
+
+    public SecurityConfig(
+            CustomUserDetails customUserDetails,
+            CustomAuthProvider customAuthProvider,
+            JwtAuthEntry jwtAuthEntry,
+            JwtAuthFilter jwtAuthFilter,
+            OpenEndpoints openEndpoints) {
+        this.customUserDetails = customUserDetails;
+        this.customAuthProvider = customAuthProvider;
+        this.jwtAuthEntry = jwtAuthEntry;
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.openEndpoints = openEndpoints;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

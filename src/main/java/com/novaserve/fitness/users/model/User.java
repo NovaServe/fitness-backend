@@ -5,6 +5,9 @@ package com.novaserve.fitness.users.model;
 
 import com.novaserve.fitness.trainings.model.Assignment;
 import com.novaserve.fitness.trainings.model.Training;
+import com.novaserve.fitness.users.model.enums.AgeGroup;
+import com.novaserve.fitness.users.model.enums.Gender;
+import com.novaserve.fitness.users.model.enums.Role;
 import jakarta.persistence.*;
 import java.util.Set;
 import lombok.*;

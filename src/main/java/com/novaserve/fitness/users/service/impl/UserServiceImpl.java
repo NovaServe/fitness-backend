@@ -5,17 +5,16 @@ package com.novaserve.fitness.users.service.impl;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.exception.*;
-import com.novaserve.fitness.users.dto.CreateUserRequestDto;
-import com.novaserve.fitness.users.dto.UserResponseDto;
-import com.novaserve.fitness.users.model.Role;
+import com.novaserve.fitness.users.dto.request.CreateUserRequestDto;
+import com.novaserve.fitness.users.dto.response.UserResponseDto;
 import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.users.model.enums.Role;
 import com.novaserve.fitness.users.repository.UserRepository;
 import com.novaserve.fitness.users.service.UserService;
 import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,19 +28,26 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
     UserRepository userRepository;
 
-    @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Autowired
     ModelMapper modelMapper;
 
-    @Autowired
     AuthUtil authUtil;
 
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    public UserServiceImpl(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            ModelMapper modelMapper,
+            AuthUtil authUtil) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
+        this.authUtil = authUtil;
+    }
 
     @Override
     @Transactional(propagation = Propagation.MANDATORY)
@@ -107,6 +113,7 @@ public class UserServiceImpl implements UserService {
         User principal = authUtil.getUserFromAuth(
                         SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
+
         boolean superadminGetsAdmins = principal.isSuperadmin() && roles.size() == 1 && isRoleAdmin(roles.get(0));
         boolean adminGetsCustomersOrInstructors =
                 principal.isAdmin() && roles.stream().allMatch(this::isRoleCustomerOrInstructor);
@@ -116,6 +123,32 @@ public class UserServiceImpl implements UserService {
             return userRepository
                     .getUsers(roles, fullName, pageable)
                     .map(user -> modelMapper.map(user, UserResponseDto.class));
+        }
+        throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto getUserDetails(long userId) {
+        User principal = authUtil.getUserFromAuth(
+                        SecurityContextHolder.getContext().getAuthentication())
+                .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFound(User.class, userId));
+
+        boolean superadminRequestsOwnOrAdminDetail =
+                principal.isSuperadmin() && (user.getId().equals(principal.getId()) || user.isAdmin());
+        boolean adminRequestsOwnOrCustomerOrInstructorDetail = principal.isAdmin()
+                && (user.getId().equals(principal.getId()) || user.isCustomer() || user.isInstructor());
+        boolean customerRequestsOwnDetail =
+                principal.isCustomer() && user.getId().equals(principal.getId());
+        boolean instructorRequestsOwnDetail =
+                principal.isInstructor() && user.getId().equals(principal.getId());
+
+        if (superadminRequestsOwnOrAdminDetail
+                || adminRequestsOwnOrCustomerOrInstructorDetail
+                || customerRequestsOwnDetail
+                || instructorRequestsOwnDetail) {
+            return modelMapper.map(user, UserResponseDto.class);
         }
         throw new ServerException(ExceptionMessage.ROLES_MISMATCH, HttpStatus.BAD_REQUEST);
     }

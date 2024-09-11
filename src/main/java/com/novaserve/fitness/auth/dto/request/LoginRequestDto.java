@@ -1,7 +1,7 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.auth.dto;
+package com.novaserve.fitness.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

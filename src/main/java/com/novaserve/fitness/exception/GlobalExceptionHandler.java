@@ -26,31 +26,44 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ServerException.class)
-    public ResponseEntity<ExceptionDto> handleApiException(ServerException e, WebRequest req) {
-        logger.error("{}, {}, {}", req.getDescription(true), e.getStatus(), e.getStackTrace());
-        return new ResponseEntity<>(new ExceptionDto(e.getMessage()), e.getStatus());
+    public ResponseEntity<ExceptionDto> handleApiException(ServerException serverException, WebRequest webRequest) {
+        logger.error(
+                "{}, {}, {}",
+                webRequest.getDescription(true),
+                serverException.getStatus(),
+                serverException.getStackTrace());
+        ExceptionDto exceptionDto = new ExceptionDto(serverException.getMessage());
+        return new ResponseEntity<>(exceptionDto, serverException.getStatus());
     }
 
     @ExceptionHandler(NotFound.class)
-    public ResponseEntity<?> handleResourceNotFound(NotFound e, WebRequest req) {
-        logger.error("{}, {}, {}", req.getDescription(true), e.getStatusCode(), e.getStackTrace());
-        return new ResponseEntity<>(e.getStatus());
+    public ResponseEntity<?> handleResourceNotFound(NotFound notFound, WebRequest webRequest) {
+        logger.error("{}, {}, {}", webRequest.getDescription(true), notFound.getStatusCode(), notFound.getStackTrace());
+        return new ResponseEntity<>(notFound.getStatus());
     }
 
     @ExceptionHandler(NotFoundInternalError.class)
-    public ResponseEntity<ExceptionDto> handleResourceNotFoundInternalError(NotFoundInternalError e, WebRequest req) {
-        logger.error("{}, {}, {}", req.getDescription(true), e.getStatusCode(), e.getStackTrace());
-        return new ResponseEntity<>(e.getStatus());
+    public ResponseEntity<ExceptionDto> handleResourceNotFoundInternalError(
+            NotFoundInternalError notFoundInternalError, WebRequest webRequest) {
+        logger.error(
+                "{}, {}, {}",
+                webRequest.getDescription(true),
+                notFoundInternalError.getStatusCode(),
+                notFoundInternalError.getStackTrace());
+        return new ResponseEntity<>(notFoundInternalError.getStatus());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException e) {
+    public ResponseEntity<Map<String, String>> handleConstraintViolationException(
+            ConstraintViolationException constraintViolationException) {
         Map<String, String> validation = new HashMap<>();
-        e.getConstraintViolations().forEach((elt) -> {
+
+        constraintViolationException.getConstraintViolations().forEach((elt) -> {
             String constraintMessage = elt.getMessage();
             String paramName = elt.getPropertyPath().toString().split("\\.")[1];
             validation.put(paramName, constraintMessage);
         });
+
         return new ResponseEntity<>(validation, HttpStatus.BAD_REQUEST);
     }
 
@@ -61,9 +74,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException e, HttpHeaders headers, HttpStatusCode code, WebRequest req) {
+            MethodArgumentNotValidException methodArgumentNotValidException,
+            HttpHeaders httpHeaders,
+            HttpStatusCode httpStatusCode,
+            WebRequest webRequest) {
         Map<String, String> errors = new HashMap<>();
-        e.getBindingResult().getAllErrors().forEach(error -> {
+
+        methodArgumentNotValidException.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = "Method argument not valid";
             if (error instanceof FieldError) {
                 fieldName = ((FieldError) error).getField();
@@ -82,6 +99,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             errors.put(fieldName, message);
             logger.error("{}: {} - {}", fieldName, message, HttpStatus.BAD_REQUEST.value());
         });
+
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 }
