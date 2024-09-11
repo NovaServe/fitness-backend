@@ -5,5 +5,7 @@
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <property name="clob.type" value="clob" dbms="postgresql" />
-    <include file="db/changelog/changes.xml"/>
+
+    <include file="db/changelog/changesets/001-create-users-table.xml"/>
+    <include file="db/changelog/changesets/002-create-trainings-tables.xml"/>
 </databaseChangeLog>

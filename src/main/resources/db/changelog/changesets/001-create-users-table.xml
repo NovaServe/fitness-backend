@@ -5,8 +5,8 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-    <changeSet id="users" author="Oleg Kucherenko" context="structure">
-        <comment>Users</comment>
+    <changeSet id="001" author="Oleg Kucherenko" context="structure">
+        <comment>Create users table</comment>
 
         <createTable tableName="users">
             <column name="id" type="bigint" autoIncrement="true">
@@ -38,7 +38,7 @@
             </column>
         </createTable>
 
-        <sqlFile path="sql/dummy_users.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="../sql/dummy_users.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
     </changeSet>
 
 </databaseChangeLog>

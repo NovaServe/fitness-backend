@@ -18,8 +18,6 @@ import com.novaserve.fitness.config.TestBeans;
 import com.novaserve.fitness.exception.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
 import com.novaserve.fitness.helpers.DtoHelper;
-import com.novaserve.fitness.users.model.AgeGroup;
-import com.novaserve.fitness.users.model.Gender;
 import com.novaserve.fitness.users.model.Role;
 import com.novaserve.fitness.users.model.User;
 import jakarta.servlet.http.Cookie;
@@ -65,22 +63,9 @@ class LoginTest {
 
     final String LOGIN_URL = "/api/v1/auth/login";
 
-    Role superadminRole;
-    Role adminRole;
-    Role customerRole;
-    Role instructorRole;
-    Gender gender;
-    AgeGroup ageGroup;
-
     @BeforeEach
     void beforeEach() {
         helper.deleteAll();
-        superadminRole = Role.ROLE_SUPERADMIN;
-        adminRole = Role.ROLE_ADMIN;
-        customerRole = Role.ROLE_CUSTOMER;
-        instructorRole = Role.ROLE_INSTRUCTOR;
-        gender = Gender.Female;
-        ageGroup = AgeGroup.Adult;
     }
 
     @Container
@@ -97,12 +82,7 @@ class LoginTest {
     @ParameterizedTest
     @MethodSource("loginCredentialTypes")
     void login_shouldAuthenticateUser_whenValidCredentials(Role role, String credentialType) throws Exception {
-        User user = helper.user()
-                .seed(1)
-                .role(role)
-                .gender(gender)
-                .ageGroup(ageGroup)
-                .get();
+        User user = helper.user().seed(1).role(role).build().save(User.class);
         LoginRequestDto dto = getDto(credentialType);
 
         var mvcResult = mockMvc.perform(post(LOGIN_URL)
@@ -144,17 +124,17 @@ class LoginTest {
                     .loginRequestDto()
                     .seed(1)
                     .withUsername()
-                    .get();
-            case "email" -> dtoHelper.loginRequestDto().seed(1).withEmail().get();
-            case "phone" -> dtoHelper.loginRequestDto().seed(1).withPhone().get();
+                    .build();
+            case "email" -> dtoHelper.loginRequestDto().seed(1).withEmail().build();
+            case "phone" -> dtoHelper.loginRequestDto().seed(1).withPhone().build();
             default -> throw new IllegalStateException("Unexpected value: " + credentialType);
         };
     }
 
     @Test
     void login_shouldThrowException_whenInvalidCredentials() throws Exception {
-        helper.user().seed(1).role(adminRole).gender(gender).ageGroup(ageGroup).get();
-        LoginRequestDto dto = dtoHelper.loginRequestDto().seed(2).withUsername().get();
+        User principal = helper.user().seed(1).role(Role.ROLE_ADMIN).build().save(User.class);
+        LoginRequestDto dto = dtoHelper.loginRequestDto().seed(2).withUsername().build();
 
         mockMvc.perform(post(LOGIN_URL)
                         .contentType(MediaType.APPLICATION_JSON)

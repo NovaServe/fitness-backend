@@ -1,8 +1,9 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.auth.service;
+package com.novaserve.fitness.auth.service.impl;
 
+import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.users.model.User;
 import com.novaserve.fitness.users.repository.UserRepository;
 import java.time.Instant;
@@ -26,6 +27,11 @@ public class AuthUtilImpl implements AuthUtil {
         return getUserFromAuth(auth).map(User::getId).orElse(null);
     }
 
+    /**
+     * @apiNote User principal =
+     *          authUtil.getUserFromAuth(
+     *              SecurityContextHolder.getContext().getAuthentication());
+     */
     @Override
     public Optional<User> getUserFromAuth(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
