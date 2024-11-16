@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="004" author="Oleg Kucherenko" context="structure">
+        <comment>Create payments</comment>
+
+        <createTable tableName="payments">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="amount" type="float">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="provider" type="varchar">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="customer_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_customer_id" references="users(id)"/>
+            </column>
+            <column name="payed_at" type="timestamp">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+        </createTable>
+
+        <sqlFile path="../sql/dummy_payments.sql" relativeToChangelogFile="true" endDelimiter=";"
+                 splitStatements="true"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -3,11 +3,12 @@
 */
 package com.novaserve.fitness.trainings.repository;
 
+import com.novaserve.fitness.profiles.model.Area;
 import com.novaserve.fitness.trainings.model.*;
-import com.novaserve.fitness.trainings.model.enums.Intensity;
-import com.novaserve.fitness.trainings.model.enums.Kind;
-import com.novaserve.fitness.trainings.model.enums.Level;
-import com.novaserve.fitness.trainings.model.enums.Type;
+import com.novaserve.fitness.trainings.model.Intensity;
+import com.novaserve.fitness.trainings.model.Kind;
+import com.novaserve.fitness.trainings.model.Level;
+import com.novaserve.fitness.trainings.model.Type;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="001" author="Oleg Kucherenko" context="structure">
+        <comment>Create clubs</comment>
+
+        <createTable tableName="clubs_schedules">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="monday_start_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="monday_end_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="tuesday_start_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="tuesday_end_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="wednesday_start_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="wednesday_end_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="thursday_start_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="thursday_end_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="friday_start_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="friday_end_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="saturday_start_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="saturday_end_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="sunday_start_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="sunday_end_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="created_at" type="time">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="clubs">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="city" type="varchar(50)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="address" type="varchar(255)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="club_schedule_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_club_schedule_id" references="clubs_schedules(id)"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+        </createTable>
+
+        <sqlFile path="../sql/dummy_clubs.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+    </changeSet>
+
+</databaseChangeLog>

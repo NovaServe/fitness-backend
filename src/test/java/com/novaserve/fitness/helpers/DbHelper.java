@@ -3,16 +3,23 @@
 */
 package com.novaserve.fitness.helpers;
 
-import com.novaserve.fitness.helpers.builders.AreaTestBuilder;
-import com.novaserve.fitness.helpers.builders.RepeatOptionTestBuilder;
-import com.novaserve.fitness.helpers.builders.TrainingTestBuilder;
-import com.novaserve.fitness.helpers.builders.UserTestBuilder;
-import com.novaserve.fitness.trainings.model.*;
+import com.novaserve.fitness.emails.model.ConfirmationCode;
+import com.novaserve.fitness.emails.repository.ConfirmationCodeRepository;
+import com.novaserve.fitness.payments.model.SubscriptionPlan;
+import com.novaserve.fitness.payments.repository.SubscriptionPlanRepository;
+import com.novaserve.fitness.profiles.model.*;
+import com.novaserve.fitness.profiles.model.Club;
+import com.novaserve.fitness.profiles.model.ClubSchedule;
+import com.novaserve.fitness.profiles.repository.ClubRepository;
+import com.novaserve.fitness.profiles.repository.ClubScheduleRepository;
+import com.novaserve.fitness.profiles.repository.UserRepository;
+import com.novaserve.fitness.trainings.model.Assignment;
+import com.novaserve.fitness.trainings.model.RepeatOption;
+import com.novaserve.fitness.trainings.model.Training;
 import com.novaserve.fitness.trainings.repository.AreaRepository;
+import com.novaserve.fitness.trainings.repository.AssignmentRepository;
 import com.novaserve.fitness.trainings.repository.RepeatOptionRepository;
 import com.novaserve.fitness.trainings.repository.TrainingRepository;
-import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,90 +27,65 @@ import org.springframework.transaction.annotation.Transactional;
 @TestComponent
 public class DbHelper {
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    AreaRepository areaRepository;
+    private ConfirmationCodeRepository confirmationCodeRepository;
 
     @Autowired
-    TrainingRepository trainingRepository;
+    private AreaRepository areaRepository;
 
     @Autowired
-    RepeatOptionRepository repeatOptionRepository;
+    private ClubRepository clubRepository;
 
-    User userInstance;
-    Area areaInstance;
-    Training trainingInstance;
-    RepeatOption repeatOptionInstance;
+    @Autowired
+    private ClubScheduleRepository clubScheduleRepository;
 
-    public void setUserInstance(User userInstance) {
-        this.userInstance = userInstance;
-    }
+    @Autowired
+    private SubscriptionPlanRepository subscriptionPlanRepository;
 
-    public void setAreaInstance(Area areaInstance) {
-        this.areaInstance = areaInstance;
-    }
+    @Autowired
+    private TrainingRepository trainingRepository;
 
-    public void setTrainingInstance(Training trainingInstance) {
-        this.trainingInstance = trainingInstance;
-    }
+    @Autowired
+    private RepeatOptionRepository repeatOptionRepository;
 
-    public void setRepeatOptionInstance(RepeatOption repeatOptionInstance) {
-        this.repeatOptionInstance = repeatOptionInstance;
+    @Autowired
+    private AssignmentRepository assignmentRepository;
+
+    public <T> T save(Object o) {
+        return switch (o.getClass().getSimpleName()) {
+            case "Area" -> (T) areaRepository.save((Area) o);
+            case "Club" -> (T) clubRepository.save((Club) o);
+            case "ClubSchedule" -> (T) clubScheduleRepository.save((ClubSchedule) o);
+            case "SuperAdmin" -> (T) userRepository.save((SuperAdmin) o);
+            case "Admin" -> (T) userRepository.save((Admin) o);
+            case "Instructor" -> (T) userRepository.save((Instructor) o);
+            case "Customer" -> (T) userRepository.save((Customer) o);
+            case "ConfirmationCode" -> (T) confirmationCodeRepository.save((ConfirmationCode) o);
+            case "SubscriptionPlan" -> (T) subscriptionPlanRepository.save((SubscriptionPlan) o);
+            case "Training" -> (T) trainingRepository.save((Training) o);
+            case "RepeatOption" -> (T) repeatOptionRepository.save((RepeatOption) o);
+            case "Assignment" -> (T) assignmentRepository.save((Assignment) o);
+            default -> throw new IllegalStateException(
+                    "Unexpected value: " + o.getClass().getSimpleName());
+        };
     }
 
     @Transactional
     public void deleteAll() {
         areaRepository.deleteAll();
+        subscriptionPlanRepository.deleteAll();
+        clubRepository.deleteAll();
+        clubScheduleRepository.deleteAll();
         repeatOptionRepository.deleteAll();
+        assignmentRepository.deleteAll();
         trainingRepository.deleteAll();
+        confirmationCodeRepository.deleteAll();
         userRepository.deleteAll();
     }
 
-    public UserTestBuilder<DbHelper> user() {
-        return new UserTestBuilder<DbHelper>(this);
-    }
-
-    public User getUser(String username) {
+    public UserBase getUserByUsername(String username) {
         return userRepository.findByUsername(username).orElse(null);
-    }
-
-    public AreaTestBuilder<DbHelper> area() {
-        return new AreaTestBuilder<DbHelper>(this);
-    }
-
-    public TrainingTestBuilder<DbHelper> training() {
-        return new TrainingTestBuilder<DbHelper>(this);
-    }
-
-    public RepeatOptionTestBuilder<DbHelper> repeatOption() {
-        return new RepeatOptionTestBuilder<DbHelper>(this);
-    }
-
-    public <T> T save(Class<T> clazz) {
-        return switch (clazz.getSimpleName()) {
-            case "User" -> {
-                userInstance.setId(null);
-                User saved = userRepository.save(userInstance);
-                userInstance = null;
-                yield clazz.cast(saved);
-            }
-            case "Area" -> {
-                Area saved = areaRepository.save(areaInstance);
-                areaInstance = null;
-                yield clazz.cast(saved);
-            }
-            case "Training" -> {
-                Training saved = trainingRepository.save(trainingInstance);
-                trainingInstance = null;
-                yield clazz.cast(saved);
-            }
-            case "RepeatOption" -> {
-                RepeatOption saved = repeatOptionRepository.save(repeatOptionInstance);
-                repeatOptionInstance = null;
-                yield clazz.cast(saved);
-            }
-            default -> throw new ClassCastException();
-        };
     }
 }

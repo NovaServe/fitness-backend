@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.trainings.dto.response;
 
-import com.novaserve.fitness.users.model.enums.Role;
+import com.novaserve.fitness.profiles.model.Role;
 import lombok.*;
 
 @Getter

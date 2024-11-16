@@ -12,10 +12,12 @@ import java.util.List;
 import org.modelmapper.Converter;
 import org.modelmapper.spi.MappingContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RepeatOptionToRepeatOptionDtoConverter implements Converter<RepeatOption, RepeatOptionDto> {
     @Autowired
-    TrainingUtil trainingUtil;
+    private TrainingUtil trainingUtil;
 
     @Override
     public RepeatOptionDto convert(MappingContext<RepeatOption, RepeatOptionDto> context) {

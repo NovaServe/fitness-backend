@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="003" author="Oleg Kucherenko" context="structure">
+        <comment>Create users</comment>
+
+        <createTable tableName="areas">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="users">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="varchar(20)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="username" type="varchar(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="full_name" type="varchar(100)">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="bio" type="varchar(500)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="email" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="phone" type="varchar(20)">
+                <constraints nullable="true" unique="true"/>
+            </column>
+            <column name="password" type="varchar">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="role" type="varchar">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="gender" type="varchar">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="age_group" type="varchar">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="is_active" type="boolean">
+                <constraints nullable="false" unique="false"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="subscription_plan_id" type="bigint">
+                <constraints nullable="true" unique="false"
+                             foreignKeyName="fk_subscription_plan_id" references="subscription_plans(id)"/>
+            </column>
+            <column name="is_subscription_paid" type="boolean">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="created_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_at" type="timestamp">
+                <constraints nullable="true" unique="false"/>
+            </column>
+            <column name="last_modified_by" type="varchar(255)">
+                <constraints nullable="true" unique="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="confirmation_codes">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="code" type="varchar">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_user_id" references="users(id)"/>
+            </column>
+            <column name="created_at" type="timestamp">
+                <constraints nullable="false" unique="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="employees_clubs">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="employee_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_employee_id" references="users(id)"/>
+            </column>
+            <column name="club_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_club_id" references="clubs(id)"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="instructors_areas">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="instructor_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_instructor_id" references="users(id)"/>
+            </column>
+            <column name="area_id" type="bigint">
+                <constraints nullable="false" unique="false"
+                             foreignKeyName="fk_area_id" references="areas(id)"/>
+            </column>
+        </createTable>
+
+        <sqlFile path="../sql/init_areas.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+        <sqlFile path="../sql/dummy_users.sql" relativeToChangelogFile="true" endDelimiter=";" splitStatements="true"/>
+    </changeSet>
+
+</databaseChangeLog>

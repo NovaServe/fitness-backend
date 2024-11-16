@@ -8,11 +8,11 @@ import com.novaserve.fitness.auth.dto.request.ValidateTokenResponseDto;
 import com.novaserve.fitness.auth.dto.response.LoginProcessDto;
 import com.novaserve.fitness.auth.service.AuthService;
 import com.novaserve.fitness.auth.service.AuthUtil;
-import com.novaserve.fitness.exception.ExceptionMessage;
-import com.novaserve.fitness.exception.ServerException;
+import com.novaserve.fitness.exceptions.ExceptionMessage;
+import com.novaserve.fitness.exceptions.ServerException;
+import com.novaserve.fitness.profiles.model.UserBase;
+import com.novaserve.fitness.profiles.repository.UserRepository;
 import com.novaserve.fitness.security.auth.*;
-import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -53,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getUsernameOrEmailOrPhone(), dto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(auth);
-            User user = authUtil.getUserFromAuth(auth)
+            UserBase user = authUtil.getUserFromAuth(auth)
                     .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
 
             String token = jwtTokenProvider.generateToken(auth);
@@ -83,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
             logger.error("Token is not validated, userId is null");
             return null;
         }
-        User user = userRepository.findById(userId).orElseThrow(() -> {
+        UserBase user = userRepository.findById(userId).orElseThrow(() -> {
             logger.error("Token is not validated, user with id {} not found", userId);
             return new ServerException(ExceptionMessage.INVALID_TOKEN, HttpStatus.UNAUTHORIZED);
         });

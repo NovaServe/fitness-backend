@@ -3,7 +3,7 @@
 */
 package com.novaserve.fitness.trainings.repository;
 
-import com.novaserve.fitness.trainings.model.Area;
+import com.novaserve.fitness.profiles.model.Area;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AreaRepository extends JpaRepository<Area, Long> {}

@@ -93,7 +93,7 @@ test {
 
 spotless {
   format 'misc', {
-    target '*.gradle', '*.md', '.gitignore'
+    target '*.gradle', '*.md', '.gitignore', '**/*.xml'
     trimTrailingWhitespace()
     indentWithSpaces(2)
   }

@@ -3,9 +3,9 @@
 */
 package com.novaserve.fitness.trainings.dto.response;
 
-import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.*;
 
@@ -19,9 +19,9 @@ public class RepeatOptionDto {
 
     private DayOfWeek dayOfWeek;
 
-    private Time startTime;
+    private LocalTime startTime;
 
-    private Time endTime;
+    private LocalTime endTime;
 
     private boolean isRecurring;
 

@@ -3,11 +3,8 @@
 */
 package com.novaserve.fitness.trainings.model;
 
-import com.novaserve.fitness.trainings.model.enums.Intensity;
-import com.novaserve.fitness.trainings.model.enums.Kind;
-import com.novaserve.fitness.trainings.model.enums.Level;
-import com.novaserve.fitness.trainings.model.enums.Type;
-import com.novaserve.fitness.users.model.User;
+import com.novaserve.fitness.profiles.model.Area;
+import com.novaserve.fitness.profiles.model.Instructor;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -31,10 +28,10 @@ public class Training {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, length = 100)
     private String title;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 500)
     private String description;
 
     @Enumerated(EnumType.STRING)
@@ -53,7 +50,7 @@ public class Training {
     @Column(name = "level", nullable = false)
     private Level level;
 
-    @Column(name = "location", nullable = false)
+    @Column(name = "location", nullable = false, length = 500)
     private String location;
 
     @Column(name = "total_places", nullable = false)
@@ -61,7 +58,7 @@ public class Training {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instructor_id", nullable = false)
-    private User instructor;
+    private Instructor instructor;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -79,9 +76,8 @@ public class Training {
     private LocalDateTime createdAt;
 
     @CreatedBy
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_id", nullable = false, updatable = false)
-    private User createdBy;
+    @Column(name = "created_by", nullable = false, updatable = false)
+    private String createdBy;
 
     @LastModifiedDate
     @Temporal(value = TemporalType.TIMESTAMP)
@@ -89,7 +85,6 @@ public class Training {
     private LocalDateTime lastModifiedAt;
 
     @LastModifiedBy
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "last_modified_by_id")
-    private User lastModifiedBy;
+    @Column(name = "last_modified_by")
+    private String lastModifiedBy;
 }

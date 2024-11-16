@@ -3,10 +3,10 @@
 */
 package com.novaserve.fitness.security.auth;
 
-import static com.novaserve.fitness.exception.ExceptionMessage.INVALID_CREDENTIALS;
+import static com.novaserve.fitness.exceptions.ExceptionMessage.INVALID_CREDENTIALS;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaserve.fitness.exception.ExceptionDto;
+import com.novaserve.fitness.exceptions.ExceptionDto;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

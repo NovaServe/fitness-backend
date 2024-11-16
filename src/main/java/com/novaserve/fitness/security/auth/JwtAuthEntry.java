@@ -4,7 +4,7 @@
 package com.novaserve.fitness.security.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.novaserve.fitness.exception.ExceptionDto;
+import com.novaserve.fitness.exceptions.ExceptionDto;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;

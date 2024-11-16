@@ -6,6 +6,9 @@
 
     <property name="clob.type" value="clob" dbms="postgresql" />
 
-    <include file="db/changelog/changesets/001-create-users-table.xml"/>
-    <include file="db/changelog/changesets/002-create-trainings-tables.xml"/>
+    <include file="db/changelog/changesets/001-create-clubs.xml"/>
+    <include file="db/changelog/changesets/002-create-subscription-plans.xml"/>
+    <include file="db/changelog/changesets/003-create-users.xml"/>
+    <include file="db/changelog/changesets/004-create-payments.xml"/>
+    <include file="db/changelog/changesets/005-create-trainings.xml"/>
 </databaseChangeLog>

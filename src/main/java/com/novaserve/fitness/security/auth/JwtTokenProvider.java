@@ -3,8 +3,8 @@
 */
 package com.novaserve.fitness.security.auth;
 
-import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.service.UserUtil;
+import com.novaserve.fitness.profiles.model.User;
+import com.novaserve.fitness.profiles.service.ProfileUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
@@ -16,11 +16,11 @@ import org.springframework.stereotype.Component;
 public class JwtTokenProvider {
     private final SecurityProps securityProps;
 
-    private final UserUtil userUtil;
+    private final ProfileUtil profileUtil;
 
-    public JwtTokenProvider(SecurityProps securityProps, UserUtil userUtil) {
+    public JwtTokenProvider(SecurityProps securityProps, ProfileUtil profileUtil) {
         this.securityProps = securityProps;
-        this.userUtil = userUtil;
+        this.profileUtil = profileUtil;
     }
 
     public String generateToken(Authentication auth) {
@@ -78,7 +78,8 @@ public class JwtTokenProvider {
             }
 
             String username = claims.getPayload().getSubject();
-            if (userUtil.getUserByUsernameOrEmailOrPhone(username, username, username)
+            if (profileUtil
+                    .getUserByUsernameOrEmailOrPhone(username, username, username)
                     .isEmpty()) {
                 return isValid;
             }
