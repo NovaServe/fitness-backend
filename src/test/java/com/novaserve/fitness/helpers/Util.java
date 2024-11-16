@@ -3,9 +3,17 @@
 */
 package com.novaserve.fitness.helpers;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Map;
+import org.springframework.boot.test.context.TestComponent;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+@TestComponent
 public class Util {
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     private static final Map<Integer, String> MAP = Map.ofEntries(
             Map.entry(0, "Zero"),
             Map.entry(1, "One"),
@@ -21,5 +29,21 @@ public class Util {
 
     public static String getNumberName(int number) {
         return MAP.get(number);
+    }
+
+    public static String generateTextWithSeed(String text, int seed) {
+        return text + seed;
+    }
+
+    public String generateTrainingTitleWithSeed(int seed) {
+        return "Training " + seed;
+    }
+
+    public static LocalTime convertToTime(int hour, int minute) {
+        return LocalTime.of(hour, minute);
+    }
+
+    public static LocalDate convertToDate(int year, int month, int day) {
+        return LocalDate.of(year, month, day);
     }
 }

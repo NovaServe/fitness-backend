@@ -10,11 +10,13 @@ import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.spi.MappingContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RepeatOptionWithAssignmentsToTrainingDtoConverter
         implements Converter<TrainingServiceImpl.RepeatOptionWithAssignments, TrainingDto> {
     @Autowired
-    ModelMapper modelMapper;
+    private ModelMapper modelMapper;
 
     @Override
     public TrainingDto convert(MappingContext<TrainingServiceImpl.RepeatOptionWithAssignments, TrainingDto> context) {

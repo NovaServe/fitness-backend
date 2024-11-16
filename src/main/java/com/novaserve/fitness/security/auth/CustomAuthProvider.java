@@ -3,9 +3,9 @@
 */
 package com.novaserve.fitness.security.auth;
 
-import com.novaserve.fitness.exception.ExceptionMessage;
-import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.UserRepository;
+import com.novaserve.fitness.exceptions.ExceptionMessage;
+import com.novaserve.fitness.profiles.model.UserBase;
+import com.novaserve.fitness.profiles.repository.UserRepository;
 import java.util.Set;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -36,7 +36,7 @@ public class CustomAuthProvider implements AuthenticationProvider {
         String principal = auth.getPrincipal().toString();
         String credentials = auth.getCredentials().toString();
 
-        User user = userRepository
+        UserBase user = userRepository
                 .findByUsernameOrEmailOrPhone(principal, principal, principal)
                 .orElseThrow(() ->
                         new UsernameNotFoundException("User not found with username, email, or phone: " + principal));

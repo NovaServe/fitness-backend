@@ -4,8 +4,8 @@
 package com.novaserve.fitness.auth.service.impl;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
-import com.novaserve.fitness.users.model.User;
-import com.novaserve.fitness.users.repository.UserRepository;
+import com.novaserve.fitness.profiles.model.UserBase;
+import com.novaserve.fitness.profiles.repository.UserRepository;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -25,30 +25,31 @@ public class AuthUtilImpl implements AuthUtil {
     }
 
     @Override
-    public Long getUserIdFromAuth(Authentication auth) {
-        return getUserFromAuth(auth).map(User::getId).orElse(null);
+    public Long getUserIdFromAuth(Authentication authentication) {
+        return getUserFromAuth(authentication).map(UserBase::getId).orElse(null);
     }
 
     /**
-     * @apiNote User principal =
+     * @apiNote UserBase principal =
      *          authUtil.getUserFromAuth(
      *              SecurityContextHolder.getContext().getAuthentication());
      */
     @Override
-    public Optional<User> getUserFromAuth(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
+    public Optional<UserBase> getUserFromAuth(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             return Optional.empty();
         }
         String username = null;
-        String principalClassName = auth.getPrincipal().getClass().getName();
+        String principalClassName = authentication.getPrincipal().getClass().getName();
 
         if ("org.springframework.security.core.userdetails.User".equals(principalClassName)) {
-            username = ((org.springframework.security.core.userdetails.User) (auth.getPrincipal())).getUsername();
-        } else if ("com.novaserve.fitness.users.model.User".equals(principalClassName)) {
-            username = ((User) (auth.getPrincipal())).getUsername();
+            username = ((org.springframework.security.core.userdetails.User) (authentication.getPrincipal()))
+                    .getUsername();
+        } else if ("com.novaserve.fitness.users.model.UserBase".equals(principalClassName)) {
+            username = ((UserBase) (authentication.getPrincipal())).getUsername();
         }
 
-        Optional<User> userOptional = userRepository.findByUsername(username);
+        Optional<UserBase> userOptional = userRepository.findByUsername(username);
         return userOptional;
     }
 

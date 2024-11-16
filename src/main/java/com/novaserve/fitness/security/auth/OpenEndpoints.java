@@ -18,14 +18,18 @@ public class OpenEndpoints {
 
     private final String validateTokenUrl;
 
+    private final String signupCustomer;
+
     public OpenEndpoints(
             @Value("/error/**") String errorUrl,
             @Value("${api.basePath}/${api.version}/auth/login") String loginUrl,
             @Value("${api.basePath}/${api.version}/auth/logout") String logoutUrl,
-            @Value("${api.basePath}/${api.version}/auth/validateToken") String validateTokenUrl) {
+            @Value("${api.basePath}/${api.version}/auth/validateToken") String validateTokenUrl,
+            @Value("${api.basePath}/${api.version}/auth/signup") String signupCustomer) {
         this.errorUrl = errorUrl;
         this.loginUrl = loginUrl;
         this.logoutUrl = logoutUrl;
         this.validateTokenUrl = validateTokenUrl;
+        this.signupCustomer = signupCustomer;
     }
 }

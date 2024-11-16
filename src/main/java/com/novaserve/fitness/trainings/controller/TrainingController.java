@@ -4,10 +4,10 @@
 package com.novaserve.fitness.trainings.controller;
 
 import com.novaserve.fitness.trainings.dto.response.TrainingsResponseDto;
-import com.novaserve.fitness.trainings.model.enums.Intensity;
-import com.novaserve.fitness.trainings.model.enums.Kind;
-import com.novaserve.fitness.trainings.model.enums.Level;
-import com.novaserve.fitness.trainings.model.enums.Type;
+import com.novaserve.fitness.trainings.model.Intensity;
+import com.novaserve.fitness.trainings.model.Kind;
+import com.novaserve.fitness.trainings.model.Level;
+import com.novaserve.fitness.trainings.model.Type;
 import com.novaserve.fitness.trainings.service.TrainingService;
 import io.swagger.v3.oas.annotations.Operation;
 import java.time.LocalDate;
@@ -43,6 +43,7 @@ public class TrainingController {
             @RequestParam(required = false) Boolean availableOnly) {
         TrainingsResponseDto trainingsResponseDto = trainingService.getTrainings(
                 startRange, endRange, areas, instructors, intensity, levels, types, kinds, availableOnly);
-        return ResponseEntity.ok(trainingsResponseDto);
+        ResponseEntity<TrainingsResponseDto> responseEntity = ResponseEntity.ok(trainingsResponseDto);
+        return responseEntity;
     }
 }

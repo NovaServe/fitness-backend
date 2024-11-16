@@ -4,21 +4,21 @@
 package com.novaserve.fitness.trainings.service.impl;
 
 import com.novaserve.fitness.auth.service.AuthUtil;
-import com.novaserve.fitness.exception.ExceptionMessage;
-import com.novaserve.fitness.exception.ServerException;
+import com.novaserve.fitness.exceptions.ExceptionMessage;
+import com.novaserve.fitness.exceptions.ServerException;
+import com.novaserve.fitness.profiles.model.UserBase;
 import com.novaserve.fitness.share.Util;
 import com.novaserve.fitness.trainings.dto.response.DayDto;
 import com.novaserve.fitness.trainings.dto.response.TrainingDto;
 import com.novaserve.fitness.trainings.dto.response.TrainingsResponseDto;
 import com.novaserve.fitness.trainings.model.*;
-import com.novaserve.fitness.trainings.model.enums.Intensity;
-import com.novaserve.fitness.trainings.model.enums.Kind;
-import com.novaserve.fitness.trainings.model.enums.Level;
-import com.novaserve.fitness.trainings.model.enums.Type;
+import com.novaserve.fitness.trainings.model.Intensity;
+import com.novaserve.fitness.trainings.model.Kind;
+import com.novaserve.fitness.trainings.model.Level;
+import com.novaserve.fitness.trainings.model.Type;
 import com.novaserve.fitness.trainings.repository.TrainingCriteriaBuilder;
 import com.novaserve.fitness.trainings.service.TrainingService;
 import com.novaserve.fitness.trainings.service.TrainingUtil;
-import com.novaserve.fitness.users.model.User;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
@@ -69,7 +69,7 @@ public class TrainingServiceImpl implements TrainingService {
 
         List<DayDto> calendarDays = generateCalendarDays(startRange, endRange);
 
-        User principal = authUtil.getUserFromAuth(
+        UserBase principal = authUtil.getUserFromAuth(
                         SecurityContextHolder.getContext().getAuthentication())
                 .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
 
@@ -128,7 +128,7 @@ public class TrainingServiceImpl implements TrainingService {
         return assignments;
     }
 
-    private Boolean isAssignedToCustomer(List<Assignment> assignments, User customer) {
+    private Boolean isAssignedToCustomer(List<Assignment> assignments, UserBase customer) {
         if (customer.isCustomer()) {
             boolean isAssignedToCustomer = assignments.stream()
                     .anyMatch(assignment -> assignment.getCustomer().equals(customer));
@@ -141,11 +141,12 @@ public class TrainingServiceImpl implements TrainingService {
      * Calculates concrete event dates for every repeat option associated with training.
      */
     private Map<LocalDate, List<RepeatOptionWithAssignments>> calculateRepeatOptionDatesFromRange(
-            LocalDate startRange, LocalDate endRange, RepeatOption repeatOption, User customerPrincipal) {
+            LocalDate startRange, LocalDate endRange, RepeatOption repeatOption, UserBase customerPrincipal) {
         if (repeatOption.getRepeatUntil() != null
                 && repeatOption.getRepeatUntil().isBefore(endRange)) {
             endRange = repeatOption.getRepeatUntil();
         }
+        // check repeat times
 
         Set<LocalDate> excludedDates = null;
         if (repeatOption.getExcludedDates() != null) {
@@ -218,7 +219,7 @@ public class TrainingServiceImpl implements TrainingService {
             List<DayDto> rawDays,
             LocalDate startRange,
             LocalDate endRange,
-            User customerPrincipal) {
+            UserBase customerPrincipal) {
 
         Map<LocalDate, List<RepeatOptionWithAssignments>> aggregatedEventsDates = rawTrainings.stream()
                 .flatMap(training -> training.getRepeatOptions().stream())
