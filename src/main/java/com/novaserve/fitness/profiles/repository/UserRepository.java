@@ -25,6 +25,6 @@ public interface UserRepository extends JpaRepository<UserBase, Long> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE u.role IN :roles AND (:fullName IS NULL OR u.fullName ILIKE %:fullName%)")
+    @Query("SELECT u FROM UserBase u WHERE u.role IN :roles AND (:fullName IS NULL OR u.fullName ILIKE %:fullName%)")
     Page<UserBase> getUsers(Set<Role> roles, String fullName, Pageable pageable);
 }

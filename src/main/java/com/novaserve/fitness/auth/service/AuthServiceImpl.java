@@ -1,13 +1,11 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.auth.service.impl;
+package com.novaserve.fitness.auth.service;
 
 import com.novaserve.fitness.auth.dto.request.LoginRequestDto;
 import com.novaserve.fitness.auth.dto.request.ValidateTokenResponseDto;
-import com.novaserve.fitness.auth.dto.response.LoginProcessDto;
-import com.novaserve.fitness.auth.service.AuthService;
-import com.novaserve.fitness.auth.service.AuthUtil;
+import com.novaserve.fitness.auth.dto.response.LoginResponseDto;
 import com.novaserve.fitness.exceptions.ExceptionMessage;
 import com.novaserve.fitness.exceptions.ServerException;
 import com.novaserve.fitness.profiles.model.UserBase;
@@ -48,25 +46,24 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public LoginProcessDto login(LoginRequestDto dto) {
+    public LoginResponseDto login(LoginRequestDto dto) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getUsernameOrEmailOrPhone(), dto.getPassword()));
             SecurityContextHolder.getContext().setAuthentication(auth);
             UserBase user = authUtil.getUserFromAuth(auth)
-                    .orElseThrow(() -> new ServerException(ExceptionMessage.UNAUTHORIZED, HttpStatus.UNAUTHORIZED));
+                    .orElseThrow(
+                            () -> new ServerException(ExceptionMessage.INVALID_CREDENTIALS, HttpStatus.UNAUTHORIZED));
 
-            String token = jwtTokenProvider.generateToken(auth);
-            String cookieExpires = authUtil.formatCookieExpires(jwtTokenProvider.getExpiresDateFromJwt(token));
+            String token = jwtTokenProvider.generateToken(user);
             logger.info("Logged in: " + dto.getUsernameOrEmailOrPhone());
 
-            LoginProcessDto loginProcessDto = LoginProcessDto.builder()
+            LoginResponseDto loginResponseDto = LoginResponseDto.builder()
                     .token(token)
                     .role(user.getRoleName())
-                    .cookieExpires(cookieExpires)
                     .fullName(user.getFullName())
                     .build();
-            return loginProcessDto;
+            return loginResponseDto;
         } catch (Exception e) {
             logger.error("Login failed: " + dto.getUsernameOrEmailOrPhone());
             logger.error("Login error: " + e.getMessage());

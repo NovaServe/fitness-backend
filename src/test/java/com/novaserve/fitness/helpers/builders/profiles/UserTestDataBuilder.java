@@ -1,7 +1,7 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.helpers.builders.users;
+package com.novaserve.fitness.helpers.builders.profiles;
 
 import com.novaserve.fitness.helpers.builders.TestDataBuilder;
 import com.novaserve.fitness.profiles.model.*;
@@ -49,6 +49,7 @@ public class UserTestDataBuilder<T extends UserBase> implements TestDataBuilder<
             instance.setUsername(UserUtil.generateUsernameWithSeed(seed));
             instance.setFullName(UserUtil.generateFullNameWithSeed(seed));
             instance.setEmail(UserUtil.generateEmailWithSeed(seed));
+            instance.setPhone(UserUtil.generatePhoneWithSeed(seed));
             instance.setPassword(UserUtil.generateHashedPasswordWithSeed(seed));
         }
         if (instance instanceof SuperAdmin superAdmin) {

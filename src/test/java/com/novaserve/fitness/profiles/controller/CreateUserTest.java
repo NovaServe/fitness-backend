@@ -22,13 +22,13 @@ import com.novaserve.fitness.config.TestBeans;
 import com.novaserve.fitness.emails.RestTemplateService;
 import com.novaserve.fitness.exceptions.ExceptionMessage;
 import com.novaserve.fitness.helpers.DbHelper;
-import com.novaserve.fitness.helpers.builders.clubs.ClubAddressTestDataBuilder;
-import com.novaserve.fitness.helpers.builders.clubs.ClubScheduleTestDataBuilder;
-import com.novaserve.fitness.helpers.builders.clubs.ClubTestDataBuilder;
-import com.novaserve.fitness.helpers.builders.payment.SubscriptionPlanTestDataBuilder;
-import com.novaserve.fitness.helpers.builders.users.AreaTestDataBuilder;
-import com.novaserve.fitness.helpers.builders.users.UserDtoTestDataBuilder;
-import com.novaserve.fitness.helpers.builders.users.UserTestDataBuilder;
+import com.novaserve.fitness.helpers.builders.payments.SubscriptionPlanTestDataBuilder;
+import com.novaserve.fitness.helpers.builders.profiles.AreaTestDataBuilder;
+import com.novaserve.fitness.helpers.builders.profiles.ClubAddressTestDataBuilder;
+import com.novaserve.fitness.helpers.builders.profiles.ClubScheduleTestDataBuilder;
+import com.novaserve.fitness.helpers.builders.profiles.ClubTestDataBuilder;
+import com.novaserve.fitness.helpers.builders.profiles.UserDtoTestDataBuilder;
+import com.novaserve.fitness.helpers.builders.profiles.UserTestDataBuilder;
 import com.novaserve.fitness.payments.model.SubscriptionPlan;
 import com.novaserve.fitness.profiles.dto.request.*;
 import com.novaserve.fitness.profiles.dto.response.AdminDetailsDto;
@@ -91,9 +91,7 @@ class CreateUserTest {
     @BeforeEach
     public void beforeEach() {
         dbHelper.deleteAll();
-
         doNothing().when(restTemplateService).postWithoutResponseBody(any(), any(), any());
-
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
@@ -530,8 +528,6 @@ class CreateUserTest {
                 .with(u -> u.setStartDate(LocalDate.now().minusWeeks(1)))
                 .build());
 
-        Area area1 = dbHelper.save(new AreaTestDataBuilder().withSeed(1).build());
-        Area area2 = dbHelper.save(new AreaTestDataBuilder().withSeed(2).build());
         Customer userAlreadyExists = dbHelper.save(
                 new UserTestDataBuilder<>(Customer.class).withSeed(2).build());
 
