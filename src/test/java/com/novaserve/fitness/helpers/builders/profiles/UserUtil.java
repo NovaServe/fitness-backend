@@ -1,7 +1,7 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.helpers.builders.users;
+package com.novaserve.fitness.helpers.builders.profiles;
 
 import com.novaserve.fitness.helpers.Util;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

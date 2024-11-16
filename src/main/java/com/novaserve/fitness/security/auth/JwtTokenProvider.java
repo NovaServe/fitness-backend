@@ -3,13 +3,12 @@
 */
 package com.novaserve.fitness.security.auth;
 
-import com.novaserve.fitness.profiles.model.User;
+import com.novaserve.fitness.profiles.model.UserBase;
 import com.novaserve.fitness.profiles.service.ProfileUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.Date;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -23,8 +22,7 @@ public class JwtTokenProvider {
         this.profileUtil = profileUtil;
     }
 
-    public String generateToken(Authentication auth) {
-        User user = (User) (auth.getPrincipal());
+    public String generateToken(UserBase user) {
         Date current = new Date(); // In UTC
         Date expires = new Date(current.getTime() + securityProps.Jwt().expiresInMilliseconds()); // In UTC
         String token = Jwts.builder()

@@ -1,9 +1,8 @@
 /*
 ** Copyright (C) 2024 NovaServe
 */
-package com.novaserve.fitness.auth.service.impl;
+package com.novaserve.fitness.auth.service;
 
-import com.novaserve.fitness.auth.service.AuthUtil;
 import com.novaserve.fitness.profiles.model.UserBase;
 import com.novaserve.fitness.profiles.repository.UserRepository;
 import java.time.Instant;
@@ -31,8 +30,7 @@ public class AuthUtilImpl implements AuthUtil {
 
     /**
      * @apiNote UserBase principal =
-     *          authUtil.getUserFromAuth(
-     *              SecurityContextHolder.getContext().getAuthentication());
+     *          authUtil.getUserFromAuth(SecurityContextHolder.getContext().getAuthentication());
      */
     @Override
     public Optional<UserBase> getUserFromAuth(Authentication authentication) {
@@ -45,7 +43,7 @@ public class AuthUtilImpl implements AuthUtil {
         if ("org.springframework.security.core.userdetails.User".equals(principalClassName)) {
             username = ((org.springframework.security.core.userdetails.User) (authentication.getPrincipal()))
                     .getUsername();
-        } else if ("com.novaserve.fitness.users.model.UserBase".equals(principalClassName)) {
+        } else {
             username = ((UserBase) (authentication.getPrincipal())).getUsername();
         }
 
